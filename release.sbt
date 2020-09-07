@@ -33,14 +33,6 @@ developers := List(
 
 publishTo := sonatypePublishToBundle.value
 
-//publishTo := {
-//  val nexus = "https://oss.sonatype.org/"
-//  if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
-//  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
-//}
-
-//credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials_app_tulz")
-
 sonatypeProfileName := "app.tulz"
 
 publishMavenStyle := true
