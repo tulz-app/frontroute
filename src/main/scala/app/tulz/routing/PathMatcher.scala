@@ -1,74 +1,90 @@
 package app.tulz.routing
 
+import app.tulz.util.Tuple
+
 import scala.language.implicitConversions
+import scala.util.Failure
+import scala.util.Success
 import scala.util.Try
 import scala.util.matching.Regex
 import scala.util.matching.Regex.Match
-import app.tulz.routing.TupleComposition.Composition
+import app.tulz.util.TupleComposition.Composition
 
-trait PathMatcher[T] {
+abstract class PathMatcher[T](val description: String)(implicit val tuple: Tuple[T]) {
   self =>
 
-  def apply(in: List[String]): Either[(String, List[String]), (T, List[String])]
+  def apply(path: List[String]): Either[(String, List[String]), (T, List[String])]
 
-  def map[V](f: T => V): PathMatcher[V] =
-    (path: List[String]) =>
-      self(path).map {
+  def tmap[V: Tuple](f: T => V): PathMatcher[V] = new PathMatcher[V](self.description) {
+    override def apply(in: List[String]): Either[(String, List[String]), (V, List[String])] =
+      self(in).map {
         case (t, out) => f(t) -> out
-    }
+      }
+  }
 
-  def flatMap[V](f: T => PathMatcher[V]): PathMatcher[V] =
-    (path: List[String]) =>
+  def tflatMap[V: Tuple](description: String)(f: T => PathMatcher[V]): PathMatcher[V] = new PathMatcher[V](description) {
+    override def apply(path: List[String]): Either[(String, List[String]), (V, List[String])] =
       self(path).flatMap {
         case (t, out) => f(t).apply(out)
-    }
+      }
+  }
 
-  def filter(f: T => Boolean): PathMatcher[T] = this.flatMap { t =>
+  def tfilter(description: String)(f: T => Boolean): PathMatcher[T] = this.tflatMap(description) { t =>
     if (f(t)) {
-      PathMatchers.provide(t)
+      PathMatcher.tprovide(t)
     } else {
-      PathMatchers.fail("filter failed")
+      PathMatcher.fail("filter failed")
     }
   }
 
-  def collect[V](f: PartialFunction[T, V]): PathMatcher[V] = this.flatMap { t =>
+  def tcollect[V: Tuple](description: String)(f: PartialFunction[T, V]): PathMatcher[V] = this.tflatMap(description) { t =>
     if (f.isDefinedAt(t)) {
-      PathMatchers.provide(f(t))
+      PathMatcher.tprovide(f(t))
     } else {
-      PathMatchers.fail("collect failed")
+      PathMatcher.fail("collect failed")
     }
   }
 
-  def withFilter(f: T => Boolean): PathMatcher[T] = this.filter(f)
+  def withFilter(description: String)(f: T => Boolean): PathMatcher[T] = this.tfilter(description)(f)
 
   def /[V](other: PathMatcher[V])(implicit compose: Composition[T, V]): PathMatcher[compose.C] =
-    for {
-      t1 <- self
-      v  <- other
-    } yield compose.gc(t1, v)
+    self.tflatMap(s"${self.description}/${other.description}") { t1 =>
+      other.tmap { v =>
+        compose.gc(t1, v)
+      }(Tuple.yes)
+    }(Tuple.yes)
 
-  def |[V >: T](other: PathMatcher[V]): PathMatcher[V] =
-    (path: List[String]) =>
+  def as[O: Tuple](f: T => O): PathMatcher[O] = self.tmap(f)
+
+  def void: PathMatcher[Unit] = this.tmap(_ => ())
+
+  def unary_!(): PathMatcher[Unit] = new PathMatcher[Unit](s"!${self.description}") {
+    override def apply(path: List[String]): Either[(String, List[String]), (Unit, List[String])] =
       self(path) match {
-        case r @ Right(_) => r
-        case Left(myMsg) =>
-          other(path) match {
-            case r @ Right(_) => r
-            case Left( (theirMsg, theirRest)) =>
-              Left(Seq(myMsg, theirMsg).mkString("; ") -> theirRest)
-          }
-    }
-
-  def caseClass[O](f: T => O): PathMatcher[O] = self.map(f)
-
-  def void: PathMatcher[Unit] = this.map(_ => ())
-
-  def unary_!(): PathMatcher[Unit] =
-    (path: List[String]) =>
-      self(path) match {
-        case Right( (_, rest) ) => Left("not !matched" -> rest)
-        case Left( (_, rest) ) => Right( () -> rest )
+        case Right((_, rest)) => Left("not !matched" -> rest)
+        case Left((_, rest))  => Right(()            -> rest)
       }
+  }
+
+  override def toString: String = description
+
+}
+
+object PathMatcher {
+
+  val unit: PathMatcher[Unit] = new PathMatcher[Unit]("unit") {
+    override def apply(path: List[String]): Either[(String, List[String]), (Unit, List[String])] =
+      Right(() -> path)
+  }
+
+  def tprovide[V: Tuple](v: V): PathMatcher[V] = unit.tmap(_ => v)
+
+  def provide[V](v: V): PathMatcher[Tuple1[V]] = tprovide(Tuple1(v))
+
+  def fail[T: Tuple](msg: String): PathMatcher[T] = new PathMatcher[T]("fail") {
+    override def apply(path: List[String]): Either[(String, List[String]), (T, List[String])] =
+      Left(msg -> path)
+  }
 
 }
 
@@ -76,43 +92,53 @@ object PathMatchers extends PathMatchers
 
 trait PathMatchers {
 
-  val unit: PathMatcher[Unit] = (path: List[String]) => Right(() -> path)
+  implicit class PathMatcher1Ops[T](matcher: PathMatcher1[T]) {
 
-  def provide[V](v: V): PathMatcher[V] = unit.map(_ => v)
+    def map[R](f: T => R): PathMatcher1[R] = matcher.tmap { case Tuple1(e) => Tuple1(f(e)) }
 
-  def fail[T](msg: String): PathMatcher[T] = (path: List[String]) => Left(msg -> path)
+    def collect[R](description: String)(f: PartialFunction[T, R]): PathMatcher1[R] = matcher.tcollect(description) { case Tuple1(e) if f.isDefinedAt(e) => Tuple1(f(e)) }
 
-  def segment: PathMatcher[String] = {
-    case head :: tail => Right[(String, List[String]), (String, List[String])](head -> tail)
-    case Nil          => Left(s"unexpected end of path" -> Nil)
+    def flatMap[R](description: String)(f: T => PathMatcher1[R]): PathMatcher1[R] =
+      matcher.tflatMap(description) { case Tuple1(e) => f(e) }
   }
 
-  def segment(s: String): PathMatcher[Unit] = segment.filter(_ == s).void
+  def segment: PathMatcher1[String] = new PathMatcher1[String]("segment") {
 
-  def regex(r: Regex): PathMatcher[Match] =
-    segment
-      .map(s => r.findFirstMatchIn(s))
-      .collect {
-        case Some(m) => m
+    override def apply(path: List[String]): Either[(String, List[String]), (Tuple1[String], List[String])] =
+      path match {
+        case head :: tail => Right(Tuple1(head)             -> tail)
+        case Nil          => Left(s"unexpected end of path" -> Nil)
       }
 
-  def fromOption[V](o: Option[V]): PathMatcher[V] =
-    (path: List[String]) =>
-      o match {
-        case Some(v) => Right(v -> path)
-        case None    => Left("empty option" -> path)
-    }
-
-  def fromTry[V](t: Try[V]): PathMatcher[V] = fromOption(t.toOption)
-
-  def tryParse[V](t: => V): PathMatcher[V] = fromTry(Try(t))
-
-  def long: PathMatcher[Long] = segment.flatMap { matched =>
-    tryParse(matched.toLong)
   }
 
-  def double: PathMatcher[Double] = segment.flatMap { matched =>
-    tryParse(matched.toDouble)
+  def segment(s: String): PathMatcher0 = segment.tfilter(s)(t => t._1 == s).void
+
+  def regex(r: Regex): PathMatcher1[Match] =
+    segment
+      .tmap(s => Tuple1(r.findFirstMatchIn(s._1)))
+      .tcollect(s"regex($r)") {
+        case Tuple1(Some(m)) => Tuple1(m)
+      }
+
+  def fromTry[V](t: Try[V]): PathMatcher1[V] = new PathMatcher1[V]("fromTry") {
+    override def apply(path: List[String]): Either[(String, List[String]), (Tuple1[V], List[String])] =
+      t match {
+        case Success(value) =>
+          Right(Tuple1(value) -> path)
+        case Failure(exception) =>
+          Left(exception.getMessage -> path)
+      }
+  }
+
+  def tryParse[V](t: => V): PathMatcher1[V] = fromTry(Try(t))
+
+  def long: PathMatcher1[Long] = segment.tflatMap("long") { matched =>
+    tryParse(matched._1.toLong)
+  }
+
+  def double: PathMatcher1[Double] = segment.tflatMap("double") { matched =>
+    tryParse(matched._1.toDouble)
   }
 
   implicit def stringToSegment(s: String): PathMatcher[Unit] = segment(s)

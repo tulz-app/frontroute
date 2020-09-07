@@ -1,84 +1,233 @@
 package app.tulz.routing
 
-import com.raquo.airstream.core.Observer
+import com.raquo.laminar.api.L._
+import app.tulz.testing._
 import com.raquo.airstream.ownership.Owner
-import com.raquo.airstream.signal.{Signal, Val, Var}
 import utest._
 
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js.timers._
+import directives._
+
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration._
 
 object RoutingTests extends TestSuite {
 
-  def singleLoc(path: String*): Signal[Loc] =
-    Val(
-      loc(path: _*)
-    )
+  implicit val testOwner: Owner = new Owner {}
 
-  def loc(path: String*): Loc =
-    Loc(path = path.toList, params = Map.empty)
-
-  case class Context()
   case class Page(p: String)
-  case class PageWithSignal($segment: Signal[String])
+  case class PageWithSignal(segment: Signal[String])
 
-  implicit val owner: Owner = new Owner {}
-  val $context              = Val(Context())
-  val routing               = new Routing[Context]
-  import routing._
+  private def routeTestF[T](
+    route: ListBuffer[String] => Route,
+    wait: FiniteDuration = 10.millis,
+    init: TestRouteLocationProvider => Unit = _ => {}
+  )(checks: ListBuffer[String] => Future[T]): Future[T] = {
+    val locationProvider = new TestRouteLocationProvider()
+    val probe            = new ListBuffer[String]()
 
-  val tests = Tests {
+    val sub = runRoute(route(probe), locationProvider).foreach(_())(unsafeWindowOwner)
+    val future = delayedFuture(wait).flatMap { _ =>
+      try {
+        checks(probe)
+      } finally {
+        sub.kill()
+      }
+    }
+    init(locationProvider)
+    future
 
-    "pathEnd works" - {
-      val route = pathEnd.map(_ => "end").mapTo(Page("end"))
-      * - {
-        val $pages = runRoute(route, singleLoc(), $context)
-        nSignals(1, $pages).map { p =>
-          p ==> Some(Page("end")) :: Nil
+  }
+
+  private def routeTest[T](
+    route: ListBuffer[String] => Route,
+    wait: FiniteDuration = 10.millis,
+    init: TestRouteLocationProvider => Unit = _ => {}
+  )(checks: ListBuffer[String] => T): Future[T] = routeTestF[T](route, wait, init)(probe => Future.successful(checks(probe)))
+
+  val tests: Tests = Tests {
+
+    test("simple pathEnd") {
+      routeTest(
+        route = probe =>
+          pathEnd {
+            complete {
+              probe.append("end")
+            }
+        },
+        init = locationProvider => {
+          locationProvider.path()
         }
+      ) { probe =>
+        probe.toList ==> List("end")
       }
     }
 
-    "sub signal works" - {
-      val route = pathPrefix("prefix").sub { _ =>
-        path(segment).signal.map { $segment =>
-          PageWithSignal($segment)
-        }
-      }
-      * - {
-        val $locs = generateSignals(
-          List(
-            loc("prefix", "1"),
-            loc("prefix", "2"),
-            loc("prefix", "3"),
-            loc("prefix", "2"),
-            loc("prefix2", "2"),
-            loc("prefix", "5"),
-            loc("prefix", "6"),
-            loc("prefix", "7"),
-            loc("prefix", "6")
-          )
-        )
-        val $pages = runRoute(route, $locs, $context)
-        nthSignal(3, $pages).flatMap {
-          case Some(page) =>
-            nSignals(4, page.$segment).map { subLocs =>
-              subLocs ==> List(
-                "5",
-                "6",
-                "7",
-                "6"
-              )
+    test("alternate path") {
+      routeTest(
+        route = probe =>
+          concat(
+            path("a") {
+              complete {
+                probe.append("a")
+              }
+            },
+            path("b") {
+              complete {
+                probe.append("b")
+              }
+            },
+            path("c") {
+              complete {
+                probe.append("c")
+              }
             }
-          case None => Future.failed(new RuntimeException("no prefix match"))
+        ),
+        init = locationProvider => {
+          locationProvider.path("b")
+          locationProvider.path("c")
+          locationProvider.path("a")
         }
+      ) { probe =>
+        probe.toList ==> List("b", "c", "a")
+      }
+    }
+
+    test("deep alternate path") {
+      routeTest(
+        route = probe =>
+          concat(
+            pathPrefix("prefix1") {
+              pathPrefix("prefix2") {
+                concat(
+                  pathEnd {
+                    complete {
+                      probe.append("prefix1/prefix2")
+                    }
+                  },
+                  path("suffix1") {
+                    complete {
+                      probe.append("prefix1/prefix2/suffix1")
+                    }
+                  }
+                )
+              }
+            },
+            pathPrefix("prefix2") {
+              pathPrefix("prefix3") {
+                concat(
+                  pathEnd {
+                    complete {
+                      probe.append("prefix2/prefix3")
+                    }
+                  },
+                  path("suffix2") {
+                    complete {
+                      probe.append("prefix2/prefix3/suffix2")
+                    }
+                  },
+                  path("suffix3") {
+                    param("param1") { paramValue =>
+                      complete {
+                        probe.append(s"prefix2/prefix3/suffix3?param1=$paramValue")
+                      }
+                    }
+                  }
+                )
+              }
+            }
+        ),
+        init = locationProvider => {
+          locationProvider.path("prefix2", "prefix3", "suffix2")
+          locationProvider.path("prefix1", "prefix2")
+          locationProvider.path("prefix1", "prefix2", "suffix1")
+          locationProvider.path("prefix2", "prefix3")
+          locationProvider.path("prefix2", "prefix3", "suffix3")
+          locationProvider.params("param1" -> "param-value")
+        }
+      ) { probe =>
+        probe.toList ==> List(
+          "prefix2/prefix3/suffix2",
+          "prefix1/prefix2",
+          "prefix1/prefix2/suffix1",
+          "prefix2/prefix3",
+          "prefix2/prefix3/suffix3?param1=param-value"
+        )
+      }
+    }
+
+    test("signal") {
+      var paramSignal: Signal[String]   = null
+      var signals: Future[List[String]] = null
+      routeTestF(
+        route = probe =>
+          pathPrefix("prefix1") {
+            pathPrefix("prefix2") {
+              path(segment).signal { s =>
+                complete {
+                  paramSignal = s
+                  signals = nSignals(3, paramSignal)
+                  probe.append("prefix1/prefix2")
+                }
+              }
+            }
+        },
+        init = locationProvider => {
+          locationProvider.path("prefix1", "prefix2", "other-suffix-1")
+          locationProvider.path("prefix1", "prefix2", "other-suffix-2")
+          locationProvider.path("prefix1", "prefix2", "other-suffix-3")
+        }
+      ) { probe =>
+        signals
+          .map { params =>
+            params ==> List(
+              "other-suffix-1",
+              "other-suffix-2",
+              "other-suffix-3"
+            )
+          }
+          .map { _ =>
+            probe.toList ==> List(
+              "prefix1/prefix2"
+            )
+          }
+      }
+    }
+
+    test("conjunction") {
+      routeTest(
+        route = probe =>
+          pathPrefix("prefix1") {
+            pathPrefix("prefix2") {
+              (path(segment) & param("param1")) { (seg, paramValue) =>
+                complete {
+                  probe.append(s"prefix1/prefix2/$seg?param1=$paramValue")
+                }
+              }
+            }
+        },
+        init = locationProvider => {
+          locationProvider.path("prefix1", "prefix2", "other-suffix-1")
+          locationProvider.params("param1" -> "param1-value1")
+          locationProvider.params("param1" -> "param1-value2")
+          locationProvider.path("prefix1", "prefix2", "other-suffix-2")
+
+        }
+      ) { probe =>
+        probe.toList ==> List(
+          "prefix1/prefix2/other-suffix-1?param1=param1-value1",
+          "prefix1/prefix2/other-suffix-1?param1=param1-value2",
+          "prefix1/prefix2/other-suffix-2?param1=param1-value2"
+        )
       }
     }
 
   }
 
-  def nthSignal[T](n: Int, s: Signal[T], waitTime: Long = 1000): Future[T] = {
+  def nthSignal[T](n: Int, s: Signal[T], waitTime: FiniteDuration = 1.second): Future[T] = {
     val p     = Promise[T]()
     var count = n
     s.addObserver(Observer { t =>
@@ -98,7 +247,7 @@ object RoutingTests extends TestSuite {
     p.future
   }
 
-  def nSignals[T](n: Int, s: Signal[T], waitTime: Long = 1000): Future[List[T]] = {
+  def nSignals[T](n: Int, s: Signal[T], wait: FiniteDuration = 1.second): Future[List[T]] = {
     val p     = Promise[List[T]]()
     var count = n
     var list  = List.empty[T]
@@ -112,32 +261,70 @@ object RoutingTests extends TestSuite {
       }
     })
 
-    setTimeout(waitTime) {
+    setTimeout(wait) {
       if (!p.isCompleted) {
+        println("nSignals timeout")
         p.failure(new RuntimeException("nSignals timeout"))
       }
     }
     p.future
   }
 
-  def generateSignals[T](s: List[T], interval: Long = 10): Signal[T] = s match {
-    case head :: rest =>
-      val $var = Var(head)
-      var ss   = rest
-      def doNext(): Unit = ss match {
-        case h :: tail =>
-          ss = tail
-          $var.writer.onNext(h)
-          setTimeout(interval) {
-            doNext()
-          }
-        case _ =>
+  def generateSignals[T](s: List[T], interval: FiniteDuration = 10.millis): Signal[T] = {
+    s match {
+      case head :: rest =>
+        val $var = Var(head)
+        var ss   = rest
+        def doNext(): Unit = ss match {
+          case h :: tail =>
+            ss = tail
+            $var.writer.onNext(h)
+            val _ = setTimeout(interval) {
+              doNext()
+            }
+          case _ =>
+        }
+        val _ = setTimeout(interval) {
+          doNext()
+        }
+        $var.signal
+      case _ =>
+        throw new RuntimeException("generate signals - empty")
+    }
+  }
+
+}
+
+class TestRouteLocationProvider extends RouteLocationProvider {
+
+  private var currentPath: List[String]                = List.empty
+  private var currentParams: Map[String, List[String]] = Map.empty
+
+  private val bus = new EventBus[RouteLocation]
+
+  val stream: EventStream[RouteLocation] = bus.events
+
+  def path(parts: String*): Unit = {
+    currentPath = parts.toList
+    emit()
+  }
+
+  def params(params: (String, String)*): Unit = {
+    currentParams = params
+      .groupBy(_._1)
+      .view
+      .map {
+        case (name, values) =>
+          name -> values.map(_._2).toList
       }
-      setTimeout(interval) {
-        doNext()
-      }
-      $var.signal
-    case _ => ???
+      .toMap
+    emit()
+  }
+
+  def emit(): Unit = {
+    bus.writer.onNext(
+      RouteLocation(currentPath, currentParams)
+    )
   }
 
 }
