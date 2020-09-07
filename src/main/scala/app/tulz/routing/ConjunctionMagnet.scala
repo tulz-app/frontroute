@@ -16,12 +16,12 @@ object ConjunctionMagnet {
     new ConjunctionMagnet[L] {
       type Out = Directive[composition.C]
       def apply(underlying: Directive[L]): Directive[composition.C] =
-        Directive[composition.C] { inner =>
-          underlying.tapply { prefix =>
+        Directive[composition.C] { inner => (location, previous, state) =>
+          underlying.tapply { prefix => (location, previous, state) =>
             other.tapply { suffix =>
               inner(composition.gc(prefix, suffix))
-            }
-          }
+            }(location, previous, state.enter("&"))
+          }(location, previous, state)
         }(Tuple.yes)
     }
 

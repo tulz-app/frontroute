@@ -15,13 +15,17 @@ class Directive[L](
 
   def tflatMap[R: Tuple](next: L => Directive[R]): Directive[R] = {
     Directive[R] { inner =>
-      self.tapply(value => next(value).tapply(inner))
+      self.tapply { value => (location, previous, state) =>
+        next(value).tapply(inner)(location, previous, state.enter(".flatMap"))
+      }
     }
   }
 
   def tmap[R: Tuple](f: L => R): Directive[R] =
     Directive[R] { inner =>
-      self.tapply(value => inner(f(value)))
+      self.tapply { value => (location, previous, state) =>
+        inner(f(value))(location, previous, state.enter(".map"))
+      }
     }
 
   def &[R](magnet: ConjunctionMagnet[L]): magnet.Out = magnet(this)
@@ -30,7 +34,7 @@ class Directive[L](
     Directive[L] { inner => (ctx, previous, state) =>
       self.tapply(value => inner(value))(ctx, previous, state).flatMap {
         case complete: RouteResult.Complete => EventStream.fromValue(complete, emitOnce = true)
-        case RouteResult.Rejected           => other.tapply(value => inner(value))(ctx, previous, state)
+        case RouteResult.Rejected           => other.tapply(value => inner(value))(ctx, previous, state.enter("|"))
       }
     }
 
@@ -38,26 +42,24 @@ class Directive[L](
 
   def tcollect[R: Tuple](f: PartialFunction[L, R]): Directive[R] =
     Directive[R] { inner =>
-      self.tapply(
-        value =>
-          if (f.isDefinedAt(value)) {
-            inner(f(value))
-          } else {
-            directives.reject
-          }
-      )
+      self.tapply { value => (location, previous, state) =>
+        if (f.isDefinedAt(value)) {
+          inner(f(value))(location, previous, state.enter(".collect"))
+        } else {
+          rejected
+        }
+      }
     }
 
   def tfilter(predicate: L => Boolean): Directive[L] =
     Directive[L] { inner =>
-      self.tapply(
-        value =>
-          if (predicate(value)) {
-            inner(value)
-          } else {
-            directives.reject
-          }
-      )
+      self.tapply { value => (location, previous, state) =>
+        if (predicate(value)) {
+          inner(value)(location, previous, state.enter(".filter"))
+        } else {
+          rejected
+        }
+      }
     }
 
 }
@@ -71,8 +73,8 @@ object Directive {
           f(
             value =>
               (ctx, previous, state) => {
-                inner(value)(ctx, previous, state.setValue(value))
-              }
+                inner(value)(ctx, previous, state)
+            }
           )(ctx, previous, state)
     )
   }
@@ -85,14 +87,14 @@ object Directive {
       (ctx, previous, state) => {
         val result = directive.tapply(hac(subRoute))(ctx, previous, state)
         result
-      }
+    }
 
   implicit def addNullaryDirectiveApply(directive: Directive0): Route => Route =
     subRoute =>
       (ctx, previous, state) => {
         val result = directive.tapply(_ => subRoute)(ctx, previous, state)
         result
-      }
+    }
 
   implicit class SingleValueModifiers[L](underlying: Directive1[L]) extends AnyRef {
 

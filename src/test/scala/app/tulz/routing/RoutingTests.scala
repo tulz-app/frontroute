@@ -160,7 +160,7 @@ object RoutingTests extends TestSuite {
     }
 
     test("signal") {
-      var paramSignal: Signal[String]   = null
+      var pathSignal: Signal[String]    = null
       var signals: Future[List[String]] = null
       routeTestF(
         route = probe =>
@@ -168,8 +168,8 @@ object RoutingTests extends TestSuite {
             pathPrefix("prefix2") {
               path(segment).signal { s =>
                 complete {
-                  paramSignal = s
-                  signals = nSignals(3, paramSignal)
+                  pathSignal = s
+                  signals = nSignals(3, pathSignal)
                   probe.append("prefix1/prefix2")
                 }
               }
@@ -194,6 +194,97 @@ object RoutingTests extends TestSuite {
               "prefix1/prefix2"
             )
           }
+      }
+    }
+
+    test("param signal") {
+      var paramSignal: Signal[String]   = null
+      var signals: Future[List[String]] = null
+      routeTestF(
+        route = probe =>
+          pathPrefix("prefix1") {
+            pathPrefix("prefix2") {
+              param("test-param").signal { s =>
+                complete {
+                  paramSignal = s
+                  signals = nSignals(3, paramSignal)
+                  probe.append("prefix1/prefix2")
+                }
+              }
+            }
+        },
+        init = locationProvider => {
+          locationProvider.path("prefix1", "prefix2")
+          locationProvider.params("test-param" -> "value-1")
+          locationProvider.params("test-param" -> "value-2")
+          locationProvider.params("test-param" -> "value-3")
+        }
+      ) { probe =>
+        signals
+          .map { params =>
+            params ==> List(
+              "value-1",
+              "value-2",
+              "value-3"
+            )
+          }
+          .map { _ =>
+            probe.toList ==> List(
+              "prefix1/prefix2"
+            )
+          }
+      }
+    }
+
+    test("two maybeParams signal") {
+      var paramSignal1: Signal[Option[String]]   = null
+      var paramSignal2: Signal[Option[String]]   = null
+      var signals1: Future[List[Option[String]]] = null
+      var signals2: Future[List[Option[String]]] = null
+      routeTestF(
+        route = probe =>
+          pathPrefix("prefix1") {
+            pathPrefix("prefix2") {
+              (maybeParam("test-param-1").signal & maybeParam("test-param-2").signal) { (p1, p2) =>
+                complete {
+                  paramSignal1 = p1
+                  paramSignal2 = p2
+                  signals1 = nSignals(4, paramSignal1)
+                  signals2 = nSignals(4, paramSignal2)
+                  probe.append("prefix1/prefix2")
+                }
+              }
+            }
+        },
+        wait = 50.millis,
+        init = locationProvider => {
+          locationProvider.path("prefix1", "prefix2")
+          locationProvider.params("test-param-1" -> "value-1-1", "test-param-2" -> "value-2-1")
+          locationProvider.params("test-param-1" -> "value-1-2", "test-param-2" -> "value-2-2")
+          locationProvider.params("test-param-1" -> "value-1-3", "test-param-2" -> "value-2-3")
+        }
+      ) { probe =>
+        for {
+          _ <- (signals1 zip signals2)
+                .map {
+                  case (params1, params2) =>
+                    (params1, params2) ==>
+                      List(
+                        None,
+                        Some("value-1-1"),
+                        Some("value-1-2"),
+                        Some("value-1-3")
+                      ) -> List(
+                        None,
+                        Some("value-2-1"),
+                        Some("value-2-2"),
+                        Some("value-2-3")
+                      )
+                }
+          _ = probe.toList ==> List(
+            "prefix1/prefix2"
+          )
+        } yield ()
       }
     }
 
@@ -251,7 +342,7 @@ object RoutingTests extends TestSuite {
     val p     = Promise[List[T]]()
     var count = n
     var list  = List.empty[T]
-    s.addObserver(Observer { t =>
+    s.foreach { t =>
       if (count >= 0) {
         count = count - 1
         list = t :: list
@@ -259,7 +350,7 @@ object RoutingTests extends TestSuite {
           p.success(list.reverse)
         }
       }
-    })
+    }(unsafeWindowOwner)
 
     setTimeout(wait) {
       if (!p.isCompleted) {

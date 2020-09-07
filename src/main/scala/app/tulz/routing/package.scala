@@ -1,6 +1,7 @@
 package app.tulz
 
 import com.raquo.airstream.eventstream.EventStream
+import org.scalajs.dom
 
 import scala.language.implicitConversions
 
@@ -14,6 +15,7 @@ package object routing {
       .flatMap { location =>
         route(location, current.resetPath, RoutingState()).map {
           case RouteResult.Complete(next, action) =>
+//            println(s"route result for $location:\n$next\n")
             if (next != current) {
               current = next
               Some(action)
@@ -21,6 +23,7 @@ package object routing {
               Option.empty
             }
           case RouteResult.Rejected =>
+            dom.console.debug(s"route result: rejected ($location)\n")
             Option.empty
         }
       }.collect {
@@ -34,5 +37,7 @@ package object routing {
   type PathMatcher1[T] = PathMatcher[Tuple1[T]]
 
   type Route = (RouteLocation, RoutingState, RoutingState) => EventStream[RouteResult]
+
+  private[routing] def rejected: EventStream[RouteResult] = EventStream.fromValue(RouteResult.Rejected, emitOnce = true)
 
 }

@@ -1,5 +1,7 @@
 package app.tulz.routing
 
+import com.raquo.airstream.signal.{Signal, StrictSignal, Var}
+
 import scala.scalajs.js
 
 private[routing] case class RoutingState(
@@ -16,20 +18,28 @@ private[routing] case class RoutingState(
   }
 
   def setValue[T](nv: T): RoutingState = {
-    val v =
-      if (nv == ((): Unit) || js.isUndefined(nv)) {
-        "∅"
-      } else {
-        nv
-      }
-    this.copy(data = data + (path -> v))
+    if (nv != ((): Unit)) {
+      val v =
+        if (js.isUndefined(nv)) {
+          "∅"
+        } else {
+          nv
+        }
+      this.copy(data = data + (path -> v))
+    } else {
+      this
+    }
   }
 
   override def toString: String = {
-    s"""${path.reverse.mkString(" ")}\n${data
+    s"""matched: ${path.reverse.mkString(" ")}\n${data
       .map {
-        case (key, value) => s"  ${key.reverse.mkString(" ")} -> $value"
-      }.mkString("\n")}"""
+        case (key, value: Var[_]) =>
+          s"  ${key.reverse.mkString(" ")} -> $value (${value.signal.now()})"
+        case (key, value) =>
+          s"  ${key.reverse.mkString(" ")} -> $value"
+      }
+      .mkString("\n")}"""
   }
 
 }
