@@ -16,6 +16,4 @@ scalacOptions := Seq(
   "utf8"
 )
 
-scalaJSUseMainModuleInitializer := true
-
 testFrameworks += new TestFramework("utest.runner.Framework")

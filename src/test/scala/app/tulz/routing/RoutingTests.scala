@@ -316,6 +316,47 @@ object RoutingTests extends TestSuite {
       }
     }
 
+    test("disjunction signal") {
+      var pathSignal: Signal[String]   = null
+      var signals: Future[List[String]] = null
+      routeTestF(
+        route = probe =>
+          pathPrefix("prefix1") {
+            pathPrefix("prefix2") {
+              (path(segment) | pathEnd.tmap(_ => Tuple1("default"))).signal { s =>
+                complete {
+                  pathSignal = s
+                  signals = nSignals(4, pathSignal)
+                  probe.append("prefix1/prefix2")
+                }
+              }
+            }
+          },
+        init = locationProvider => {
+          locationProvider.path("prefix1", "prefix2")
+          locationProvider.path("prefix1", "prefix2", "suffix-1")
+          locationProvider.path("prefix1", "prefix2", "suffix-1")
+          locationProvider.path("prefix1", "prefix2", "suffix-2")
+          locationProvider.path("prefix1", "prefix2", "suffix-3")
+        }
+      ) { probe =>
+        signals
+          .map { suffixes =>
+            suffixes ==> List(
+              "default",
+              "suffix-1",
+              "suffix-2",
+              "suffix-3"
+            )
+          }
+          .map { _ =>
+            probe.toList ==> List(
+              "prefix1/prefix2"
+            )
+          }
+      }
+    }
+
   }
 
   def nthSignal[T](n: Int, s: Signal[T], waitTime: FiniteDuration = 1.second): Future[T] = {
@@ -354,7 +395,7 @@ object RoutingTests extends TestSuite {
 
     setTimeout(wait) {
       if (!p.isCompleted) {
-        println("nSignals timeout")
+        println(s"nSignals timeout, waited $wait for $n signals: $list")
         p.failure(new RuntimeException("nSignals timeout"))
       }
     }

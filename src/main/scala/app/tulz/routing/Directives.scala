@@ -24,7 +24,7 @@ trait Directives {
       inner =>
         (ctx, previous, state) => {
           signal.flatMap { extracted =>
-            inner(Tuple1(extracted))(ctx, previous, state.enter(".signal").setValue(extracted))
+            inner(Tuple1(extracted))(ctx, previous, state.path(".signal").setValue(extracted))
           }
       }
     )
@@ -35,7 +35,7 @@ trait Directives {
       inner =>
         (ctx, previous, state) => {
           ctx.params.get(name).flatMap(_.headOption) match {
-            case Some(paramValue) => inner(Tuple1(paramValue))(ctx, previous, state.enter(s"param($name)").setValue(paramValue))
+            case Some(paramValue) => inner(Tuple1(paramValue))(ctx, previous, state.path(s"param($name)").setValue(paramValue))
             case None             => EventStream.fromValue(RouteResult.Rejected, emitOnce = true)
           }
       }
@@ -47,7 +47,7 @@ trait Directives {
       inner =>
         (ctx, previous, state) => {
           val maybeParamValue = ctx.params.get(name).flatMap(_.headOption)
-          inner(Tuple1(maybeParamValue))(ctx, previous, state.enter(s"maybeParam($name)").setValue(maybeParamValue))
+          inner(Tuple1(maybeParamValue))(ctx, previous, state.path(s"maybeParam($name)").setValue(maybeParamValue))
       }
     )
 
@@ -55,7 +55,7 @@ trait Directives {
     extract(ctx => ctx.unmatchedPath)
 
   def tprovide[L: Tuple](value: L): Directive[L] =
-    Directive(inner => (ctx, previous, state) => inner(value)(ctx, previous, state.enter(".provide").setValue(value)))
+    Directive(inner => (ctx, previous, state) => inner(value)(ctx, previous, state.path(".provide").setValue(value)))
 
   def provide[L](value: L): Directive1[L] =
     tprovide(Tuple1(value))
@@ -66,7 +66,7 @@ trait Directives {
       inner =>
         (ctx, previous, state) => {
           m(ctx.unmatchedPath) match {
-            case Right((t, rest)) => inner(t)(ctx.withUnmatchedPath(rest), previous, state.enter(s"pathPrefix($m)").setValue(t))
+            case Right((t, rest)) => inner(t)(ctx.withUnmatchedPath(rest), previous, state.path(s"pathPrefix($m)").setValue(t))
             case _                => EventStream.fromValue(RouteResult.Rejected, emitOnce = true)
           }
       }
@@ -78,7 +78,7 @@ trait Directives {
       inner =>
         (ctx, previous, state) => {
           if (ctx.unmatchedPath.isEmpty) {
-            inner(())(ctx, previous, state.enter("path-end"))
+            inner(())(ctx, previous, state.path("path-end"))
           } else {
             EventStream.fromValue(RouteResult.Rejected, emitOnce = true)
           }
@@ -91,7 +91,7 @@ trait Directives {
       inner =>
         (ctx, previous, state) => {
           m(ctx.unmatchedPath) match {
-            case Right((t, Nil)) => inner(t)(ctx.withUnmatchedPath(List.empty), previous, state.enter(s"path($m)").setValue(t))
+            case Right((t, Nil)) => inner(t)(ctx.withUnmatchedPath(List.empty), previous, state.path(s"path($m)").setValue(t))
             case _               => EventStream.fromValue(RouteResult.Rejected, emitOnce = true)
           }
       }
@@ -123,7 +123,7 @@ trait Directives {
       rs match {
         case Nil => EventStream.fromValue(RouteResult.Rejected, emitOnce = true)
         case (route, index) :: tail =>
-          state.enter(index.toString)
+          state.path(index.toString)
           route(ctx, previous, state).flatMap {
             case complete: RouteResult.Complete => EventStream.fromValue(complete, emitOnce = true)
             case RouteResult.Rejected           => findFirst(tail)

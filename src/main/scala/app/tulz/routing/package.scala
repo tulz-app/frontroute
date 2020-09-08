@@ -10,7 +10,7 @@ package object routing {
   object directives extends Directives with PathMatchers
 
   def runRoute(route: Route, locationProvider: RouteLocationProvider): EventStream[() => Unit] = {
-    var current = RoutingState().enter("!")
+    var current = RoutingState().path("!")
     locationProvider.stream
       .flatMap { location =>
         route(location, current.resetPath, RoutingState()).map {

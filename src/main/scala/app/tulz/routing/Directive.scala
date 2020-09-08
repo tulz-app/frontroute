@@ -16,7 +16,7 @@ class Directive[L](
   def tflatMap[R: Tuple](next: L => Directive[R]): Directive[R] = {
     Directive[R] { inner =>
       self.tapply { value => (location, previous, state) =>
-        next(value).tapply(inner)(location, previous, state.enter(".flatMap"))
+        next(value).tapply(inner)(location, previous, state.path(".flatMap"))
       }
     }
   }
@@ -24,7 +24,7 @@ class Directive[L](
   def tmap[R: Tuple](f: L => R): Directive[R] =
     Directive[R] { inner =>
       self.tapply { value => (location, previous, state) =>
-        inner(f(value))(location, previous, state.enter(".map"))
+        inner(f(value))(location, previous, state.path(".map"))
       }
     }
 
@@ -32,10 +32,17 @@ class Directive[L](
 
   def |[U >: L](other: Directive[L]): Directive[L] = {
     Directive[L] { inner => (ctx, previous, state) =>
-      self.tapply(value => inner(value))(ctx, previous, state).flatMap {
-        case complete: RouteResult.Complete => EventStream.fromValue(complete, emitOnce = true)
-        case RouteResult.Rejected           => other.tapply(value => inner(value))(ctx, previous, state.enter("|"))
-      }
+      self
+        .tapply { value => (ctx, previous, state) =>
+          inner(value)(ctx, previous, state.leaveDisjunction())
+        }(ctx, previous, state.enterDisjunction())
+        .flatMap {
+          case complete: RouteResult.Complete => EventStream.fromValue(complete, emitOnce = true)
+          case RouteResult.Rejected =>
+            other.tapply { value => (ctx, previous, state) =>
+              inner(value)(ctx, previous, state.leaveDisjunction())
+            }(ctx, previous, state.enterDisjunction())
+        }
     }
 
   }
@@ -44,7 +51,7 @@ class Directive[L](
     Directive[R] { inner =>
       self.tapply { value => (location, previous, state) =>
         if (f.isDefinedAt(value)) {
-          inner(f(value))(location, previous, state.enter(".collect"))
+          inner(f(value))(location, previous, state.path(".collect"))
         } else {
           rejected
         }
@@ -55,7 +62,7 @@ class Directive[L](
     Directive[L] { inner =>
       self.tapply { value => (location, previous, state) =>
         if (predicate(value)) {
-          inner(value)(location, previous, state.enter(".filter"))
+          inner(value)(location, previous, state.path(".filter"))
         } else {
           rejected
         }
@@ -117,13 +124,14 @@ object Directive {
         underlying.tapply {
           value => // TODO figure this out, when this is run, enter is not yet called
             (ctx, previous, state) =>
-              previous.getValue[Var[L]](state.path) match {
+              val next = state.unsetValue().path(".signal")
+              previous.getValue[Var[L]](next.path) match {
                 case None =>
                   val var$ = Var(value._1)
-                  inner(Tuple1(var$.signal))(ctx, previous, state.setValue(var$))
+                  inner(Tuple1(var$.signal))(ctx, previous, next.setValue(var$))
                 case Some(var$) =>
                   var$.writer.onNext(value._1)
-                  inner(Tuple1(var$.signal))(ctx, previous, state.setValue(var$))
+                  inner(Tuple1(var$.signal))(ctx, previous, next.setValue(var$))
               }
         }(ctx, previous, state)
       })

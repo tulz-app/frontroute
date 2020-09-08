@@ -20,7 +20,7 @@ object ConjunctionMagnet {
           underlying.tapply { prefix => (location, previous, state) =>
             other.tapply { suffix =>
               inner(composition.gc(prefix, suffix))
-            }(location, previous, state.enter("&"))
+            }(location, previous, state.path("&"))
           }(location, previous, state)
         }(Tuple.yes)
     }
