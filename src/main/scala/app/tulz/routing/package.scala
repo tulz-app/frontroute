@@ -23,7 +23,7 @@ package object routing {
               Option.empty
             }
           case RouteResult.Rejected =>
-            dom.console.debug(s"route result: rejected ($location)\n")
+            dom.console.debug(s"route result: rejected ($location)")
             Option.empty
         }
       }.collect {
