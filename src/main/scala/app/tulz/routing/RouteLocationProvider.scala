@@ -1,6 +1,6 @@
 package app.tulz.routing
 
-import com.raquo.laminar.api.L._
+import com.raquo.airstream.eventstream.EventStream
 import org.scalajs.dom
 import org.scalajs.dom.raw.Location
 
@@ -12,10 +12,12 @@ trait RouteLocationProvider {
 
 }
 
-class BrowserRouteLocationProvider extends RouteLocationProvider {
+class BrowserRouteLocationProvider(
+  $popStateEvent: EventStream[dom.PopStateEvent]
+) extends RouteLocationProvider {
 
   val stream: EventStream[RouteLocation] =
-    windowEvents.onPopState.mapTo(extractRouteLocation)
+    $popStateEvent.mapTo(extractRouteLocation)
 
   private def extractRouteLocation = {
     RouteLocation(

@@ -1,8 +1,9 @@
 enablePlugins(ScalaJSPlugin)
 
 libraryDependencies ++= Seq(
-  "com.raquo" %%% "laminar" % "0.10.2",
-  "com.lihaoyi" %%% "utest" % "0.7.4" % Test
+  "com.raquo" %%% "airstream" % "0.10.0",
+  "com.raquo" %%% "laminar" % "0.10.2" % Test,
+  "com.lihaoyi" %%% "utest" % "0.7.5" % Test
 )
 
 scalacOptions := Seq(
