@@ -1,6 +1,6 @@
 ![Maven Central](https://img.shields.io/maven-central/v/app.tulz/laminar-router_sjs1_2.13.svg)
 
-Routing library for Laminar with a DSL inspired by Akka HTTP.
+Routing library for [Laminar](https://github.com/raquo/Laminar) with a DSL inspired by Akka HTTP.
 
 ```scala
 "app.tulz" %%% "laminar-router" % "0.10.1"   // Requires Airstream 0.10.0 
