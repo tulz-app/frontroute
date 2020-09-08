@@ -10,8 +10,8 @@
   }
   ```
 * API: laminar-route does not depend on Laminar anymore (like Waypoint)  
-  * Add $popStateEvent to `BrowserRouteLocationProvider` constructor
-  * Migration: You should provide $popStateEvent = windowEvents.onPopState if using Laminar
+  * Add `$popStateEvent` to `BrowserRouteLocationProvider` constructor
+  * Migration: You should provide `$popStateEvent = windowEvents.onPopState` if using Laminar
 * API: new utility object - `BrowserNavigation` with `pushState` function
 
 ### 0.10.0
