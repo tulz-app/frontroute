@@ -22,7 +22,7 @@ private[routing] case class RoutingState(
       path match {
         case Nil         => this
         case "(" :: tail => this.copy(path = "(...|...)" :: tail, data = data)
-        case other       =>          leave(other.tail, data.removed(other))
+        case other       =>          leave(other.tail, data - other)
       }
     leave(path, data)
   }
@@ -47,7 +47,7 @@ private[routing] case class RoutingState(
   }
 
   def unsetValue[T](): RoutingState = {
-    this.copy(data = data.removed(path))
+    this.copy(data = data - path)
   }
 
   private def showPath(path: List[String]) = path.reverse.mkString(" ")
