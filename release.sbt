@@ -1,24 +1,23 @@
+name := "frontroute"
 
-name := "laminar-router"
-
-normalizedName := "laminar-router"
+normalizedName := "frontroute"
 
 organization := "app.tulz"
 
-scalaVersion := "2.13.3"
+scalaVersion := "2.13.4"
 
-crossScalaVersions := Seq("2.12.10", "2.13.3")
+crossScalaVersions := Seq("2.12.12", "2.13.4")
 
-homepage := Some(url("https://github.com/tulz-app/laminar-router"))
+homepage := Some(url("https://github.com/tulz-app/frontroute"))
 
-licenses += ("MIT", url("https://github.com/tulz-app/laminar-router/blob/master/LICENSE.md"))
+licenses += ("MIT", url("https://github.com/tulz-app/frontroute/blob/main/LICENSE.md"))
 
-description := "Routing library for Laminar with DSL inspired by Akka HTTP."
+description := "Routing library based on Airstream for Laminar with DSL inspired by Akka HTTP."
 
 scmInfo := Some(
   ScmInfo(
-    url("https://github.com/tulz-app/laminar-router"),
-    "scm:git@github.com/tulz-app/laminar-router.git"
+    url("https://github.com/tulz-app/frontroute"),
+    "scm:git@github.com/tulz-app/frontroute.git"
   )
 )
 
@@ -33,7 +32,7 @@ developers := List(
 
 publishTo := sonatypePublishToBundle.value
 
-sonatypeProfileName := "app.tulz"
+sonatypeProfileName := "yurique"
 
 publishMavenStyle := true
 
@@ -41,10 +40,10 @@ publishArtifact in Test := false
 
 releaseCrossBuild := true
 
-pomIncludeRepository := { _ => false }
+pomIncludeRepository := { _ =>
+  false
+}
 
 publishArtifact in Test := false
 
 releasePublishArtifactsAction := PgpKeys.publishSigned.value
-
-

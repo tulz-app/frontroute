@@ -74,15 +74,13 @@ class Directive[L](
 object Directive {
 
   def apply[L: Tuple](f: (L => Route) => Route): Directive[L] = {
-    new Directive[L](
-      inner =>
-        (ctx, previous, state) =>
-          f(
-            value =>
-              (ctx, previous, state) => {
-                inner(value)(ctx, previous, state)
-            }
-          )(ctx, previous, state)
+    new Directive[L](inner =>
+      (ctx, previous, state) =>
+        f(value =>
+          (ctx, previous, state) => {
+            inner(value)(ctx, previous, state)
+          }
+        )(ctx, previous, state)
     )
   }
 
@@ -94,14 +92,14 @@ object Directive {
       (ctx, previous, state) => {
         val result = directive.tapply(hac(subRoute))(ctx, previous, state)
         result
-    }
+      }
 
   implicit def addNullaryDirectiveApply(directive: Directive0): Route => Route =
     subRoute =>
       (ctx, previous, state) => {
         val result = directive.tapply(_ => subRoute)(ctx, previous, state)
         result
-    }
+      }
 
   implicit class SingleValueModifiers[L](underlying: Directive1[L]) extends AnyRef {
 
@@ -112,8 +110,8 @@ object Directive {
       underlying.tflatMap { case Tuple1(value) => f(value) }
 
     def collect[R: Tuple](f: PartialFunction[L, R]): Directive[R] =
-      underlying.tcollect {
-        case Tuple1(value) => f(value)
+      underlying.tcollect { case Tuple1(value) =>
+        f(value)
       }
 
     def filter(description: String)(predicate: L => Boolean): Directive1[L] =

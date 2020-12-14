@@ -22,7 +22,7 @@ private[routing] case class RoutingState(
       path match {
         case Nil         => this
         case "(" :: tail => this.copy(path = "(...|...)" :: tail, data = data)
-        case other       =>          leave(other.tail, data - other)
+        case other       => leave(other.tail, data - other)
       }
     leave(path, data)
   }
@@ -32,6 +32,7 @@ private[routing] case class RoutingState(
   }
 
   def setValue[T](nv: T): RoutingState = {
+    //noinspection ComparingUnrelatedTypes
     if (nv != ((): Unit)) {
       val v = {
         if (js.isUndefined(nv)) {

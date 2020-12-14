@@ -17,15 +17,15 @@ abstract class PathMatcher[T](val description: String)(implicit val tuple: Tuple
 
   def tmap[V: Tuple](f: T => V): PathMatcher[V] = new PathMatcher[V](self.description) {
     override def apply(in: List[String]): Either[(String, List[String]), (V, List[String])] =
-      self(in).map {
-        case (t, out) => f(t) -> out
+      self(in).map { case (t, out) =>
+        f(t) -> out
       }
   }
 
   def tflatMap[V: Tuple](description: String)(f: T => PathMatcher[V]): PathMatcher[V] = new PathMatcher[V](description) {
     override def apply(path: List[String]): Either[(String, List[String]), (V, List[String])] =
-      self(path).flatMap {
-        case (t, out) => f(t).apply(out)
+      self(path).flatMap { case (t, out) =>
+        f(t).apply(out)
       }
   }
 
@@ -58,11 +58,11 @@ abstract class PathMatcher[T](val description: String)(implicit val tuple: Tuple
 
   def void: PathMatcher[Unit] = this.tmap(_ => ())
 
-  def unary_!(): PathMatcher[Unit] = new PathMatcher[Unit](s"!${self.description}") {
+  def unary_! : PathMatcher[Unit] = new PathMatcher[Unit](s"!${self.description}") {
     override def apply(path: List[String]): Either[(String, List[String]), (Unit, List[String])] =
       self(path) match {
         case Right((_, rest)) => Left("not !matched" -> rest)
-        case Left((_, rest))  => Right(()            -> rest)
+        case Left((_, rest))  => Right(() -> rest)
       }
   }
 
@@ -106,7 +106,7 @@ trait PathMatchers {
 
     override def apply(path: List[String]): Either[(String, List[String]), (Tuple1[String], List[String])] =
       path match {
-        case head :: tail => Right(Tuple1(head)             -> tail)
+        case head :: tail => Right(Tuple1(head) -> tail)
         case Nil          => Left(s"unexpected end of path" -> Nil)
       }
 
@@ -117,8 +117,8 @@ trait PathMatchers {
   def regex(r: Regex): PathMatcher1[Match] =
     segment
       .tmap(s => Tuple1(r.findFirstMatchIn(s._1)))
-      .tcollect(s"regex($r)") {
-        case Tuple1(Some(m)) => Tuple1(m)
+      .tcollect(s"regex($r)") { case Tuple1(Some(m)) =>
+        Tuple1(m)
       }
 
   def fromTry[V](t: Try[V]): PathMatcher1[V] = new PathMatcher1[V]("fromTry") {

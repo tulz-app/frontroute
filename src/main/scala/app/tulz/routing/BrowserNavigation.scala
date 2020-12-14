@@ -6,8 +6,13 @@ import scala.scalajs.js
 
 object BrowserNavigation {
 
-  def pushState(statedata: js.Any, title: String, url: String): Unit = {
+  def pushState(url: String, title: String, statedata: js.Any = js.undefined): Unit = {
     dom.window.history.pushState(statedata, title, url)
+    emitPopStateEvent()
+  }
+
+  def replaceState(url: String, title: String, statedata: js.Any = js.undefined): Unit = {
+    dom.window.history.replaceState(statedata, title, url)
     emitPopStateEvent()
   }
 

@@ -23,12 +23,14 @@ package object routing {
               Option.empty
             }
           case RouteResult.Rejected =>
-            dom.console.debug(s"route result: rejected ($location)")
+            dom.console.debug(s"route: rejected ($location)")
             Option.empty
         }
-      }.collect {
-        case Some(events) => events
-      }.flatten
+      }
+      .collect { case Some(events) =>
+        events
+      }
+      .flatten
   }
 
   type Directive0      = Directive[Unit]
