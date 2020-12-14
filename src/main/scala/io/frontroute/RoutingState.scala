@@ -1,13 +1,22 @@
-package app.tulz.routing
+package io.frontroute
 
 import com.raquo.airstream.signal.Var
 
 import scala.annotation.tailrec
 import scala.scalajs.js
 
-private[routing] case class RoutingState(
-  path: List[String] = List.empty,
-  data: Map[List[String], Any] = Map.empty
+object RoutingState {
+
+  val empty: RoutingState = RoutingState(
+    path = List.empty,
+    data = Map.empty
+  )
+
+}
+
+final private[frontroute] case class RoutingState(
+  path: List[String],
+  data: Map[List[String], Any]
 ) {
 
   def resetPath: RoutingState = this.copy(path = List.empty)

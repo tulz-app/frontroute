@@ -1,5 +1,5 @@
-package app.tulz.routing.util
-import app.tulz.routing.Route
+package io.frontroute
+package util
 
 abstract private[util] class ApplyConverterInstances {
   implicit def hac1[T1]: ApplyConverter[Tuple1[T1]] { type In = (T1) => Route } = new ApplyConverter[Tuple1[T1]] {

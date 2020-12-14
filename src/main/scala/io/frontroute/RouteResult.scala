@@ -1,4 +1,4 @@
-package app.tulz.routing
+package io.frontroute
 
 import com.raquo.airstream.eventstream.EventStream
 

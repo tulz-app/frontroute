@@ -1,18 +1,17 @@
-package app.tulz.routing
+package io.frontroute
 
-import app.tulz.util.Tuple
+import app.tulz.tuplez.Tuple
 import com.raquo.airstream.eventstream.EventStream
 import com.raquo.airstream.signal.Signal
-import scala.language.implicitConversions
 
 trait Directives {
 
   def reject: Route = (_, _, _) => EventStream.fromValue(RouteResult.Rejected, emitOnce = true)
 
-  private[routing] def extractContext: Directive1[RouteLocation] =
+  private[frontroute] def extractContext: Directive1[RouteLocation] =
     Directive[Tuple1[RouteLocation]](inner => (ctx, previous, state) => inner(Tuple1(ctx))(ctx, previous, state))
 
-  private[routing] def extract[T](f: RouteLocation => T): Directive1[T] =
+  private[frontroute] def extract[T](f: RouteLocation => T): Directive1[T] =
     Directive[Tuple1[T]](inner => (ctx, previous, state) => inner(Tuple1(f(ctx)))(ctx, previous, state))
 
   def signal[T](signal: Signal[T]): Directive1[T] = {

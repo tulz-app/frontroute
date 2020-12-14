@@ -1,12 +1,10 @@
-package app.tulz.routing
+package io.frontroute
 
-import app.tulz.routing.util.ApplyConverter
-import app.tulz.util.Tuple
+import app.tulz.tuplez.Tuple
 import com.raquo.airstream.eventstream.EventStream
 import com.raquo.airstream.signal.Signal
 import com.raquo.airstream.signal.Var
-
-import scala.language.implicitConversions
+import io.frontroute.util.ApplyConverter
 
 class Directive[L](
   val tapply: (L => Route) => Route

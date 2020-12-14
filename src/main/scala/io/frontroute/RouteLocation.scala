@@ -1,4 +1,4 @@
-package app.tulz.routing
+package io.frontroute
 
 final case class RouteLocation(
   unmatchedPath: List[String],

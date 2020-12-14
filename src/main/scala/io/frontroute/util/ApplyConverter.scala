@@ -1,6 +1,5 @@
-package app.tulz.routing.util
-
-import app.tulz.routing.Route
+package io.frontroute
+package util
 
 abstract class ApplyConverter[L] {
   type In

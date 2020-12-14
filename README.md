@@ -3,7 +3,7 @@
 Routing library for [Laminar](https://github.com/raquo/Laminar) with a DSL inspired by Akka HTTP.
 
 ```scala
-"app.tulz" %%% "laminar-router" % "0.10.1"   // Requires Airstream 0.10.0 
+"io.frontroute" %%% "frontroute" % "0.11.0"   // Depends on Airstream 0.11.1 
 ```
 
 ![Documentation coming soon](https://img.shields.io/static/v1?label=Documentation&message=coming%20soon&color=orange)
@@ -16,6 +16,7 @@ A sneak peek at the DSL (see the above example):
 import com.raquo.laminar.api.L._
 import app.tulz.routing._
 import app.tulz.routing.directives._
+import io.frontroute.{ BrowserNavigation, BrowserRouteLocationProvider }
 
 object App {
 

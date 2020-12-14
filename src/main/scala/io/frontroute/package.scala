@@ -1,21 +1,18 @@
-package app.tulz
+package io
 
 import com.raquo.airstream.eventstream.EventStream
-import org.scalajs.dom
+import io.frontroute.debug.Logging
 
-import scala.language.implicitConversions
-
-package object routing {
+package object frontroute {
 
   object directives extends Directives with PathMatchers
 
   def runRoute(route: Route, locationProvider: RouteLocationProvider): EventStream[() => Unit] = {
-    var current = RoutingState().path("!")
+    var current = RoutingState.empty.path("!")
     locationProvider.stream
       .flatMap { location =>
-        route(location, current.resetPath, RoutingState()).map {
+        route(location, current.resetPath, RoutingState.empty).map {
           case RouteResult.Complete(next, action) =>
-//            println(s"route result for $location:\n$next\n")
             if (next != current) {
               current = next
               Some(action)
@@ -23,7 +20,7 @@ package object routing {
               Option.empty
             }
           case RouteResult.Rejected =>
-            dom.console.debug(s"route: rejected ($location)")
+            Logging.debug(s"route: rejected ($location)")
             Option.empty
         }
       }
@@ -40,6 +37,6 @@ package object routing {
 
   type Route = (RouteLocation, RoutingState, RoutingState) => EventStream[RouteResult]
 
-  private[routing] def rejected: EventStream[RouteResult] = EventStream.fromValue(RouteResult.Rejected, emitOnce = true)
+  private[frontroute] def rejected: EventStream[RouteResult] = EventStream.fromValue(RouteResult.Rejected, emitOnce = true)
 
 }

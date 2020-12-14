@@ -1,14 +1,13 @@
-package app.tulz.routing
+package io.frontroute
 
-import app.tulz.util.Tuple
+import app.tulz.tuplez.Tuple
 
-import scala.language.implicitConversions
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 import scala.util.matching.Regex
 import scala.util.matching.Regex.Match
-import app.tulz.util.TupleComposition.Composition
+import app.tulz.tuplez.Composition
 
 abstract class PathMatcher[T](val description: String)(implicit val tuple: Tuple[T]) {
   self =>
@@ -47,10 +46,10 @@ abstract class PathMatcher[T](val description: String)(implicit val tuple: Tuple
 
   def withFilter(description: String)(f: T => Boolean): PathMatcher[T] = this.tfilter(description)(f)
 
-  def /[V](other: PathMatcher[V])(implicit compose: Composition[T, V]): PathMatcher[compose.C] =
+  def /[V](other: PathMatcher[V])(implicit compose: Composition[T, V]): PathMatcher[compose.Composed] =
     self.tflatMap(s"${self.description}/${other.description}") { t1 =>
       other.tmap { v =>
-        compose.gc(t1, v)
+        compose.compose(t1, v)
       }(Tuple.yes)
     }(Tuple.yes)
 

@@ -1,13 +1,14 @@
-package app.tulz.routing
+package io.frontroute
 
 import com.raquo.laminar.api.L._
-import app.tulz.testing._
+import io.frontroute.testing._
 import com.raquo.airstream.ownership.Owner
 import utest._
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.Future
+import scala.concurrent.Promise
 import scala.scalajs.js.timers._
 import directives._
 
@@ -57,7 +58,7 @@ object RoutingTests extends TestSuite {
             complete {
               probe.append("end")
             }
-        },
+          },
         init = locationProvider => {
           locationProvider.path()
         }
@@ -85,7 +86,7 @@ object RoutingTests extends TestSuite {
                 probe.append("c")
               }
             }
-        ),
+          ),
         init = locationProvider => {
           locationProvider.path("b")
           locationProvider.path("c")
@@ -139,7 +140,7 @@ object RoutingTests extends TestSuite {
                 )
               }
             }
-        ),
+          ),
         init = locationProvider => {
           locationProvider.path("prefix2", "prefix3", "suffix2")
           locationProvider.path("prefix1", "prefix2")
@@ -174,7 +175,7 @@ object RoutingTests extends TestSuite {
                 }
               }
             }
-        },
+          },
         init = locationProvider => {
           locationProvider.path("prefix1", "prefix2", "other-suffix-1")
           locationProvider.path("prefix1", "prefix2", "other-suffix-2")
@@ -212,7 +213,7 @@ object RoutingTests extends TestSuite {
                 }
               }
             }
-        },
+          },
         init = locationProvider => {
           locationProvider.path("prefix1", "prefix2")
           locationProvider.params("test-param" -> "value-1")
@@ -255,7 +256,7 @@ object RoutingTests extends TestSuite {
                 }
               }
             }
-        },
+          },
         wait = 50.millis,
         init = locationProvider => {
           locationProvider.path("prefix1", "prefix2")
@@ -265,25 +266,25 @@ object RoutingTests extends TestSuite {
         }
       ) { probe =>
         for {
-          _ <- (signals1 zip signals2)
-                .map {
-                  case (params1, params2) =>
-                    (params1, params2) ==>
-                      List(
-                        None,
-                        Some("value-1-1"),
-                        Some("value-1-2"),
-                        Some("value-1-3")
-                      ) -> List(
-                        None,
-                        Some("value-2-1"),
-                        Some("value-2-2"),
-                        Some("value-2-3")
-                      )
-                }
+          _ <- signals1
+                 .zip(signals2)
+                 .map { case (params1, params2) =>
+                   (params1, params2) ==>
+                     List(
+                       None,
+                       Some("value-1-1"),
+                       Some("value-1-2"),
+                       Some("value-1-3")
+                     ) -> List(
+                       None,
+                       Some("value-2-1"),
+                       Some("value-2-2"),
+                       Some("value-2-3")
+                     )
+                 }
           _ = probe.toList ==> List(
-            "prefix1/prefix2"
-          )
+                "prefix1/prefix2"
+              )
         } yield ()
       }
     }
@@ -299,7 +300,7 @@ object RoutingTests extends TestSuite {
                 }
               }
             }
-        },
+          },
         init = locationProvider => {
           locationProvider.path("prefix1", "prefix2", "other-suffix-1")
           locationProvider.params("param1" -> "param1-value1")
@@ -317,7 +318,7 @@ object RoutingTests extends TestSuite {
     }
 
     test("disjunction signal") {
-      var pathSignal: Signal[String]   = null
+      var pathSignal: Signal[String]    = null
       var signals: Future[List[String]] = null
       routeTestF(
         route = probe =>
@@ -445,9 +446,8 @@ class TestRouteLocationProvider extends RouteLocationProvider {
     currentParams = params
       .groupBy(_._1)
       .view
-      .map {
-        case (name, values) =>
-          name -> values.map(_._2).toList
+      .map { case (name, values) =>
+        name -> values.map(_._2).toList
       }
       .toMap
     emit()
