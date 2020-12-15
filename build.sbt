@@ -1,7 +1,7 @@
 enablePlugins(ScalaJSPlugin)
 
 libraryDependencies ++= Seq(
-  "app.tulz"    %%% "tuplez"    % "0.1.0-SNAPSHOT",
+  "app.tulz"    %%% "tuplez"    % "0.1.0",
   "com.raquo"   %%% "airstream" % "0.11.1",
   "com.raquo"   %%% "laminar"   % "0.11.0" % Test,
   "com.lihaoyi" %%% "utest"     % "0.7.5"  % Test
