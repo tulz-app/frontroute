@@ -195,9 +195,7 @@ def completeN[T](events: EventStream[() => Unit]): Route
 
 * `completeN` accepts a stream of `() => Unit` functions
 
-When the route is matched,
-* subscribes to this stream,
-* "executes" the functions emitted by the stream.
+When the route is matched, `frontroute` subscribes to this stream and "executes" the functions emitted by the stream.
 
 As soon as the route changes (another `complete` or `completeN` is "triggered"), the subscription is cancelled.
 
