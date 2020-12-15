@@ -1,19 +1,24 @@
 # frontroute
 
-![Maven Central](https://img.shields.io/maven-central/v/io.frontroute/frontroute_sjs1_2.13.svg)
+![Maven Central](https://img.shields.io/maven-central/v/io.frontroute/frontroute_sjs1_2.13.svg) ![Scala.js](https://img.shields.io/static/v1?label=built+with&message=Scala.js&color=green)
 
-A routing library for [Laminar](https://github.com/raquo/Laminar).
+`frontroute` is a front-end router library for single-page application (SPA) built with [Scala.js](http://www.scala-js.org/), with an API inspired by [Akka HTTP](https://doc.akka.io/docs/akka-http/current/).
 
-It doesn't actually have Laminar as a dependency (though it depends on Laminar's companion - [Airstream](https://github.com/raquo/Airstream)), 
-but it's intended to be used with it.
+Primarily deisgned for use with [raquo/Laminar](https://github.com/raquo/Laminar), though it's not a dependency and `frontroute` should fit nicely with any Scala.js library.
 
-### Adding to your project
+Built on top of:
+
+* [raquo/Airstream](https://github.com/raquo/Airstream) `v0.11.1` 
+* [tulz-app/tuplez](https://github.com/tulz-app/tuplez/) `v0.1.0`
+
+
+### Getting started
+
+`frontroute` is available for [Scala.js](http://www.scala-js.org/) v1.1.0+ (published for Scala 2.12 and 2.13).
 
 ```scala
-"io.frontroute" %%% "frontroute" % "0.11.1"  
+libraryDependencies += "io.frontroute" %%% "frontroute" % "0.11.1"
 ```
-
-Dependencies: [Airstream](https://github.com/raquo/Airstream) v0.11.1 and [app.tulz.tuplez](https://github.com/tulz-app/tuplez/)
 
 ```scala
 import io.frontroute._
@@ -22,7 +27,7 @@ import io.frontroute.directives._
 
 ## Overview
 
-`frontroute` provides a DSL inspired by Akka HTTP:
+Let's start with a small example:
 
 ```scala
 
@@ -693,4 +698,15 @@ object PageNotFound {
 ## An example project 
 
 An example is available: https://github.com/yurique/laminar-router-example
+
+
+
+## Author
+
+Iurii Malchenko – [@yurique](https://twitter.com/yurique)
+
+
+## License
+
+Laminar is provided under the [MIT license](https://github.com/tulz-app/frontroute/blob/main/LICENSE.md).
 
