@@ -243,8 +243,8 @@ concat(
 ### A more complicated use case
 
 If you wanted to get some data from the back-end before rendering a page, you could use `completeN`.
-Also, this will prevent the previous action from taking effect when the call to the back-end returns but 
-the route has already changed in the meantime.
+Also, this will prevent "this" action from taking effect when the call to the back-end returns after 
+the route has changed and another "complete" is in effect.
 
 For example, let's say we want to be displaying a "loading" screen while the data is being requested and after that - the actual page.
 
@@ -284,8 +284,8 @@ concat(
 )
 ```
 
-As a side note, in order to keep the routes readable as they grow, it might be a good idea to extract 
-the actions:
+As a side note, in order to keep the routes readable as they grow, it is recommended to extract 
+the "actions":
 
 ```scala
 val route = concat(
@@ -319,14 +319,14 @@ existing directives using the combinators.
 
 Say, you wanted to check if part of the path is a number. 
 
-Let's create a `isNumber` directive for that, we will use it like this:
+Let's create an `isNumber` directive for that, we will use it like this:
 
 ```scala
 val route = concat(
   // ...
   path("user" / segment) { userId =>
     isNumber(userId) { userIdAsInt =>
-      userByIdPage(userId) }  
+      userByIdPage(userId) 
     }
   }
   // ...
@@ -341,8 +341,8 @@ Let's define the directive now:
 
 ```scala
   def isNumber(s: String): Directive1[Int] = {
-  // Directive1 means is doesn't return a single value (vs. a tuple)
-  // Directive0 would not return any value at all, it would just either match or reject
+  // Directive1 means the directive provides a single value (vs. a tuple)
+  // Directive0 means the directive does not provide any value at all, it just either matches or rejects
     Try(s.toInt) match {
       case Success(int) => provide(int)
       case Failure(_) => reject
@@ -380,12 +380,13 @@ path("user")
 // this is a Directive0 as the constant string path matcher doesn't return a value
 path("user" / segment)
 // matches if the unparsed part of the URI path is a /user segment followed by a single segment
-// this is a Directive1[String] as the segment string path matcher returns the segment value
+// this is a Directive1[String] because the 'segment' path matcher is a PathMatcher[String] 
 ```
+
 ### pathPrefix
 
-Works almost the same as `path` but doesn't require the URI path to be fully matched by the 
-path matcher.
+Works almost the same as `path` but doesn't require the URI path to be fully matched by 
+the underlying path matcher.
 
 ### extractUnmatchedPath
 
@@ -395,9 +396,9 @@ This is a `Directive1[List[String]]` - simply provides the unmatched part or the
 
 We have these simple path matchers:
 
-* `segment: PathMatcher1[String]` - matches (and "consumes") a single segment of the URI path, and provides it as the value; if there are no more unmatched segments - rejects
-* `segment(s: String): PathMatcher0` - almost the same, but matches only if the segment matches the provided string; doesn't "return" a value  
-* `regex(r: Regex): PathMatcher1[String]` - matches only if the segment matches the regular expression
+* `segment: PathMatcher1[String]` - matches (and "consumes") a single segment of the URI path, and provides the segment as the value; rejects if there are no more unmatched segments left
+* `segment(s: String): PathMatcher0` - matches only if the segment is equal to the provided string; doesn't provide a value; rejects if there are no more unmatched segments left  
+* `regex(r: Regex): PathMatcher1[String]` - matches only if the segment matches the regular expression, provides the segment as the value; rejects if there are no more unmatched segments left
 * `long: PathMatcher1[Long]` - matches if the segment can be parsed as a `Long`
 * `double: PathMatcher1[Double]` - matches if the segment can be parsed as a `Double`
 
@@ -413,10 +414,10 @@ Path matchers can be combined using the following combinators:
   the reason for this is that `PathMatcher` internally always holds it's value as a tuple and this needs to be preserved 
 * `tflatMap[V: Tuple](description: String)(f: T => PathMatcher[V])` - description here is needed because of how `frontroute` works under the hood;
 * `tfilter(description: String)(f: T => Boolean): PathMatcher[T]`
-* `def tcollect[V: Tuple](description: String)(f: PartialFunction[T, V]): PathMatcher[V]`
-* `/` - makes matches consume the URI path one after another: `path("user" / segment / "details" / segment) // : PathMatcher[(String, String)]` 
-* `def as[O: Tuple](f: T => O): PathMatcher[O]` - an alias for `map`
-* `def unary_! : PathMatcher[Unit]` - negates a matcher: `pathPrefix(!"users")`
+* `tcollect[V: Tuple](description: String)(f: PartialFunction[T, V]): PathMatcher[V]`
+* `/` - makes the matchers consume the URI path one after another: `path("user" / segment / "details" / segment) // : PathMatcher[(String, String)]` 
+* `as[O: Tuple](f: T => O): PathMatcher[O]` - an alias for `map`
+* `unary_! : PathMatcher[Unit]` - negates a matcher: `pathPrefix(!"users")`
 * `PathMatcher.tprovide[V: Tuple](v: V): PathMatcher[V]` - always matches and provides a constant value
 * `PathMatcher.provide[V](v: V): PathMatcher[Tuple1[V]]` - same as `tprovide`, but wraps the value into a `Tuple1`
 * `PathMatcher.fail[T: Tuple](msg: String): PathMatcher[T]` - always fails
@@ -429,7 +430,7 @@ Path matchers can be combined using the following combinators:
 * `maybeParam(name: String): Directive1[Option[String]]` - extracts the parameter value from the URI query string if present, always matches
 * `tprovide[L: Tuple](value: L): Directive[L]` - always matches, providing a constant value
 * `provide[L](value: L): Directive1[L]` - same as `provide`, wraps the value in `Tuple1`
-* `debug(message: => String)(subRoute: Route): Route` - prints a debug message (using the `Logging` utility) whenever the route matches; !! make sure to check the Debugging/logging section below !! 
+* `debug(message: => String)(subRoute: Route): Route` - prints a debug message (using the `Logging` utility) whenever the route matches; !! make sure to check the `Debugging/logging` section below !! 
 
 
 
@@ -501,7 +502,7 @@ pathPrefix("dashboard") {
 ```
 
 In this case, whenever the query string changes to have a different value for the `tab` parameter, the route will be re-evaluated and 
-`render(Page.Dashboard(selectedTab))` will be called again. Depending on the way you implement the `render` this might be a problem.
+`render(Page.Dashboard(selectedTab))` will be called again. Depending on the way you implement your "actions" inside `complete`s, this might not be what you want.
 
 For example, you might be re-rendering (to keep things simple) the whole page from scratch whenever `render` is called with a new `Page` value.
 
