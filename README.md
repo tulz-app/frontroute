@@ -12,8 +12,10 @@ but it's intended to be used with it.
 sbt:
 
 ```scala
-"io.frontroute" %%% "frontroute" % "0.11.0"   // Depends on Airstream 0.11.1 and app.tulz.tuplez 
+"io.frontroute" %%% "frontroute" % "0.11.0"  
 ```
+
+Dependencies: [Airstream](https://github.com/raquo/Airstream) v0.11.1 and [app.tulz.tuplez](https://github.com/tulz-app/tuplez/)
 
 ```scala
 import io.frontroute._
