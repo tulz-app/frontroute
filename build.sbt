@@ -20,3 +20,5 @@ scalacOptions := Seq(
 )
 
 testFrameworks += new TestFramework("utest.runner.Framework")
+
+publishArtifact in (Compile, packageDoc) := false
