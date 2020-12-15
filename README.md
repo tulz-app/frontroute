@@ -7,12 +7,10 @@ A routing library for [Laminar](https://github.com/raquo/Laminar).
 It doesn't actually have Laminar as a dependency (though it depends on Laminar's companion - [Airstream](https://github.com/raquo/Airstream)), 
 but it's intended to be used with it.
 
-### Installation
-
-sbt:
+### Adding to your project
 
 ```scala
-"io.frontroute" %%% "frontroute" % "0.11.0"  
+"io.frontroute" %%% "frontroute" % "0.11.1"  
 ```
 
 Dependencies: [Airstream](https://github.com/raquo/Airstream) v0.11.1 and [app.tulz.tuplez](https://github.com/tulz-app/tuplez/)
