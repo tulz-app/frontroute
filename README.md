@@ -318,7 +318,7 @@ On the low level, in order to create a custom directive you need a `(L => Route)
 The good thing, though, is you will most likely not need to do anything low-level - most directives are supposed to be built from the 
 existing directives using the combinators.
 
-Say, you wanted to check if part of the path is a number. 
+Say, you wanted to check if the matched segment (part of the URI path delimited by `/`) is a number. 
 
 Let's create an `isNumber` directive for that, we will use it like this:
 
