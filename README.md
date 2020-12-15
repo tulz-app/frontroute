@@ -59,6 +59,36 @@ There is a set of basic directives available out of the box:
 
 One can define most of the routing for the app using those, but it is possible (and encouraged) to implement custom directives.
 
+Directives are designed to be nested (as well as combined with `&` and `|`). 
+
+Whenever a directive matches it gives control to the nested directive, providing the value it "extracted" (if not `Unit`):
+
+```scala
+concat( // this is not "nesting", unlike most of the following "calls"
+  pathPrefix("public") { // provides no value, Unit - no need to type "_ =>"
+    concat( // not "nesting"
+      pathPrefix("articles") { // no value
+        path(segment) { articleId => // a String value provided 
+          renderArticlePage(articleId)  
+        }
+      },
+      (pathPrefix("books") & maybeParam("author") & maybeParam("title")) { 
+        (maybeAuthor, maybeTitle) => 
+          // no value from the pathPrefix, combined with Option[String] value from the first param directive and Option[String] from the second one
+          // the internal value is a 2-tuple - (Option[String], Option[String])
+          // but here, when nesting it's not a single-parameter like Function1[Tuple2[Option[String], Option[String]], ???]
+          // it's a 2-parameter function Function2[Option[String], Option[String], ???]
+          renderBookSearchPage(maybeAuthor, maybeTitle)
+      }
+    )
+  },
+  pathPrefix("admin") { // provides no value
+    // ... you get the idea
+  }
+)
+
+```
+
 ## Usage
 
 After you have your routes defined:
@@ -81,9 +111,9 @@ trait RouteLocationProvider {
 }
 ```
 
-and it's job to provide the stream of `RouteLocation`. You can implement it depending on your needs (for tests, for example).
+and its single job is to provide the stream of `RouteLocation`. You can implement it depending on your needs (for tests, for example).
 
-But most of the times you will use the provided `BrowserRouteLocationProvider` - it takes a stream of `PopStateEvent` and 
+But, most of the times, you will probably be using the provided `BrowserRouteLocationProvider` - it takes a stream of `PopStateEvent` and 
 parses the `dom.window.location` to produce the corresponding `RouteLocation`s.
 
 
@@ -94,8 +124,6 @@ runRoute(route, routeLocationProvider)
 ```
 
 `runRoute` also requires an implicit `Owner` (`unsafeWindowOwner` will work perfectly fine most of the times).
-
-`runRoute` returns a `Subscription`. 
 
 Under the hood,
 
@@ -124,15 +152,16 @@ concat(
 
 ### The "complete" directive
 
-In a simple case, the "do something" here means "execute some code" (do `console.log`, update the rendered page, etc).
+In a simple case, the "do something" here means "execute some code" (do `console.log`, update the "current page" signal , etc).
 
 For that, there is a built-in directive - `complete`.
 
-> It is not really a directive: it's rather a function that terminates a 
-tree of directives into a `Route` - but that is not important from a user's stand-point, 
-and it might be easier to think about it as of another directive. 
+> Side note: it is not really a directive, but rather a function that terminates a 
+tree of directives (by returning a `Route` which eventually gets used to build the root `Route`).
+> But that is not important from a user's stand-point, 
+and it might be easier to think about "complete" as of just another directive. 
 
-It accepts a by-name block of code to be executed when the route is matched:
+It accepts a by-name block of code that will get executed whenever the route is matched:
 
 ```scala
 def complete[T](action: => Unit): Route
@@ -159,7 +188,9 @@ A more powerful version of `complete` is `completeN`:
 def completeN[T](events: EventStream[() => Unit]): Route
 ```
 
-* `completeN` accepts a stream of `() => Unit` functions,
+* `completeN` accepts a stream of `() => Unit` functions
+
+When the route is matched,
 * subscribes to this stream,
 * "executes" the functions emitted by the stream.
 
@@ -167,7 +198,7 @@ As soon as the route changes (another `complete` or `completeN` is "triggered"),
 
 ### How to use the "complete" directives
 
-Let's look at an example of how you can do something useful with these directives. 
+Let's look at an example of how you can do something useful with these "directives". 
 
 Say, for example, you have a `Signal` for your "current page", defined with a `Var`:
 
@@ -185,7 +216,7 @@ val currentPage = Var[Page](Page.Blank)
 ```
 
 You might define a custom "directive" (again, it will not be a real directive as we're going to build it using `complete`)
-that updates the values of the `currentPage`:
+that updates the value of the `currentPage`:
 
 ```scala
 def render(page: Page): Route =
@@ -210,13 +241,14 @@ concat(
 ### A more complicated use case
 
 If you wanted to get some data from the back-end before rendering a page, you could use `completeN`.
-Also, this will prevent the previous action from taking effect when the call to the back-end returns if 
-the route changes in the meantime.
+Also, this will prevent the previous action from taking effect when the call to the back-end returns but 
+the route has already changed in the meantime.
 
 For example, let's say we want to be displaying a "loading" screen while the data is being requested and after that - the actual page.
 
 ```scala
 ...
+final case object Loading extends Page
 final case class UserPage(data: UserData) extends Page
 ...
 ```
@@ -280,7 +312,7 @@ private def userByIdDetailsPage(userId: String) =
 
 On the low level, in order to create a custom directive you need a `(L => Route) => Route` function. Simple, right? :)
 
-The good thing, is you will most likely not need to do that - most directives are supposed to be built from the 
+The good thing, though, is you will most likely not need to do anything low-level - most directives are supposed to be built from the 
 existing directives using the combinators.
 
 Say, you wanted to check if part of the path is a number. 
@@ -299,7 +331,7 @@ val route = concat(
 )
 ```
 
-> For this particular case, defining a custom path matcher would make more sense, but let's try this any way
+> For this particular case, defining a custom path matcher would make more sense, but let's try this anyway
 > to keep things simple.
 
 
@@ -331,11 +363,11 @@ For path-matching we have the following directives:
 
 ### pathEnd
 
-The directive will match only if the whole URI path has been consumed
+The directive will match only if the whole URI path has been matched.
 
 ### path(pathMatcher: PathMatcher)
 
-This directive will match if the underlying pathMatcher matches the remaining of the URI path.
+This directive will match if the underlying pathMatcher matches the remaining of the URI path entirely.
 This directive returns whatever the path matcher returns.
 
 Examples:
@@ -355,7 +387,7 @@ path matcher.
 
 ### extractUnmatchedPath
 
-This is a `Directive1[List[String]]` - it simply provides the unmatched part or the URI path.
+This is a `Directive1[List[String]]` - simply provides the unmatched part or the URI path, without "consuming" it.
 
 ## Path matchers
 
@@ -460,7 +492,7 @@ Consider the following example:
 
 ```scala
 pathPrefix("dashboard") {
-  maybeParam("tab").map(_.getOrElse("summary")) { selectedTab: String => 
+  maybeParam("tab").map(_.getOrElse("summary")) { selectedTab => // : String 
     render(Page.Dashboard(selectedTab))   
   }
 }
@@ -479,13 +511,13 @@ Now, if you use the `.signal` combinator:
 
 ```scala
 pathPrefix("dashboard") {
-  maybeParam("tab").map(_.getOrElse("summary")).signal { selectedTab: Signal[String] => 
+  maybeParam("tab").map(_.getOrElse("summary")).signal { selectedTab => // : Signal[String] 
     render(Page.Dashboard(selectedTab))   
   }
 }
 ```
 
-the `selectedTab` will become a `Signal[String]`, and when the `tab` parameter changes, `render` will not be called again - rather the value inside the
+the `selectedTab` will become a `Signal[String]`, and when the `tab` parameter changes, `render` will not be called again - but rather the value inside the
 `selectedTab` signal will change. And you can react to it in your rendering logic.
 
 
