@@ -133,7 +133,7 @@ runRoute(route, routeLocationProvider)
 Under the hood,
 
 * `runRoute` transforms a stream of `RouteLocation` (that you provide initially) into a stream 
-of functions (`() => Unit`)
+of `() => Unit` functions (those functions are provided when defining the route; this is described below),
 * it subscribes to this stream, and executes those functions as they come through,
 * `runRoute` returns a `Subscription` which can be used to stop this process.
 
