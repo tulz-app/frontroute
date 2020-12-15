@@ -164,7 +164,7 @@ For that, there is a built-in directive - `complete`.
 > Side note: it is not really a directive, but rather a function that terminates a 
 tree of directives (by returning a `Route` which eventually gets used to build the root `Route`).
 > But that is not important from a user's stand-point, 
-and it might be easier to think about "complete" as of just another directive. 
+and it might be simpler to think about "complete" as of just another directive. 
 
 It accepts a by-name block of code that will get executed whenever the route is matched:
 
