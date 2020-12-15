@@ -25,8 +25,6 @@ scalacOptions := Seq(
   "utf8"
 )
 
-mappings in (Compile, packageSrc) := Seq.empty
-
 publishArtifact in Test := false
 
 testFrameworks += new TestFramework("utest.runner.Framework")
