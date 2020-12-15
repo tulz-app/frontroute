@@ -3,6 +3,7 @@ package io.frontroute
 import app.tulz.tuplez.Tuple
 import com.raquo.airstream.eventstream.EventStream
 import com.raquo.airstream.signal.Signal
+import io.frontroute.debug.Logging
 
 trait Directives {
 
@@ -103,7 +104,7 @@ trait Directives {
 
   def debug(message: => String)(subRoute: Route): Route =
     (ctx, previous, state) => {
-      println(message)
+      Logging.debug(message)
       subRoute(ctx, previous, state)
     }
 

@@ -30,7 +30,7 @@ object RoutingTests extends TestSuite {
     val locationProvider = new TestRouteLocationProvider()
     val probe            = new ListBuffer[String]()
 
-    val sub = runRoute(route(probe), locationProvider).foreach(_())(unsafeWindowOwner)
+    val sub = runRoute(route(probe), locationProvider)(unsafeWindowOwner)
     val future = delayedFuture(wait).flatMap { _ =>
       try {
         checks(probe)

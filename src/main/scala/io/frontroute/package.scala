@@ -1,13 +1,15 @@
 package io
 
 import com.raquo.airstream.eventstream.EventStream
+import com.raquo.airstream.ownership.Owner
+import com.raquo.airstream.ownership.Subscription
 import io.frontroute.debug.Logging
 
 package object frontroute {
 
   object directives extends Directives with PathMatchers
 
-  def runRoute(route: Route, locationProvider: RouteLocationProvider): EventStream[() => Unit] = {
+  def runRoute(route: Route, locationProvider: RouteLocationProvider)(implicit owner: Owner): Subscription = {
     var current = RoutingState.empty.path("!")
     locationProvider.stream
       .flatMap { location =>
@@ -28,6 +30,7 @@ package object frontroute {
         events
       }
       .flatten
+      .foreach(_())
   }
 
   type Directive0      = Directive[Unit]

@@ -2,7 +2,7 @@ name := "frontroute"
 
 normalizedName := "frontroute"
 
-organization := "app.tulz"
+organization := "io.frontroute"
 
 scalaVersion := "2.13.4"
 
