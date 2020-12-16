@@ -357,41 +357,110 @@ defined as easily from the more powerful existing directives and more powerful c
 
 ## Path matching
 
+When evaluating the route tree `frontroute` keeps and updates its internal state, which includes the "unmatched path". 
+
+Unmatched path is a essentially a `List[String]`, and is initially set to `location.pathname.dropWhile(_ == '/').split('/').toList.dropWhile(_.isEmpty)`.
+
+For example, when the path is `/users/12/posts/43/details` the initial "unmatched path" is set to `List("users", "12", "posts", "43", "details")`.
+
+When one of the path matching directives matches, it "consumes" the part of the "unmatched path" 
+
+> It is actually the `PathMatcher` provide to the directive that does the matching and "consuming".
+
+For example, with the above initial "unmatched path", here's what the "unmatched path" will be during the route evaluation:
+
+```scala
+concat(
+  
+  // unmatchedPath: List("users", "12", "posts", "43", "details")
+  // "public" != "users", directive rejects
+  pathPrefix("public") { ... }, 
+  
+  // unmatchedPath: List("users", "12", "posts", "43", "details")
+  // "users" == "users" => "users" segment is consumed 
+  // "all" != "12" => "all" matcher rejects => "... / ..." matcher rejects => directive rejects => unmatchedPath is rolled back
+  pathPrefix("users" / "all") { userId => 
+    List("posts", "43", "details")
+    pathPrefix(
+  },
+
+  // unmatchedPath: List("users", "12", "posts", "43", "details")
+  // "users" == "users" "users" segment is consumed, 
+  // segment matches any string => "12" is consumed and provided by the "segment" patch matcher
+  // "... / ..." matches, combines the Unit and "12" into a Tuple1(12) 
+  // directive matches 
+  pathPrefix("users" / segment) { userId => // userId == "12"
+    // unmatchedPath: List("posts", "43", "details")
+    pathPrefix("posts") {
+      concat(
+        // unmatchedPath: List("43", "details")
+        // "all" != "43"
+        path("all") { ... },
+        
+        // unmatchedPath: List("43", "details")
+        // long matches "43"
+        pathPrefix(long) { postId => // postId: Long == 43
+          // unmatchedPath: List("details")
+          // no match
+          pathEnd { ... },
+          
+          // unmatchedPath: List("details")
+          // "details" == "details" AND no more unmatched segments
+          path("details") { 
+            // this route is matched and "executed"
+            // ...
+          }
+        }
+      )      
+    }
+  }
+)
+
+```
+
 For path-matching we have the following directives:
 
-* `pathEnd`
-* `path(pathMatcher: PathMatcher)`
-* `pathPrefix(pathMatcher: PathMatcher)`
-* `extractUnmatchedPath`
+* `pathEnd: Directive0`
+* `pathPrefix[T](m: PathMatcher[T]): Directive[T]`
+* `path[T](m: PathMatcher[T]): Directive[T]`
+* `extractUnmatchedPath: Directive1[List[String]]`
 
 ### pathEnd
 
+`pathEnd: Directive0`
+
 The directive will match only if the whole URI path has been matched.
 
-### path(pathMatcher: PathMatcher)
+### pathPrefix(
 
-This directive will match if the underlying pathMatcher matches the remaining of the URI path entirely.
+`pathPrefix[T](m: PathMatcher[T]): Directive[T]`
+
+This directive will match if the underlying pathMatcher matches at the beginning of the unmatched path.
 This directive returns whatever the path matcher returns.
 
 Examples:
 
 ```scala
-path("user") 
-// directive matches if the unmatched part of the URI path is just a single segment - /user
+pathPrefix("user") 
+// directive matches if the "unmatched path" starts with a "user" segment
 // this is a Directive0 as the constant string path matcher doesn't return a value
-path("user" / segment)
-// matches if the unparsed part of the URI path is a /user segment followed by a single segment
+
+pathPrefix("user" / segment)
+// matches if the "unmatched path" starts with a "user" segment followed by another segment
 // this is a Directive1[String] because the 'segment' path matcher is a PathMatcher[String] 
 ```
 
-### pathPrefix
+### path
 
-Works almost the same as `path` but doesn't require the URI path to be fully matched by 
-the underlying path matcher.
+`path[T](m: PathMatcher[T]): Directive[T]`
+
+Works almost the same as `pathPrefix` but requires the "unmatched path" to be empty after the segments are consumed. Effectively, it is a `pathPrefix(matcher)` followed by the `pathEnd`
 
 ### extractUnmatchedPath
 
-This is a `Directive1[List[String]]` - simply provides the unmatched part or the URI path, without "consuming" it.
+`extractUnmatchedPath: Directive1[List[String]]`
+
+Always matches, provides the "unmatched path" without "consuming" it.
 
 ## Path matchers
 
@@ -434,10 +503,11 @@ Path matchers can be combined using the following combinators:
 * `debug(message: => String)(subRoute: Route): Route` - prints a debug message (using the `Logging` utility) whenever the route matches; !! make sure to check the `Debugging/logging` section below !! 
 
 
-
 ### Concat
 
-* `concat(routes: Route*): Route` - allows to define alternative routes
+* `concat(routes: Route*): Route` - allows to combine alternate routes.
+
+All the provided routes will be "tried" sequentially until one of them matches. If all routes reject, the `concat` route rejects as well.
 
 We've seen it in action in the earlier examples.
 
@@ -450,7 +520,7 @@ Like patch matchers, directives provide a number of combinators.
 * `tcollect[R: Tuple](f: PartialFunction[L, R]): Directive[R]`
 * `tfilter(predicate: L => Boolean): Directive[L]`
 
-Unary directives (`Directive1`) also have the simpler `flatMap`, `map`, `collect` and `filter` combinators (without the `t` prefix and dealing with scalar values)
+Unary directives (`Directive1`) also have the simpler `flatMap`, `map`, `collect` and `filter` combinators (without the `t` prefix) and allow to deal with scalar values (vs. Tuple1[T] as it would be with `t`-prefixed ones).
 
 
 ### Conjunction
@@ -459,8 +529,16 @@ Directives can be combined using the conjunction operator (`&`):
 
 ```scala
 path("users" / segment / "password-reset") & param("code") // : Directive[(String, String)]
-// will reject if any of the directives combined with & rejects
 ```
+
+In the above example, the conjunction will reject if any of the parts rejects.
+
+If all parts match, the conjunction:
+* matches as well
+* the values provided by the parts are combined into a single n-tuple, omitting Units, and the tuple is provided by the conjunction
+* (if all parts provide Unit - the conjunction will provide Unit as well) 
+* (see the [tuplez](https://github.com/tulz-app/tuplez/) lib for details)
+
 
 ### Disjunction
 
@@ -473,8 +551,10 @@ pathEnd | path("index") // either will match
 pathPrefix("users") {
   (pathEnd & param("userId") | path(segment)) { userIdFromPathOrFromParam => ...}
 }
-
 ```
+
+The disjunction will match if any of the parts matches. Rejects if all parts reject.
+Provides the value provided by the first part that matched (other parts are not evaluated in that case).
 
 ## The "signal" directive
 
