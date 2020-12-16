@@ -818,5 +818,5 @@ Iurii Malchenko – [@yurique](https://twitter.com/yurique)
 
 ## License
 
-Laminar is provided under the [MIT license](https://github.com/tulz-app/frontroute/blob/main/LICENSE.md).
+`frontroute` is provided under the [MIT license](https://github.com/tulz-app/frontroute/blob/main/LICENSE.md).
 
