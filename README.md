@@ -81,8 +81,10 @@ concat( // this is not "nesting", unlike most of the following "calls"
         (maybeAuthor, maybeTitle) => 
           // no value from the pathPrefix, combined with Option[String] value from the first param directive and Option[String] from the second one
           // the internal value is a 2-tuple - (Option[String], Option[String])
-          // but here, when nesting it's not a single-parameter like Function1[Tuple2[Option[String], Option[String]], ???]
-          // it's a 2-parameter function Function2[Option[String], Option[String], ???]
+          // but here, when nesting, you can provide either a single-parameter function that accepts the tuple - 
+          //   Function1[  Tuple2[Option[String], Option[String]], ?  ]
+          // or the 2-parameter function that accepts elements on the tuple -  
+          //   Function2[  Option[String], Option[String], ?  ]
           renderBookSearchPage(maybeAuthor, maybeTitle)
       }
     )
