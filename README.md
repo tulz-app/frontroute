@@ -370,16 +370,16 @@ When one of the path matching directives matches, it "consumes" the part of the 
 For example, with the above initial "unmatched path", here's what the "unmatched path" will be during the route evaluation:
 
 ```scala
-// unmatchedPath: List("users", "12", "posts", "43", "details")
+unmatchedPath: List("users", "12", "posts", "43", "details")
 concat(
   
-  // unmatchedPath: List("users", "12", "posts", "43", "details")
+  unmatchedPath: List("users", "12", "posts", "43", "details")
   // "public" != "users"
   //   --> rejects
   //   --> directive rejects
   pathPrefix("public") { ... }, 
   
-  // unmatchedPath: List("users", "12", "posts", "43", "details")
+  unmatchedPath: List("users", "12", "posts", "43", "details")
   // "users" == "users"
   //   --> matches, provides Unit
   //   --> "users" is consumed (unmatchedPath: List("12", "posts", "43", "details"))
@@ -393,7 +393,7 @@ concat(
     pathPrefix("something") { ... }
   },
 
-  // unmatchedPath: List("users", "12", "posts", "43", "details")
+  unmatchedPath: List("users", "12", "posts", "43", "details")
   // "users" == "users" 
   //   --> matches and provides Unit
   //   --> "users" is consumed (unmatchedPath: List("12", "posts", "43", "details"))
@@ -404,7 +404,7 @@ concat(
   //   --> provides Tuple1(12)
   //   --> directive matches and provides Tuple1(12)
   pathPrefix("users" / segment) { userId => // userId == "12"
-    // unmatchedPath: List("posts", "43", "details")
+    unmatchedPath: List("posts", "43", "details")
     // "posts" == "posts"
     //   --> matches and provides Unit
     //   --> "posts" is consumed (unmatchedPath: List("43", "details"))
@@ -412,31 +412,31 @@ concat(
     pathPrefix("posts") {
       unmatchedPath: List("43", "details")
       concat(
-        // unmatchedPath: List("43", "details")
+        unmatchedPath: List("43", "details")
         // "all" != "43" 
         //   --> rejects
         //   --> directive rejects
         path("all") { ... },
         
-        // unmatchedPath: List("43", "details")
+        unmatchedPath: List("43", "details")
         // long matches "43"
         //   --> matches and provides 43: Long
         //   --> "43" is consumed (unmatchedPath: List("details"))
         //   --> directive matches and provides 43: Long
         pathPrefix(long) { postId => // postId: Long == 43
-          // unmatchedPath: List("details")
+          unmatchedPath: List("details")
           // no match 
           //   --> rejects
           //   --> directive rejects
           pathEnd { ... },
           
-          // unmatchedPath: List("details")
+          unmatchedPath: List("details")
           // "details" == "details" AND no more unmatched segments
           //   --> matches and provides Unit
           //   --> "details" is consumed (unmatchedPath: List.empty)
           //   --> directive matches and provides Unit
           path("details") { 
-            // unmatchedPath: List.empty
+            unmatchedPath: List.empty
             // complete terminates the evaluation, the provided code block will get executed
             complete {
               dom.console.log("user post details - match")
