@@ -377,38 +377,43 @@ concat(
   pathPrefix("public") { ... }, 
   
   // unmatchedPath: List("users", "12", "posts", "43", "details")
-  // "users" == "users" => "users" segment is consumed 
-  // "all" != "12" => "all" matcher rejects => "... / ..." matcher rejects => directive rejects => unmatchedPath is rolled back
+  // "users" == "users" --> "users" segment is consumed 
+  // "all" != "12" --> "all" matcher rejects 
+  //   --> " ... / ... " matcher rejects 
+  //   --> directive rejects
+  //   --> unmatchedPath is rolled back
   pathPrefix("users" / "all") { userId => 
     List("posts", "43", "details")
     pathPrefix(
   },
 
   // unmatchedPath: List("users", "12", "posts", "43", "details")
-  // "users" == "users" "users" segment is consumed, 
-  // segment matches any string => "12" is consumed and provided by the "segment" patch matcher
-  // "... / ..." matches, combines the Unit and "12" into a Tuple1(12) 
-  // directive matches 
+  // "users" == "users" --> "users" segment is consumed
+  // segment matches any string --> "12" is consumed and provided by the "segment" patch matcher
+  //   --> " ... / ... " matches, combines the Unit and "12" into a Tuple1(12) 
+  //   --> directive matches and provides Tuple1(12)
   pathPrefix("users" / segment) { userId => // userId == "12"
     // unmatchedPath: List("posts", "43", "details")
     pathPrefix("posts") {
       concat(
         // unmatchedPath: List("43", "details")
-        // "all" != "43"
+        // "all" != "43" --> rejects
         path("all") { ... },
         
         // unmatchedPath: List("43", "details")
-        // long matches "43"
+        // long matches "43" --> matches and provides 43: Long
         pathPrefix(long) { postId => // postId: Long == 43
           // unmatchedPath: List("details")
-          // no match
+          // no match --> rejects
           pathEnd { ... },
           
           // unmatchedPath: List("details")
           // "details" == "details" AND no more unmatched segments
           path("details") { 
-            // this route is matched and "executed"
-            // ...
+            complete {
+              // complete terminates the evaluation and this code block will get "executed"
+              dom.console.log("user post details - match")
+            }
           }
         }
       )      
