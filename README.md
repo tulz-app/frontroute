@@ -83,8 +83,9 @@ concat( // this is not "nesting", unlike most of the following "calls"
           // the internal value is a 2-tuple - (Option[String], Option[String])
           // but here, when nesting, you can provide either a single-parameter function that accepts the tuple - 
           //   Function1[  Tuple2[Option[String], Option[String]], ?  ]
-          // or the 2-parameter function that accepts elements on the tuple -  
+          // or a 2-parameter function that accepts elements on the tuple -  
           //   Function2[  Option[String], Option[String], ?  ]
+          // (this works with tuples of any size)
           renderBookSearchPage(maybeAuthor, maybeTitle)
       }
     )
