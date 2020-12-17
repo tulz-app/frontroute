@@ -4,12 +4,12 @@
 
 `frontroute` is a front-end router library for single-page application (SPA) built with [Scala.js](http://www.scala-js.org/), with an API inspired by [Akka HTTP](https://doc.akka.io/docs/akka-http/current/).
 
-Primarily deisgned for use with [raquo/Laminar](https://github.com/raquo/Laminar), though it's not a dependency and `frontroute` should fit nicely with any Scala.js library.
+Primarily designed for use with [raquo/Laminar](https://github.com/raquo/Laminar), though it's not a dependency and `frontroute` should fit nicely with any Scala.js library.
 
 Built on top of:
 
 * [raquo/Airstream](https://github.com/raquo/Airstream) `v0.11.1` 
-* [tulz-app/tuplez](https://github.com/tulz-app/tuplez/) `v0.1.0`
+* [tulz-app/tuplez](https://github.com/tulz-app/tuplez/) `v0.2.0`
 
 
 ### Getting started
@@ -17,7 +17,7 @@ Built on top of:
 `frontroute` is available for [Scala.js](http://www.scala-js.org/) v1.1.0+ (published for Scala 2.12 and 2.13).
 
 ```scala
-libraryDependencies += "io.frontroute" %%% "frontroute" % "0.11.1"
+libraryDependencies += "io.frontroute" %%% "frontroute" % "0.11.2"
 ```
 
 ```scala
@@ -121,14 +121,15 @@ trait RouteLocationProvider {
 
 and its single job is to provide the stream of `RouteLocation`. You can implement it depending on your needs (for tests, for example).
 
-But, most of the times, you will probably be using the provided `BrowserRouteLocationProvider` - it takes a stream of `PopStateEvent` and 
+But, most of the times, you will probably be using the provided `BrowserNavigation.locationProvider` - it takes a stream of `PopStateEvent` and 
 parses the `dom.window.location` to produce the corresponding `RouteLocation`s.
 
 
 
 ```scala
-val provideLocationProvider: RouteLocationProvider = new BrowserRouteLocationProvider(windowEvents.onPopState)
+val provideLocationProvider: RouteLocationProvider = BrowserNavigation.locationProvider(windowEvents.onPopState) // windowEvents.onPopState is available if you are using Laminar 
 runRoute(route, routeLocationProvider)
+BrowserNavigation.emitPopStateEvent() // this is most likely needed to force the first pop state event and make things happen 
 ```
 
 `runRoute` also requires an implicit `Owner` (`unsafeWindowOwner` will work perfectly fine most of the times).
@@ -536,7 +537,8 @@ Path matchers can be combined using the following combinators:
 * `tprovide[L: Tuple](value: L): Directive[L]` - always matches, providing a constant value
 * `provide[L](value: L): Directive1[L]` - same as `provide`, wraps the value in `Tuple1`
 * `debug(message: => String)(subRoute: Route): Route` - prints a debug message (using the `Logging` utility) whenever the route matches; !! make sure to check the `Debugging/logging` section below !! 
-
+* `historyState: Directive1[Option[js.Any]]` - extracts the history state (will only work if `BrowserNavigation` is used for `pushState`/`replaceState`); `BrowserNavigation` is described below 
+* `historyScroll: Directive1[Option[ScrollPosition]]` - if `BrowserNavigation` is used `pushState`/`replaceState` it can preserve the window scroll position when navigating (enabled by default); this directive returns the preserved window scroll position (if any) 
 
 ### Concat
 
@@ -670,6 +672,70 @@ val route =
 
 ```
 
+### Navigation (History API)
+
+`frontroute` uses (and depends on, in order to work correctly) the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History).
+
+`BrowserNavigation` object is provided and should be used for all navigation.
+
+#### BrowserNavigation.locationProvider
+
+```scala
+def locationProvider(popStateEvents: EventStream[dom.PopStateEvent]): RouteLocationProvider
+```
+
+Creates an instance of `RouteLocationProvider` that is required to run the routes (see description above).
+It takes a single parameter - a stream of `PopStateEvent`. If you're using Laminar, this stream is provided by `windowEvents.onPopState`.
+
+#### BrowserNavigation.preserveScroll
+
+```scala
+def preserveScroll(keep: Boolean): Unit
+```
+
+Configures whether `BrowserNavigation` should preserve the window scroll location (in history state) when pushing state (`pushState`).
+
+#### emitPopStateEvent
+
+```scala
+def emitPopStateEvent(): Unit
+```
+
+Emits (`dom.window.dispatchEvent`) a `popstate` event. You will most likely need to call this right after calling `runRoute`.
+
+#### restoreScroll
+
+```scala
+def restoreScroll(): Unit
+```
+
+If scroll position is available in the current history state - scrolls the window to that position. You might want to use this after you render your content and want the `back`/`forward` buttons 
+to get the user to the position on the page where they used to be before navigation.
+
+#### pushState / replaceState
+
+```scala
+def pushState(
+  data: js.Any = js.undefined,
+  title: String = "",
+  url: js.UndefOr[String] = js.undefined,
+  popStateEvent: Boolean = true
+): Unit
+
+def replaceState(
+  url: js.UndefOr[String] = js.undefined,
+  title: String = "",
+  data: js.Any = js.undefined,
+  popStateEvent: Boolean = true
+): Unit
+```
+
+These functions should be used for navigation instead of directly calling `window.history.pushState` / `window.history.replaceState`.
+
+If `popStateEvent` is `true`, `emitPopStateEvent` will be called right after `window.history.pushState` / `window.history.replaceState` 
+(the browser does not emit this event in case of programmatic history push/replace, set it to `false` only if you know what you are doing).
+
+
 ### Debugging/logging
 
 `frontroute` can provide a little bit of help when debugging you routes by logging the rejected logs.
@@ -718,7 +784,8 @@ object App {
         }
       )
     
-    runRoute(route, new BrowserRouteLocationProvider(windowEvents.onPopState))(unsafeWindowOwner)
+    runRoute(route, BrowserNavigation.locationProvider(windowEvents.onPopState))(unsafeWindowOwner)
+    BrowserNavigation.emitPopStateEvent() 
   }
 
   private def completeRender(r: => Element): Route =

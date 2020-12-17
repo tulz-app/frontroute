@@ -5,7 +5,9 @@ import com.raquo.airstream.eventstream.EventStream
 import com.raquo.airstream.signal.Signal
 import io.frontroute.debug.Logging
 
-trait Directives {
+import scala.scalajs.js
+
+trait Directives extends DirectiveApplyConverters {
 
   def reject: Route = (_, _, _) => EventStream.fromValue(RouteResult.Rejected, emitOnce = true)
 
@@ -34,6 +36,19 @@ trait Directives {
         }
       }
     )
+  }
+
+  def historyState: Directive1[Option[js.Any]] = {
+    extractContext.map(_.state.flatMap(_.user.toOption))
+  }
+
+  def historyScroll: Directive1[Option[ScrollPosition]] = {
+    extractContext.map(_.state.flatMap(_.internal.toOption).flatMap(_.scroll.toOption).map { scroll =>
+      ScrollPosition(
+        scrollX = scroll.scrollX.toOption.map(_.round.toInt),
+        scrollY = scroll.scrollY.toOption.map(_.round.toInt)
+      )
+    })
   }
 
   def maybeParam(name: String): Directive1[Option[String]] =

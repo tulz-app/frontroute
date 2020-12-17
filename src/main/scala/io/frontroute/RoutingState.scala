@@ -5,7 +5,7 @@ import com.raquo.airstream.signal.Var
 import scala.annotation.tailrec
 import scala.scalajs.js
 
-object RoutingState {
+private[frontroute] object RoutingState {
 
   val empty: RoutingState = RoutingState(
     path = List.empty,

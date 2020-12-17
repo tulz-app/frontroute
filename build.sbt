@@ -7,7 +7,7 @@ scalaVersion := "2.13.4"
 crossScalaVersions := Seq("2.12.12", "2.13.4")
 
 libraryDependencies ++= Seq(
-  "app.tulz"    %%% "tuplez"    % "0.2.0-SNAPSHOT",
+  "app.tulz"    %%% "tuplez"    % "0.2.0",
   "com.raquo"   %%% "airstream" % "0.11.1",
   "com.raquo"   %%% "laminar"   % "0.11.0" % Test,
   "com.lihaoyi" %%% "utest"     % "0.7.5"  % Test

@@ -455,7 +455,7 @@ class TestRouteLocationProvider extends RouteLocationProvider {
 
   def emit(): Unit = {
     bus.writer.onNext(
-      RouteLocation(currentPath, currentParams)
+      RouteLocation(currentPath, currentParams, None)
     )
   }
 
