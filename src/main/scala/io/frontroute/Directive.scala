@@ -1,10 +1,9 @@
 package io.frontroute
 
-import app.tulz.tuplez.Tuple
+import app.tulz.tuplez._
 import com.raquo.airstream.eventstream.EventStream
 import com.raquo.airstream.signal.Signal
 import com.raquo.airstream.signal.Var
-import io.frontroute.util.ApplyConverter
 
 class Directive[L](
   val tapply: (L => Route) => Route
@@ -84,20 +83,6 @@ object Directive {
 
   implicit def toDirective[L: Tuple](route: Route): Directive[L] =
     Directive[L](_ => route)
-
-  implicit def addDirectiveApply[L: Tuple](directive: Directive[L])(implicit hac: ApplyConverter[L]): hac.In => Route =
-    subRoute =>
-      (ctx, previous, state) => {
-        val result = directive.tapply(hac(subRoute))(ctx, previous, state)
-        result
-      }
-
-  implicit def addNullaryDirectiveApply(directive: Directive0): Route => Route =
-    subRoute =>
-      (ctx, previous, state) => {
-        val result = directive.tapply(_ => subRoute)(ctx, previous, state)
-        result
-      }
 
   implicit class SingleValueModifiers[L](underlying: Directive1[L]) extends AnyRef {
 

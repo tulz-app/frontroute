@@ -7,7 +7,7 @@ import io.frontroute.debug.Logging
 
 package object frontroute {
 
-  object directives extends Directives with PathMatchers
+  object directives extends Directives with PathMatchers with DirectiveApplyConverters
 
   def runRoute(route: Route, locationProvider: RouteLocationProvider)(implicit owner: Owner): Subscription = {
     var current = RoutingState.empty.path("!")
