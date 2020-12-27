@@ -9,7 +9,7 @@ Primarily designed for use with [raquo/Laminar](https://github.com/raquo/Laminar
 Built on top of:
 
 * [raquo/Airstream](https://github.com/raquo/Airstream) `v0.11.1` 
-* [tulz-app/tuplez](https://github.com/tulz-app/tuplez/) `v0.2.0`
+* [tulz-app/tuplez](https://github.com/tulz-app/tuplez/) `v0.3.0`
 
 
 ### Getting started
@@ -17,7 +17,7 @@ Built on top of:
 `frontroute` is available for [Scala.js](http://www.scala-js.org/) v1.1.0+ (published for Scala 2.12 and 2.13).
 
 ```scala
-libraryDependencies += "io.frontroute" %%% "frontroute" % "0.11.2"
+libraryDependencies += "io.frontroute" %%% "frontroute" % "0.11.3"
 ```
 
 ```scala
