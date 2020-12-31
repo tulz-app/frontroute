@@ -25,7 +25,7 @@ object RoutingTests extends TestSuite {
   private def routeTestF[T](
     route: ListBuffer[String] => Route,
     wait: FiniteDuration = 10.millis,
-    init: TestRouteLocationProvider => Unit = _ => {}
+    init: TestRouteLocationProvider => Unit
   )(checks: ListBuffer[String] => Future[T]): Future[T] = {
     val locationProvider = new TestRouteLocationProvider()
     val probe            = new ListBuffer[String]()
@@ -46,7 +46,7 @@ object RoutingTests extends TestSuite {
   private def routeTest[T](
     route: ListBuffer[String] => Route,
     wait: FiniteDuration = 10.millis,
-    init: TestRouteLocationProvider => Unit = _ => {}
+    init: TestRouteLocationProvider => Unit
   )(checks: ListBuffer[String] => T): Future[T] = routeTestF[T](route, wait, init)(probe => Future.successful(checks(probe)))
 
   val tests: Tests = Tests {

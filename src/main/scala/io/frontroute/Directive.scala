@@ -97,7 +97,7 @@ object Directive {
         f(value)
       }
 
-    def filter(description: String)(predicate: L => Boolean): Directive1[L] =
+    def filter(predicate: L => Boolean): Directive1[L] =
       underlying.tfilter { case Tuple1(value) => predicate(value) }
 
     def signal: Directive1[Signal[L]] =

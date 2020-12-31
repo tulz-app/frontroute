@@ -15,17 +15,15 @@ libraryDependencies ++= Seq(
   "com.lihaoyi" %%% "utest"        % "0.7.5"  % Test
 )
 
-scalacOptions := Seq(
-  "-unchecked",
-  "-deprecation",
-  "-feature",
-  "-Xlint:nullary-unit,inaccessible,infer-any,missing-interpolator,private-shadow,type-parameter-shadow,poly-implicit-overload,option-implicit,delayedinit-select,stars-align",
-  "-Xcheckinit",
-  "-Ywarn-value-discard",
-  "-language:implicitConversions",
-  "-encoding",
-  "utf8"
-)
+lazy val adjustScalacOptions = { options: Seq[String] =>
+  options.filterNot(
+    Set(
+      "-Wdead-code"
+    )
+  )
+}
+
+scalacOptions ~= adjustScalacOptions
 
 publishArtifact in Test := false
 
