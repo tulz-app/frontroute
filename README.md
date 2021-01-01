@@ -59,7 +59,7 @@ There is a set of basic directives available out of the box:
 * `param`
 * `maybeParam`
 * `extractUnmatchedPath`
-* `provide` / `tprovide`
+* `provide`
 * `signal`
 
 One can define most of the routing for the app using those, but it is possible (and encouraged) to implement custom directives.
