@@ -1,6 +1,5 @@
 package io.frontroute
 
-import app.tulz.tuplez.Tuple
 import app.tulz.tuplez.Composition
 
 trait ConjunctionMagnet[L] {
@@ -20,7 +19,7 @@ object ConjunctionMagnet {
               inner(composition.compose(prefix, suffix))
             }(location, previous, state.path("&"))
           }(location, previous, state)
-        }(Tuple.yes)
+        }
     }
 
 }

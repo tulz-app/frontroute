@@ -33,13 +33,11 @@ package object frontroute {
       .foreach(_())
   }
 
-  type Directive0      = Directive[Unit]
-  type Directive1[T]   = Directive[Tuple1[T]]
-  type PathMatcher0    = PathMatcher[Unit]
-  type PathMatcher1[T] = PathMatcher[Tuple1[T]]
+  type Directive0   = Directive[Unit]
+  type PathMatcher0 = PathMatcher[Unit]
 
   type Route = (RouteLocation, RoutingState, RoutingState) => EventStream[RouteResult]
 
-  private[frontroute] def rejected: EventStream[RouteResult] = EventStream.fromValue(RouteResult.Rejected, emitOnce = true)
+  private[frontroute] def rejected: EventStream[RouteResult] = EventStream.fromValue(RouteResult.Rejected, emitOnce = false)
 
 }

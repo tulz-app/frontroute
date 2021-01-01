@@ -1,6 +1,5 @@
 package io.frontroute
 
-import app.tulz.tuplez.Tuple
 import com.raquo.airstream.eventstream.EventStream
 import com.raquo.airstream.signal.Signal
 import io.frontroute.debug.Logging
@@ -9,40 +8,40 @@ import scala.scalajs.js
 
 trait Directives extends DirectiveApplyConverters {
 
-  def reject: Route = (_, _, _) => EventStream.fromValue(RouteResult.Rejected, emitOnce = true)
+  def reject: Route = (_, _, _) => EventStream.fromValue(RouteResult.Rejected, emitOnce = false)
 
-  private[frontroute] def extractContext: Directive1[RouteLocation] =
-    Directive[Tuple1[RouteLocation]](inner => (ctx, previous, state) => inner(Tuple1(ctx))(ctx, previous, state))
+  private[frontroute] def extractContext: Directive[RouteLocation] =
+    Directive[RouteLocation](inner => (ctx, previous, state) => inner(ctx)(ctx, previous, state))
 
-  private[frontroute] def extract[T](f: RouteLocation => T): Directive1[T] =
-    Directive[Tuple1[T]](inner => (ctx, previous, state) => inner(Tuple1(f(ctx)))(ctx, previous, state))
+  private[frontroute] def extract[T](f: RouteLocation => T): Directive[T] =
+    extractContext.map(f)
 
-  def signal[T](signal: Signal[T]): Directive1[T] = {
-    Directive[Tuple1[T]](inner =>
+  def signal[T](signal: Signal[T]): Directive[T] = {
+    Directive[T](inner =>
       (ctx, previous, state) => {
         signal.flatMap { extracted =>
-          inner(Tuple1(extracted))(ctx, previous, state.path(".signal").setValue(extracted))
+          inner(extracted)(ctx, previous, state.path(".signal").setValue(extracted))
         }
       }
     )
   }
 
-  def param(name: String): Directive1[String] = {
-    Directive[Tuple1[String]](inner =>
+  def param(name: String): Directive[String] = {
+    Directive[String](inner =>
       (ctx, previous, state) => {
         ctx.params.get(name).flatMap(_.headOption) match {
-          case Some(paramValue) => inner(Tuple1(paramValue))(ctx, previous, state.path(s"param($name)").setValue(paramValue))
-          case None             => EventStream.fromValue(RouteResult.Rejected, emitOnce = true)
+          case Some(paramValue) => inner(paramValue)(ctx, previous, state.path(s"param($name)").setValue(paramValue))
+          case None             => EventStream.fromValue(RouteResult.Rejected, emitOnce = false)
         }
       }
     )
   }
 
-  def historyState: Directive1[Option[js.Any]] = {
+  def historyState: Directive[Option[js.Any]] = {
     extractContext.map(_.state.flatMap(_.user.toOption))
   }
 
-  def historyScroll: Directive1[Option[ScrollPosition]] = {
+  def historyScroll: Directive[Option[ScrollPosition]] = {
     extractContext.map(_.state.flatMap(_.internal.toOption).flatMap(_.scroll.toOption).map { scroll =>
       ScrollPosition(
         scrollX = scroll.scrollX.toOption.map(_.round.toInt),
@@ -51,30 +50,35 @@ trait Directives extends DirectiveApplyConverters {
     })
   }
 
-  def maybeParam(name: String): Directive1[Option[String]] =
-    Directive[Tuple1[Option[String]]](inner =>
+  def maybeParam(name: String): Directive[Option[String]] =
+    Directive[Option[String]](inner =>
       (ctx, previous, state) => {
         val maybeParamValue = ctx.params.get(name).flatMap(_.headOption)
-        inner(Tuple1(maybeParamValue))(ctx, previous, state.path(s"maybeParam($name)").setValue(maybeParamValue))
+        inner(maybeParamValue)(ctx, previous, state.path(s"maybeParam($name)").setValue(maybeParamValue))
       }
     )
 
-  def extractUnmatchedPath: Directive1[List[String]] =
-    extract(ctx => ctx.unmatchedPath)
+  def extractUnmatchedPath: Directive[List[String]] = extract(_.unmatchedPath)
 
-  def tprovide[L: Tuple](value: L): Directive[L] =
+  def extractHostname: Directive[String] = extract(_.hostname)
+
+  def extractPort: Directive[String] = extract(_.port)
+
+  def extractHost: Directive[String] = extract(_.host)
+
+  def extractProtocol: Directive[String] = extract(_.protocol)
+
+  def extractOrigin: Directive[Option[String]] = extract(_.origin)
+
+  def provide[L](value: L): Directive[L] =
     Directive(inner => (ctx, previous, state) => inner(value)(ctx, previous, state.path(".provide").setValue(value)))
 
-  def provide[L](value: L): Directive1[L] =
-    tprovide(Tuple1(value))
-
   def pathPrefix[T](m: PathMatcher[T]): Directive[T] = {
-    import m.tuple
     Directive[T](inner =>
       (ctx, previous, state) => {
         m(ctx.unmatchedPath) match {
           case Right((t, rest)) => inner(t)(ctx.withUnmatchedPath(rest), previous, state.path(s"pathPrefix($m)").setValue(t))
-          case _                => EventStream.fromValue(RouteResult.Rejected, emitOnce = true)
+          case _                => EventStream.fromValue(RouteResult.Rejected, emitOnce = false)
         }
       }
     )
@@ -86,18 +90,17 @@ trait Directives extends DirectiveApplyConverters {
         if (ctx.unmatchedPath.isEmpty) {
           inner(())(ctx, previous, state.path("path-end"))
         } else {
-          EventStream.fromValue(RouteResult.Rejected, emitOnce = true)
+          EventStream.fromValue(RouteResult.Rejected, emitOnce = false)
         }
       }
     )
 
   def path[T](m: PathMatcher[T]): Directive[T] = {
-    import m.tuple
     Directive[T](inner =>
       (ctx, previous, state) => {
         m(ctx.unmatchedPath) match {
           case Right((t, Nil)) => inner(t)(ctx.withUnmatchedPath(List.empty), previous, state.path(s"path($m)").setValue(t))
-          case _               => EventStream.fromValue(RouteResult.Rejected, emitOnce = true)
+          case _               => EventStream.fromValue(RouteResult.Rejected, emitOnce = false)
         }
       }
     )
@@ -106,14 +109,14 @@ trait Directives extends DirectiveApplyConverters {
   def completeN[T](events: EventStream[() => Unit]): Route = { (_, _, state) =>
     EventStream.fromValue(
       RouteResult.Complete(state, events),
-      emitOnce = true
+      emitOnce = false
     )
   }
 
   def complete[T](action: => Unit): Route = { (_, _, state) =>
     EventStream.fromValue(
-      RouteResult.Complete(state, EventStream.fromValue(() => action, emitOnce = true)),
-      emitOnce = true
+      RouteResult.Complete(state, EventStream.fromValue(() => action, emitOnce = false)),
+      emitOnce = false
     )
   }
 
@@ -126,16 +129,18 @@ trait Directives extends DirectiveApplyConverters {
   def concat(routes: Route*): Route = (ctx, previous, state) => {
     def findFirst(rs: List[(Route, Int)]): EventStream[RouteResult] =
       rs match {
-        case Nil => EventStream.fromValue(RouteResult.Rejected, emitOnce = true)
+        case Nil => EventStream.fromValue(RouteResult.Rejected, emitOnce = false)
         case (route, index) :: tail =>
           state.path(index.toString)
           route(ctx, previous, state).flatMap {
-            case complete: RouteResult.Complete => EventStream.fromValue(complete, emitOnce = true)
+            case complete: RouteResult.Complete => EventStream.fromValue(complete, emitOnce = false)
             case RouteResult.Rejected           => findFirst(tail)
           }
       }
 
     findFirst(routes.zipWithIndex.toList)
   }
+
+  implicit def toDirective[L](route: Route): Directive[L] = Directive[L](_ => route)
 
 }

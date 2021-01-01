@@ -1,5 +1,16 @@
 # Changelog
 
+### 0.11.4
+
+* New: LinkHandler
+* New: directives: `origin`, `host`, `hostname`, `port` and `protocol`
+* simplified directives and path matchers (single values are now scalars, not Tuple1), no more `Tuple` marker
+* Breaking: Scala.js 1.3.1+ is now required
+
+### 0.11.3
+
+Update the tuplez dependency to `v0.3.0`, no other changes.
+
 ### 0.11.2
 
 * preserving scroll position in history state

@@ -126,6 +126,11 @@ object BrowserNavigation {
 
       private def extractRouteLocation(event: dom.PopStateEvent) =
         RouteLocation(
+          hostname = dom.window.location.hostname,
+          port = dom.window.location.port,
+          protocol = dom.window.location.protocol,
+          host = dom.window.location.host,
+          origin = dom.window.location.origin.toOption,
           unmatchedPath = extractPath(dom.window.location),
           params = extractParams(dom.window.location),
           state = HistoryState.tryParse(event.state)

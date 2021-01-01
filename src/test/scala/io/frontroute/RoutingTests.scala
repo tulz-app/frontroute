@@ -67,6 +67,86 @@ object RoutingTests extends TestSuite {
       }
     }
 
+    test("extractHostname") {
+      routeTest(
+        route = probe =>
+          extractHostname { hostname =>
+            complete {
+              probe.append(hostname)
+            }
+          },
+        init = locationProvider => {
+          locationProvider.path()
+        }
+      ) { probe =>
+        probe.toList ==> List("test.nowhere")
+      }
+    }
+
+    test("extractPort") {
+      routeTest(
+        route = probe =>
+          extractPort { port =>
+            complete {
+              probe.append(port)
+            }
+          },
+        init = locationProvider => {
+          locationProvider.path()
+        }
+      ) { probe =>
+        probe.toList ==> List("8080")
+      }
+    }
+
+    test("extractHost") {
+      routeTest(
+        route = probe =>
+          extractHost { host =>
+            complete {
+              probe.append(host)
+            }
+          },
+        init = locationProvider => {
+          locationProvider.path()
+        }
+      ) { probe =>
+        probe.toList ==> List("test.nowhere:8080")
+      }
+    }
+
+    test("extractProtocol") {
+      routeTest(
+        route = probe =>
+          extractProtocol { protocol =>
+            complete {
+              probe.append(protocol)
+            }
+          },
+        init = locationProvider => {
+          locationProvider.path()
+        }
+      ) { probe =>
+        probe.toList ==> List("https")
+      }
+    }
+
+    test("extractOrigin") {
+      routeTest(
+        route = probe =>
+          extractOrigin { origin =>
+            complete {
+              probe.append(origin.getOrElse("---"))
+            }
+          },
+        init = locationProvider => {
+          locationProvider.path()
+        }
+      ) { probe =>
+        probe.toList ==> List("https://test.nowhere:8080")
+      }
+    }
+
     test("alternate path") {
       routeTest(
         route = probe =>
@@ -294,7 +374,7 @@ object RoutingTests extends TestSuite {
         route = probe =>
           pathPrefix("prefix1") {
             pathPrefix("prefix2") {
-              (path(segment) & param("param1")) { (seg, paramValue) =>
+              addDirectiveApply(path(segment) & param("param1")).apply { (seg, paramValue) =>
                 complete {
                   probe.append(s"prefix1/prefix2/$seg?param1=$paramValue")
                 }
@@ -324,7 +404,7 @@ object RoutingTests extends TestSuite {
         route = probe =>
           pathPrefix("prefix1") {
             pathPrefix("prefix2") {
-              (path(segment) | pathEnd.tmap(_ => Tuple1("default"))).signal { s =>
+              (path(segment) | pathEnd.map(_ => "default")).signal { s =>
                 complete {
                   pathSignal = s
                   signals = nSignals(4, pathSignal)
@@ -430,12 +510,18 @@ object RoutingTests extends TestSuite {
 
 class TestRouteLocationProvider extends RouteLocationProvider {
 
+  private var currentOrigin                            = "https://test.nowhere:8080"
   private var currentPath: List[String]                = List.empty
   private var currentParams: Map[String, List[String]] = Map.empty
 
   private val bus = new EventBus[RouteLocation]
 
   val stream: EventStream[RouteLocation] = bus.events
+
+  def origin(origin: String): Unit = {
+    currentOrigin = origin
+    emit()
+  }
 
   def path(parts: String*): Unit = {
     currentPath = parts.toList
@@ -453,9 +539,20 @@ class TestRouteLocationProvider extends RouteLocationProvider {
     emit()
   }
 
+  private val UrlString = "(https?)://([a-zA-Z0-9.]+):(\\d+)".r
   def emit(): Unit = {
+    val UrlString(protocol, hostname, port) = currentOrigin
     bus.writer.onNext(
-      RouteLocation(currentPath, currentParams, None)
+      RouteLocation(
+        hostname = hostname,
+        port = port,
+        protocol = protocol,
+        host = s"${hostname}:${port}",
+        origin = Some(currentOrigin),
+        unmatchedPath = currentPath,
+        params = currentParams,
+        state = None
+      )
     )
   }
 
