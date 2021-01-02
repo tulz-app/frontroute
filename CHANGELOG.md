@@ -1,5 +1,9 @@
 # Changelog
 
+### 0.11.5
+
+Fixing `LinkHandler`.
+
 ### 0.11.4
 
 * New: LinkHandler

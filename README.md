@@ -17,7 +17,7 @@ Built on top of:
 `frontroute` is available for [Scala.js](http://www.scala-js.org/) v1.3.1+ (published for Scala 2.12 and 2.13).
 
 ```scala
-libraryDependencies += "io.frontroute" %%% "frontroute" % "0.11.4"
+libraryDependencies += "io.frontroute" %%% "frontroute" % "0.11.5"
 ```
 
 ```scala

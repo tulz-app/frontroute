@@ -1,7 +1,6 @@
 package io.frontroute
 
 import org.scalajs.dom
-import org.scalajs.dom.ext._
 import org.scalajs.dom.raw._
 
 import scala.scalajs.js
@@ -15,67 +14,41 @@ object LinkHandler {
     var routeTo: js.UndefOr[js.Function1[String, Unit]] = js.native
   }
 
-  private val clickListener: js.Function1[Event, Boolean] = event => {
-    findParent("a", event.currentTarget.asInstanceOf[Node]).fold(true) { element =>
-      val anchor = element.asInstanceOf[HTMLAnchorElement]
+  private val clickListener: js.Function1[Event, Unit] = event => {
+    findParent("A", event.target.asInstanceOf[dom.Node]).foreach { aParent =>
+      val anchor = aParent.asInstanceOf[HTMLAnchorElement]
       val rel    = anchor.rel
       if (js.isUndefined(rel) || rel == null || rel == "") {
+        event.preventDefault()
         BrowserNavigation.pushState(url = anchor.href)
-        false
-      } else {
-        rel match {
-          case "external" =>
-            event.preventDefault()
-            dom.window.open(anchor.href)
-            false
-          case _ =>
-            true
-        }
+      } else if (rel == "external") {
+        event.preventDefault()
+        dom.window.open(anchor.href)
       }
     }
-  }
-
-  private val observer = new MutationObserver((records, _) => {
-    records.foreach { record =>
-      record.addedNodes.foreach { node =>
-        node.addEventListener("click", clickListener)
-      }
-      record.removedNodes.foreach { node =>
-        node.removeEventListener("click", clickListener)
-      }
-    }
-  })
-
-  def uninstall(): Unit = {
-    observer.disconnect()
-    WindowWithRouteTo.routeTo = js.undefined
   }
 
   private val routeTo: js.Function1[String, Unit] = (path: String) => BrowserNavigation.pushState(null, null, path)
 
   def install(): Unit = {
     WindowWithRouteTo.routeTo = routeTo
-    observer.observe(dom.document, js.Dynamic.literal(childList = true).asInstanceOf[MutationObserverInit])
-    dom.document.querySelectorAll("a").foreach(_.addEventListener("click", clickListener))
+    dom.document.addEventListener("click", clickListener)
+  }
+
+  def uninstall(): Unit = {
+    WindowWithRouteTo.routeTo = js.undefined
+    dom.document.removeEventListener("click", clickListener)
   }
 
   @scala.annotation.tailrec
-  private def findParent(tagName: String, element: Node): js.UndefOr[Node] = {
+  private def findParent(nodeName: String, element: Node): js.UndefOr[Node] = {
     if (js.isUndefined(element) || element == null) {
       js.undefined
     } else {
-      val tagMatched =
-        element.nodeName
-          .asInstanceOf[js.UndefOr[String]]
-          .orElse(
-            element.asInstanceOf[Element].tagName.asInstanceOf[js.UndefOr[String]]
-          )
-          .map(_.toLowerCase())
-          .contains(tagName.toLowerCase())
-      if (tagMatched) {
+      if (element.nodeName == nodeName) {
         element
       } else {
-        findParent(tagName, element.parentNode)
+        findParent(nodeName, element.parentNode)
       }
     }
   }
