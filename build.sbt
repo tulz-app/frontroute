@@ -8,8 +8,8 @@ crossScalaVersions := Seq("2.12.12", "2.13.4")
 
 libraryDependencies ++= Seq(
   "com.raquo"   %%% "airstream"         % "0.11.1",
-  "app.tulz"    %%% "tuplez-full-light" % "0.3.1",
-  "app.tulz"    %%% "tuplez-apply"      % "0.3.1",
+  "app.tulz"    %%% "tuplez-full-light" % "0.3.2",
+  "app.tulz"    %%% "tuplez-apply"      % "0.3.2",
   "com.raquo"   %%% "laminar"           % "0.11.0" % Test,
   "com.lihaoyi" %%% "utest"             % "0.7.5"  % Test
 )
