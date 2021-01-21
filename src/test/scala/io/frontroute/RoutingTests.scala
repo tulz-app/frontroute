@@ -406,11 +406,65 @@ object RoutingTests extends TestSuite {
       }
     }
 
-    test("disjunction") {
+    test("disjunction and .map") {
       case class Page(isIndex: Boolean)
       routeTest(
         route = probe =>
           (pathEnd.map(_ => true) | path("page-1").map(_ => false)) { isIndex =>
+            complete {
+              probe.append(Page(isIndex).toString)
+            }
+          },
+        init = locationProvider => {
+          locationProvider.path()
+          locationProvider.path("page-1")
+          locationProvider.path()
+          locationProvider.path("page-1")
+          locationProvider.path()
+        }
+      ) { probe =>
+        probe.toList ==> Seq(
+          Page(true).toString,
+          Page(false).toString,
+          Page(true).toString,
+          Page(false).toString,
+          Page(true).toString
+        )
+      }
+    }
+
+    test("disjunction and .mapTo") {
+      case class Page(isIndex: Boolean)
+      routeTest(
+        route = probe =>
+          (pathEnd.mapTo(true) | path("page-1").mapTo(false)) { isIndex =>
+            complete {
+              probe.append(Page(isIndex).toString)
+            }
+          },
+        init = locationProvider => {
+          locationProvider.path()
+          locationProvider.path("page-1")
+          locationProvider.path()
+          locationProvider.path("page-1")
+          locationProvider.path()
+        }
+      ) { probe =>
+        probe.toList ==> Seq(
+          Page(true).toString,
+          Page(false).toString,
+          Page(true).toString,
+          Page(false).toString,
+          Page(true).toString
+        )
+      }
+    }
+
+    test("disjunction and .collect") {
+      case class Page(isIndex: Boolean)
+      routeTest(
+        route = probe =>
+          (pathEnd.collect { case _ => true } | path("page-1").collect { case _ => false }) { isIndex =>
             complete {
               probe.append(Page(isIndex).toString)
             }

@@ -1,11 +1,24 @@
 # Changelog
 
+### 0.11.7
+
+* Bugfix: `.collect` and `.mapTo` were not storing the mapped value (in the internal state)
+
+An example that would show this behavior:
+
+```scala
+(pathEnd.mapTo(true) | path("page-1").mapTo(false)) { isIndex =>
+  render(Page(isIndex))
+}
+```
+
 ### 0.11.6
 
-## Disjunction bug fix.
+* Bugfix: disjunction
+* Bugfix: `.map` was not storing the mapped value (in the internal state)
 
-The value of the disjunction was not preserved, thus a disjunction would not
-match multiple times in a row (even if the provided value was different).
+The value of the disjunction was not stored (in the internal state), thus a disjunction would not
+match multiple times in a row (even if the resulting values were different).
 
 An example that would show this behavior:
 
@@ -15,12 +28,10 @@ An example that would show this behavior:
 }
 ```
 
-## New utilities
-
-* `.some` – transforms a `Directive[A]` into a `Directive[Option[A]]` (with `Some(_)` value)
-* `.none` – transforms a `Directive[Option[A]]` into a `Directive[Option[A]]` (with `None` value)
-* `.mapOption` – transforms a `Directive[Option[A]]` into a `Directive[Option[B]]` (applying the provided function to the `Option`)
-
+* API: new combinators for directives
+    * `.some` – transforms a `Directive[A]` into a `Directive[Option[A]]` (with `Some(_)` value)
+    * `.none` – transforms a `Directive[A]` into a `Directive[Option[A]]` (with `None` value)
+    * `.mapOption` – transforms a `Directive[Option[A]]` into a `Directive[Option[B]]` (applying the provided function to the `Option`)
 
 ### 0.11.5
 

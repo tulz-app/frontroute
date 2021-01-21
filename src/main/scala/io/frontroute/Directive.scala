@@ -30,12 +30,7 @@ class Directive[L](
 
   @inline def none[R]: Directive[Option[R]] = mapTo(Option.empty[R])
 
-  def mapTo[R](otherValue: => R): Directive[R] =
-    Directive[R] { inner =>
-      self.tapply { _ => (location, previous, state) =>
-        inner(otherValue)(location, previous, state.path(".mapTo"))
-      }
-    }
+  @inline def mapTo[R](otherValue: => R): Directive[R] = map(_ => otherValue)
 
   def &[R](magnet: ConjunctionMagnet[L]): magnet.Out = magnet(this)
 
@@ -60,7 +55,8 @@ class Directive[L](
     Directive[R] { inner =>
       self.tapply { value => (location, previous, state) =>
         if (f.isDefinedAt(value)) {
-          inner(f(value))(location, previous, state.path(".collect"))
+          val mapped = f(value)
+          inner(mapped)(location, previous, state.path(".collect").setValue(mapped))
         } else {
           rejected
         }

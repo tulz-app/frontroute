@@ -17,7 +17,7 @@ Built on top of:
 `frontroute` is available for [Scala.js](http://www.scala-js.org/) v1.3.1+ (published for Scala 2.12 and 2.13).
 
 ```scala
-libraryDependencies += "io.frontroute" %%% "frontroute" % "0.11.6"
+libraryDependencies += "io.frontroute" %%% "frontroute" % "0.11.7"
 ```
 
 ```scala
@@ -542,8 +542,14 @@ The basic ones are:
 
 * `flatMap[R](next: L => Directive[R]): Directive[R]`
 * `map[R](f: L => R): Directive[R]`
+* `mapTo[R](otherValue: => R): Directive[R]`
 * `collect[R](f: PartialFunction[L, R]): Directive[R]`
 * `filter(predicate: L => Boolean): Directive[L]`
+* `def some: Directive[Option[L]]` – wraps the value in `Some(_)`
+* `none[R]: Directive[Option[R]]` – replaces the value with `None`
+
+For a `Directive[Option[A]]`:
+* `def mapOption[R](f: A => R): Directive[Option[R]]` – maps the value inside the `Option`
 
 ### Conjunction
 
