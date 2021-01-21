@@ -11,7 +11,7 @@ libraryDependencies ++= Seq(
   "app.tulz"    %%% "tuplez-full-light" % "0.3.3",
   "app.tulz"    %%% "tuplez-apply"      % "0.3.3",
   "com.raquo"   %%% "laminar"           % "0.11.0" % Test,
-  "com.lihaoyi" %%% "utest"             % "0.7.5"  % Test
+  "com.lihaoyi" %%% "utest"             % "0.7.6"  % Test
 )
 
 lazy val adjustScalacOptions = { options: Seq[String] =>
