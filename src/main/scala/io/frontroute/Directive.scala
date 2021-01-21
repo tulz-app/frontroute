@@ -1,8 +1,8 @@
 package io.frontroute
 
-import com.raquo.airstream.eventstream.EventStream
-import com.raquo.airstream.signal.Signal
-import com.raquo.airstream.signal.Var
+import com.raquo.airstream.core.EventStream
+import com.raquo.airstream.core.Signal
+import com.raquo.airstream.state.Var
 import io.frontroute.ops.DirectiveOfOptionOps
 
 class Directive[L](

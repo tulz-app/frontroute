@@ -109,26 +109,26 @@ val route =
   )
 ```
 
-you need to run the `runRoute` function, passing in the route and a thing called `RouteLocationProvider`. 
+you need to run the `runRoute` function, passing in the route and a `LocationProvider`. 
 
-`RouteLocationProvider` is a simple trait:
+`LocationProvider` is a simple trait:
 
 ```scala
-trait RouteLocationProvider {
+trait LocationProvider {
   def stream: EventStream[RouteLocation]
 }
 ```
 
 and its single job is to provide the stream of `RouteLocation`. You can implement it depending on your needs (for tests, for example).
 
-But, most of the times, you will probably be using the provided `BrowserNavigation.locationProvider` — it takes a stream of `PopStateEvent` and 
+But, most of the times, you will probably be using the provided `LocationProvider.browser` — it takes a stream of `PopStateEvent` and 
 parses the `dom.window.location` to produce the corresponding `RouteLocation`s.
 
 
 
 ```scala
-val provideLocationProvider: RouteLocationProvider = BrowserNavigation.locationProvider(windowEvents.onPopState) // windowEvents.onPopState is available if you are using Laminar 
-runRoute(route, routeLocationProvider)
+val locationProvider: LocationProvider = LocationProvider.browser(windowEvents.onPopState) // windowEvents.onPopState is available if you are using Laminar 
+runRoute(route, locationProvider)
 BrowserNavigation.emitPopStateEvent() // this is most likely needed to force the first pop state event and make things happen 
 ```
 
@@ -673,10 +673,10 @@ val route =
 #### BrowserNavigation.locationProvider
 
 ```scala
-def locationProvider(popStateEvents: EventStream[dom.PopStateEvent]): RouteLocationProvider
+def locationProvider(popStateEvents: EventStream[dom.PopStateEvent]): LocationProvider
 ```
 
-Creates an instance of `RouteLocationProvider` that is required to run the routes (see description above).
+Creates an instance of `LocationProvider` that is required to run the routes (see description above).
 It takes a single parameter — a stream of `PopStateEvent`. If you're using Laminar, this stream is provided by `windowEvents.onPopState`.
 
 #### BrowserNavigation.preserveScroll
