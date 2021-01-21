@@ -9,7 +9,7 @@ Primarily designed for use with [raquo/Laminar](https://github.com/raquo/Laminar
 Built on top of:
 
 * [raquo/Airstream](https://github.com/raquo/Airstream) `v0.11.1` 
-* [tulz-app/tuplez](https://github.com/tulz-app/tuplez/) `v0.3.1`
+* [tulz-app/tuplez](https://github.com/tulz-app/tuplez/) `v0.3.3`
 
 
 ### Getting started

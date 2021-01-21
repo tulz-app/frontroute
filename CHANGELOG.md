@@ -2,10 +2,24 @@
 
 ### 0.11.6
 
-Disjunction bug fix.
+## Disjunction bug fix.
 
-The value of the disjunction was not preserved, thus a disjunction would not 
+The value of the disjunction was not preserved, thus a disjunction would not
 match multiple times in a row (even if the provided value was different).
+
+An example that would show this behavior:
+
+```scala
+(pathEnd.map(_ => true) | path("page-1").map(_ => false)) { isIndex =>
+  render(Page(isIndex))
+}
+```
+
+## New utilities
+
+* `.some` – transforms a `Directive[A]` into a `Directive[Option[A]]` (with `Some(_)` value)
+* `.none` – transforms a `Directive[Option[A]]` into a `Directive[Option[A]]` (with `None` value)
+* `.mapOption` – transforms a `Directive[Option[A]]` into a `Directive[Option[B]]` (applying the provided function to the `Option`)
 
 
 ### 0.11.5
