@@ -1,6 +1,6 @@
 package io.frontroute
 
-import com.raquo.airstream.signal.Var
+import com.raquo.airstream.state.Var
 
 import scala.annotation.tailrec
 import scala.scalajs.js
@@ -9,14 +9,24 @@ private[frontroute] object RoutingState {
 
   val empty: RoutingState = RoutingState(
     path = List.empty,
-    data = Map.empty
+    data = Map.empty,
+    persistent = Map.empty
+  )
+
+  def withPersistentData(
+    persistentData: Map[List[String], Any]
+  ): RoutingState = RoutingState(
+    path = List.empty,
+    data = Map.empty,
+    persistent = persistentData
   )
 
 }
 
 final private[frontroute] case class RoutingState(
   path: List[String],
-  data: Map[List[String], Any]
+  data: Map[List[String], Any],
+  persistent: Map[List[String], Any]
 ) {
 
   def resetPath: RoutingState = this.copy(path = List.empty)
@@ -64,6 +74,30 @@ final private[frontroute] case class RoutingState(
 
   def unsetValue[T](): RoutingState = {
     this.copy(data = data - path)
+  }
+
+  def getPersistentValue[T](at: List[String]): Option[T] = {
+    persistent.get(at).map(_.asInstanceOf[T])
+  }
+
+  def setPersistentValue[T](nv: T): RoutingState = {
+    //noinspection ComparingUnrelatedTypes
+    if (nv != ((): Unit)) {
+      val v = {
+        if (js.isUndefined(nv)) {
+          "∅"
+        } else {
+          nv
+        }
+      }
+      this.copy(persistent = persistent + (path -> v))
+    } else {
+      this
+    }
+  }
+
+  def unsetPersistentValue[T](): RoutingState = {
+    this.copy(persistent = persistent - path)
   }
 
   private def showPath(path: List[String]) = path.reverse.mkString(" ")

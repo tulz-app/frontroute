@@ -1,6 +1,6 @@
 package io
 
-import com.raquo.airstream.eventstream.EventStream
+import com.raquo.airstream.core.EventStream
 import com.raquo.airstream.ownership.Owner
 import com.raquo.airstream.ownership.Subscription
 import io.frontroute.debug.Logging
@@ -9,11 +9,11 @@ package object frontroute {
 
   object directives extends Directives with PathMatchers
 
-  def runRoute(route: Route, locationProvider: RouteLocationProvider)(implicit owner: Owner): Subscription = {
+  def runRoute(route: Route, locationProvider: LocationProvider)(implicit owner: Owner): Subscription = {
     var current = RoutingState.empty.path("!")
     locationProvider.stream
       .flatMap { location =>
-        route(location, current.resetPath, RoutingState.empty).map {
+        route(location, current.resetPath, RoutingState.withPersistentData(current.persistent)).map {
           case RouteResult.Complete(next, action) =>
             if (next != current) {
               current = next

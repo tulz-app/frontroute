@@ -1,53 +1,46 @@
-enablePlugins(ScalaJSPlugin)
+ThisBuild / scalaVersion := ScalaVersions.v213
+ThisBuild / crossScalaVersions := Seq(ScalaVersions.v3RC1, ScalaVersions.v3M3, ScalaVersions.v213, ScalaVersions.v212)
 
-name := "frontroute"
-
-scalaVersion := "2.13.4"
-
-crossScalaVersions := Seq("2.12.12", "2.13.4")
-
-libraryDependencies ++= Seq(
-  "com.raquo"   %%% "airstream"         % "0.11.1",
-  "app.tulz"    %%% "tuplez-full-light" % "0.3.3",
-  "app.tulz"    %%% "tuplez-apply"      % "0.3.3",
-  "com.raquo"   %%% "laminar"           % "0.11.0" % Test,
-  "com.lihaoyi" %%% "utest"             % "0.7.5"  % Test
-)
-
-lazy val adjustScalacOptions = { options: Seq[String] =>
-  options.filterNot(
-    Set(
-      "-Wdead-code",
-      "-Ywarn-dead-code"
+lazy val root =
+  project
+    .in(file("."))
+    .enablePlugins(ScalaJSPlugin, ScalaJSJUnitPlugin)
+    .settings(
+      name := "frontroute",
+      libraryDependencies ++=
+        Seq(
+          "com.raquo"    %%% "airstream"    % "0.12.0-SNAPSHOT",
+          "app.tulz"     %%% "tuplez-apply" % "0.3.3",
+          "com.raquo"    %%% "laminar"      % "0.12.0-SNAPSHOT" % Test,
+          ("com.lihaoyi" %%% "utest"        % "0.7.5"           % Test).withDottyCompat(scalaVersion.value)
+        ),
+      testFrameworks += new TestFramework("utest.runner.Framework"),
+      scalacOptions ~= (
+        _.filterNot(
+          Set(
+            "-Wdead-code",
+            "-Ywarn-dead-code",
+            "-Wunused:params",
+            "-Ywarn-unused:params",
+            "-Wunused:explicits"
+          )
+        )
+      ),
+      Test / scalacOptions := (Compile / scalacOptions).value.filterNot(_.startsWith("-Wunused:")).filterNot(_.startsWith("-Ywarn-unused")),
+      scalacOptions in (Compile, doc) ~= (_.filterNot(
+        Set(
+          "-scalajs",
+          "-deprecation",
+          "-explain-types",
+          "-explain",
+          "-feature",
+          "-language:existentials,experimental.macros,higherKinds,implicitConversions",
+          "-unchecked",
+          "-Xfatal-warnings",
+          "-Ykind-projector",
+          "-from-tasty",
+          "-encoding",
+          "utf8"
+        )
+      ))
     )
-  )
-}
-
-scalacOptions ~= adjustScalacOptions
-
-publishArtifact in Test := false
-
-testFrameworks += new TestFramework("utest.runner.Framework")
-
-description := "Routing library based on Airstream for Laminar with DSL inspired by Akka HTTP."
-
-scmInfo := Some(
-  ScmInfo(
-    url("https://github.com/tulz-app/frontroute"),
-    "scm:git@github.com/tulz-app/frontroute.git"
-  )
-)
-
-ThisBuild / organization := "io.frontroute"
-ThisBuild / homepage := Some(url("https://github.com/tulz-app/frontroute"))
-ThisBuild / licenses += ("MIT", url("https://github.com/tulz-app/frontroute/blob/main/LICENSE.md"))
-ThisBuild / developers := List(
-  Developer(
-    id = "yurique",
-    name = "Iurii Malchenko",
-    email = "i@yurique.com",
-    url = url("https://github.com/yurique")
-  )
-)
-ThisBuild / publishTo := sonatypePublishToBundle.value
-ThisBuild / sonatypeProfileName := "yurique"

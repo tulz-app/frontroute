@@ -1,13 +1,11 @@
 package io.frontroute
 
-import com.raquo.airstream.eventstream.EventStream
 import io.frontroute.domext.HistoryWithTitle
 import io.frontroute.domext.WindowWithScrollXY
 import io.frontroute.internal.FrontrouteHistoryState
 import io.frontroute.internal.HistoryState
 import io.frontroute.internal.HistoryStateScrollPosition
 import org.scalajs.dom
-import org.scalajs.dom.raw.Location
 
 import scala.scalajs.js
 
@@ -118,43 +116,5 @@ object BrowserNavigation {
         }
     }
   }
-
-  def locationProvider(popStateEvents: EventStream[dom.PopStateEvent]): RouteLocationProvider =
-    new RouteLocationProvider {
-
-      val stream: EventStream[RouteLocation] = popStateEvents.map(extractRouteLocation)
-
-      private def extractRouteLocation(event: dom.PopStateEvent) =
-        RouteLocation(
-          hostname = dom.window.location.hostname,
-          port = dom.window.location.port,
-          protocol = dom.window.location.protocol,
-          host = dom.window.location.host,
-          origin = dom.window.location.origin.toOption,
-          unmatchedPath = extractPath(dom.window.location),
-          params = extractParams(dom.window.location),
-          state = HistoryState.tryParse(event.state)
-        )
-
-      private def extractPath(location: Location): List[String] = {
-        location.pathname.dropWhile(_ == '/').split('/').toList.dropWhile(_.isEmpty)
-      }
-
-      private def extractParams(location: Location): Map[String, Seq[String]] = {
-        val vars   = location.search.dropWhile(_ == '?').split('&')
-        val result = scala.collection.mutable.Map[String, Seq[String]]()
-        vars.foreach { entry =>
-          entry.split('=') match {
-            case Array(key, value) =>
-              val decodedKey   = js.URIUtils.decodeURIComponent(key)
-              val decodedValue = js.URIUtils.decodeURIComponent(value)
-              result(decodedKey) = result.getOrElse(decodedKey, Seq.empty) :+ decodedValue
-            case _ =>
-          }
-        }
-        result.toMap
-      }
-
-    }
 
 }
