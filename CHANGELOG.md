@@ -1,5 +1,13 @@
 # Changelog
 
+### 0.11.6
+
+Disjunction bug fix.
+
+The value of the disjunction was not preserved, thus a disjunction would not 
+match multiple times in a row (even if the provided value was different).
+
+
 ### 0.11.5
 
 Fixing `LinkHandler`.
