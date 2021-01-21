@@ -22,13 +22,22 @@ object RoutingTests extends TestSuite {
   case class Page(p: String)
   case class PageWithSignal(segment: Signal[String])
 
+  class Probe[A] {
+    private val buffer = new ListBuffer[A]()
+
+    def append(s: A): Unit = {
+      val _ = buffer.append(s)
+    }
+    def toList: Seq[A] = buffer.toList
+  }
+
   private def routeTestF[T](
-    route: ListBuffer[String] => Route,
+    route: Probe[String] => Route,
     wait: FiniteDuration = 10.millis,
     init: TestRouteLocationProvider => Unit
-  )(checks: ListBuffer[String] => Future[T]): Future[T] = {
+  )(checks: Probe[String] => Future[T]): Future[T] = {
     val locationProvider = new TestRouteLocationProvider()
-    val probe            = new ListBuffer[String]()
+    val probe            = new Probe[String]
 
     val sub = runRoute(route(probe), locationProvider)(unsafeWindowOwner)
     val future = delayedFuture(wait).flatMap { _ =>
@@ -44,10 +53,10 @@ object RoutingTests extends TestSuite {
   }
 
   private def routeTest[T](
-    route: ListBuffer[String] => Route,
+    route: Probe[String] => Route,
     wait: FiniteDuration = 10.millis,
     init: TestRouteLocationProvider => Unit
-  )(checks: ListBuffer[String] => T): Future[T] = routeTestF[T](route, wait, init)(probe => Future.successful(checks(probe)))
+  )(checks: Probe[String] => T): Future[T] = routeTestF[T](route, wait, init)(probe => Future.successful(checks(probe)))
 
   val tests: Tests = Tests {
 
@@ -393,6 +402,33 @@ object RoutingTests extends TestSuite {
           "prefix1/prefix2/other-suffix-1?param1=param1-value1",
           "prefix1/prefix2/other-suffix-1?param1=param1-value2",
           "prefix1/prefix2/other-suffix-2?param1=param1-value2"
+        )
+      }
+    }
+
+    test("disjunction") {
+      case class Page(isIndex: Boolean)
+      routeTest(
+        route = probe =>
+          (pathEnd.map(_ => true) | path("page-1").map(_ => false)) { isIndex =>
+            complete {
+              probe.append(Page(isIndex).toString)
+            }
+          },
+        init = locationProvider => {
+          locationProvider.path()
+          locationProvider.path("page-1")
+          locationProvider.path()
+          locationProvider.path("page-1")
+          locationProvider.path()
+        }
+      ) { probe =>
+        probe.toList ==> Seq(
+          Page(true).toString,
+          Page(false).toString,
+          Page(true).toString,
+          Page(false).toString,
+          Page(true).toString
         )
       }
     }

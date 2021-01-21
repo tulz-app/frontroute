@@ -27,13 +27,19 @@ final private[frontroute] case class RoutingState(
 
   def leaveDisjunction(): RoutingState = {
     @tailrec
-    def leave(path: List[String], data: Map[List[String], Any]): RoutingState =
+    def leave(path: List[String], data: Map[List[String], Any], value: Option[Any]): RoutingState = {
       path match {
-        case Nil         => this
-        case "(" :: tail => this.copy(path = "(...|...)" :: tail, data = data)
-        case other       => leave(other.tail, data - other)
+        case Nil => this
+
+        case "(" :: tail =>
+          val newPath = "(.|.)" :: tail
+          this.copy(path = newPath, data = data + (newPath -> value))
+
+        case other => leave(other.tail, data - other, value)
+
       }
-    leave(path, data)
+    }
+    leave(path, data, getValue(path))
   }
 
   def getValue[T](at: List[String]): Option[T] = {

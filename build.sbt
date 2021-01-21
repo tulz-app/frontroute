@@ -8,8 +8,8 @@ crossScalaVersions := Seq("2.12.12", "2.13.4")
 
 libraryDependencies ++= Seq(
   "com.raquo"   %%% "airstream"         % "0.11.1",
-  "app.tulz"    %%% "tuplez-full-light" % "0.3.1",
-  "app.tulz"    %%% "tuplez-apply"      % "0.3.1",
+  "app.tulz"    %%% "tuplez-full-light" % "0.3.3",
+  "app.tulz"    %%% "tuplez-apply"      % "0.3.3",
   "com.raquo"   %%% "laminar"           % "0.11.0" % Test,
   "com.lihaoyi" %%% "utest"             % "0.7.5"  % Test
 )
@@ -49,9 +49,5 @@ ThisBuild / developers := List(
     url = url("https://github.com/yurique")
   )
 )
-ThisBuild / releasePublishArtifactsAction := PgpKeys.publishSigned.value
 ThisBuild / publishTo := sonatypePublishToBundle.value
-ThisBuild / pomIncludeRepository := { _ => false }
 ThisBuild / sonatypeProfileName := "yurique"
-ThisBuild / publishMavenStyle := true
-ThisBuild / releaseCrossBuild := true

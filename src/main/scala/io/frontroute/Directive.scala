@@ -3,6 +3,7 @@ package io.frontroute
 import com.raquo.airstream.eventstream.EventStream
 import com.raquo.airstream.signal.Signal
 import com.raquo.airstream.signal.Var
+import io.frontroute.ops.DirectiveOfOptionOps
 
 class Directive[L](
   val tapply: (L => Route) => Route
@@ -20,7 +21,19 @@ class Directive[L](
   def map[R](f: L => R): Directive[R] =
     Directive[R] { inner =>
       self.tapply { value => (location, previous, state) =>
-        inner(f(value))(location, previous, state.path(".map"))
+        val mapped = f(value)
+        inner(mapped)(location, previous, state.path(".map").setValue(mapped))
+      }
+    }
+
+  @inline def some: Directive[Option[L]] = map(Some(_))
+
+  @inline def none[R]: Directive[Option[R]] = mapTo(Option.empty[R])
+
+  def mapTo[R](otherValue: => R): Directive[R] =
+    Directive[R] { inner =>
+      self.tapply { _ => (location, previous, state) =>
+        inner(otherValue)(location, previous, state.path(".mapTo"))
       }
     }
 
@@ -73,11 +86,11 @@ class Directive[L](
             val next = state.unsetValue().path(".signal")
             previous.getValue[Var[L]](next.path) match {
               case None =>
-                val var$ = Var(value)
-                inner(var$.signal)(ctx, previous, next.setValue(var$))
-              case Some(var$) =>
-                var$.writer.onNext(value)
-                inner(var$.signal)(ctx, previous, next.setValue(var$))
+                val newVar = Var(value)
+                inner(newVar.signal)(ctx, previous, next.setValue(newVar))
+              case Some(existingVar) =>
+                existingVar.writer.onNext(value)
+                inner(existingVar.signal)(ctx, previous, next.setValue(existingVar))
             }
       }(ctx, previous, state)
     })
@@ -96,5 +109,7 @@ object Directive {
         )(ctx, previous, state)
     )
   }
+
+  implicit def directiveOfOptionSyntax[A](underlying: Directive[Option[A]]): DirectiveOfOptionOps[A] = new DirectiveOfOptionOps[A](underlying)
 
 }
