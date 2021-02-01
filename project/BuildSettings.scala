@@ -5,7 +5,7 @@ object BuildSettings {
     val airstream      = "0.12.0-M1"
     val laminar        = "0.12.0-M1"
     val `tuplez-apply` = "0.3.3"
-    val utest          = "0.7.5"
+    val utest          = "0.7.7"
 
   }
 
