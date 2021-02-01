@@ -8,7 +8,7 @@ Primarily designed for use with [raquo/Laminar](https://github.com/raquo/Laminar
 
 Built on top of:
 
-* [raquo/Airstream](https://github.com/raquo/Airstream) `v0.11.1` 
+* [raquo/Airstream](https://github.com/raquo/Airstream) `v0.11.1` (`v0.12.0-M1`) 
 * [tulz-app/tuplez](https://github.com/tulz-app/tuplez/) `v0.3.3`
 
 
@@ -18,6 +18,8 @@ Built on top of:
 
 ```scala
 libraryDependencies += "io.frontroute" %%% "frontroute" % "0.11.7"
+// OR
+libraryDependencies += "io.frontroute" %%% "frontroute" % "0.12.0-M1"
 ```
 
 ```scala
