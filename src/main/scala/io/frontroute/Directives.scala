@@ -2,7 +2,6 @@ package io.frontroute
 
 import com.raquo.airstream.core.EventStream
 import com.raquo.airstream.core.Signal
-import com.raquo.airstream.state.Var
 import io.frontroute.debug.Logging
 
 import scala.scalajs.js
@@ -17,14 +16,14 @@ trait Directives extends DirectiveApplyConverters {
   private[frontroute] def extract[T](f: RouteLocation => T): Directive[T] =
     extractContext.map(f)
 
-  def state[T](initial: => T): Directive[Var[T]] = {
-    Directive[Var[T]](inner =>
+  def state[T](initial: => T): Directive[T] = {
+    Directive[T](inner =>
       (ctx, previous, state) => {
         val next = state.path("state")
-        state.getPersistentValue[Var[T]](next.path) match {
+        state.getPersistentValue[T](next.path) match {
           case None =>
-            val newVar = Var(initial)
-            inner(newVar)(ctx, previous, next.setPersistentValue(newVar))
+            val newStateValue = initial
+            inner(newStateValue)(ctx, previous, next.setPersistentValue(newStateValue))
 
           case Some(existing) =>
             inner(existing)(ctx, previous, next)
