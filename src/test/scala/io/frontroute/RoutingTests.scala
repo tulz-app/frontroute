@@ -34,9 +34,9 @@ object RoutingTests extends TestSuite {
   private def routeTestF[T](
     route: Probe[String] => Route,
     wait: FiniteDuration = 10.millis,
-    init: TestRouteLocationProvider => Unit
+    init: TestLocationProvider => Unit
   )(checks: Probe[String] => Future[T]): Future[T] = {
-    val locationProvider = new TestRouteLocationProvider()
+    val locationProvider = new TestLocationProvider()
     val probe            = new Probe[String]
 
     val sub = runRoute(route(probe), locationProvider)(unsafeWindowOwner)
@@ -55,7 +55,7 @@ object RoutingTests extends TestSuite {
   private def routeTest[T](
     route: Probe[String] => Route,
     wait: FiniteDuration = 10.millis,
-    init: TestRouteLocationProvider => Unit
+    init: TestLocationProvider => Unit
   )(checks: Probe[String] => T): Future[T] = routeTestF[T](route, wait, init)(probe => Future.successful(checks(probe)))
 
   val tests: Tests = Tests {
@@ -104,7 +104,7 @@ object RoutingTests extends TestSuite {
           locationProvider.path()
         }
       ) { probe =>
-        probe.toList ==> List("8080")
+        probe.toList ==> List("443")
       }
     }
 
@@ -120,7 +120,7 @@ object RoutingTests extends TestSuite {
           locationProvider.path()
         }
       ) { probe =>
-        probe.toList ==> List("test.nowhere:8080")
+        probe.toList ==> List("test.nowhere:443")
       }
     }
 
@@ -152,7 +152,7 @@ object RoutingTests extends TestSuite {
           locationProvider.path()
         }
       ) { probe =>
-        probe.toList ==> List("https://test.nowhere:8080")
+        probe.toList ==> List("https://test.nowhere:443")
       }
     }
 
@@ -598,9 +598,11 @@ object RoutingTests extends TestSuite {
 
 }
 
-class TestRouteLocationProvider extends RouteLocationProvider {
+class TestLocationProvider extends LocationProvider {
 
-  private var currentOrigin                            = "https://test.nowhere:8080"
+  private var currentProtocol                          = "https"
+  private var currentHostname                          = "test.nowhere"
+  private var currentPort                              = "443"
   private var currentPath: List[String]                = List.empty
   private var currentParams: Map[String, List[String]] = Map.empty
 
@@ -608,8 +610,18 @@ class TestRouteLocationProvider extends RouteLocationProvider {
 
   val stream: EventStream[RouteLocation] = bus.events
 
-  def origin(origin: String): Unit = {
-    currentOrigin = origin
+  def protocol(protocol: String): Unit = {
+    currentProtocol = protocol
+    emit()
+  }
+
+  def hostname(hostname: String): Unit = {
+    currentHostname = hostname
+    emit()
+  }
+
+  def port(port: String): Unit = {
+    currentPort = port
     emit()
   }
 
@@ -629,16 +641,14 @@ class TestRouteLocationProvider extends RouteLocationProvider {
     emit()
   }
 
-  private val UrlString = "(https?)://([a-zA-Z0-9.]+):(\\d+)".r
   def emit(): Unit = {
-    val UrlString(protocol, hostname, port) = currentOrigin
     bus.writer.onNext(
       RouteLocation(
-        hostname = hostname,
-        port = port,
-        protocol = protocol,
-        host = s"${hostname}:${port}",
-        origin = Some(currentOrigin),
+        hostname = currentHostname,
+        port = currentPort,
+        protocol = currentProtocol,
+        host = s"${currentHostname}:${currentPort}",
+        origin = Some(s"${currentProtocol}://${currentHostname}:${currentPort}"),
         unmatchedPath = currentPath,
         params = currentParams,
         state = None

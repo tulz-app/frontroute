@@ -1,0 +1,9 @@
+ThisBuild / scmInfo := Some(ScmInfo(url("https://github.com/tulz-app/frontroute"), "scm:git@github.com/tulz-app/frontroute.git"))
+ThisBuild / organization := "io.frontroute"
+ThisBuild / homepage := Some(url("https://github.com/tulz-app/frontroute"))
+ThisBuild / licenses += "MIT" -> url("https://github.com/tulz-app/frontroute/blob/main/LICENSE.md")
+ThisBuild / developers += Developer("yurique", "Iurii Malchenko", "i@yurique.com", url("https://github.com/yurique"))
+ThisBuild / publishTo := sonatypePublishToBundle.value
+ThisBuild / sonatypeProfileName := "yurique"
+ThisBuild / publishArtifact in Test := false
+ThisBuild / description := "Router library based for Laminar with DSL inspired by Akka HTTP."

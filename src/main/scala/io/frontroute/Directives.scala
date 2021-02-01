@@ -1,7 +1,7 @@
 package io.frontroute
 
-import com.raquo.airstream.eventstream.EventStream
-import com.raquo.airstream.signal.Signal
+import com.raquo.airstream.core.EventStream
+import com.raquo.airstream.core.Signal
 import io.frontroute.debug.Logging
 
 import scala.scalajs.js
@@ -15,6 +15,22 @@ trait Directives extends DirectiveApplyConverters {
 
   private[frontroute] def extract[T](f: RouteLocation => T): Directive[T] =
     extractContext.map(f)
+
+  def state[T](initial: => T): Directive[T] = {
+    Directive[T](inner =>
+      (ctx, previous, state) => {
+        val next = state.path("state")
+        state.getPersistentValue[T](next.path) match {
+          case None =>
+            val newStateValue = initial
+            inner(newStateValue)(ctx, previous, next.setPersistentValue(newStateValue))
+
+          case Some(existing) =>
+            inner(existing)(ctx, previous, next)
+        }
+      }
+    )
+  }
 
   def signal[T](signal: Signal[T]): Directive[T] = {
     Directive[T](inner =>
@@ -106,7 +122,7 @@ trait Directives extends DirectiveApplyConverters {
     )
   }
 
-  def completeN[T](events: EventStream[() => Unit]): Route = { (_, _, state) =>
+  def complete[T](events: EventStream[() => Unit]): Route = { (_, _, state) =>
     EventStream.fromValue(
       RouteResult.Complete(state, events),
       emitOnce = false
