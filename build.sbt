@@ -1,5 +1,12 @@
 ThisBuild / scalaVersion := ScalaVersions.v213
-ThisBuild / crossScalaVersions := Seq(ScalaVersions.v3RC1, ScalaVersions.v3M3, ScalaVersions.v213, ScalaVersions.v212)
+ThisBuild / crossScalaVersions := Seq(
+  /*
+  ScalaVersions.v3RC1,
+  ScalaVersions.v3M3,
+   */
+  ScalaVersions.v213,
+  ScalaVersions.v212
+)
 
 lazy val root =
   project
@@ -9,10 +16,10 @@ lazy val root =
       name := "frontroute",
       libraryDependencies ++=
         Seq(
-          "com.raquo"    %%% "airstream"    % "0.12.0-SNAPSHOT",
-          "app.tulz"     %%% "tuplez-apply" % "0.3.3",
-          "com.raquo"    %%% "laminar"      % "0.12.0-SNAPSHOT" % Test,
-          ("com.lihaoyi" %%% "utest"        % "0.7.5"           % Test).withDottyCompat(scalaVersion.value)
+          "com.raquo"   %%% "airstream"    % BuildSettings.version.airstream,
+          "app.tulz"    %%% "tuplez-apply" % BuildSettings.version.`tuplez-apply`,
+          "com.raquo"   %%% "laminar"      % BuildSettings.version.laminar % Test,
+          "com.lihaoyi" %%% "utest"        % BuildSettings.version.utest   % Test
         ),
       testFrameworks += new TestFramework("utest.runner.Framework"),
       scalacOptions ~= (
