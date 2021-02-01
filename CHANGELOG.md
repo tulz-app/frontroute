@@ -1,5 +1,14 @@
 # Changelog
 
+### 0.12.0 \[M1\]
+
+Update to Airstream `v0.12.0-M1`.
+
+* API: renamed `RouteLocationProvider` into `LocationProvider`
+* API: new `CustomLocationProvider`
+* API: renamed `completeN` into `complete`
+* API: new `state` directive
+
 ### 0.11.7
 
 * Bugfix: `.collect` and `.mapTo` were not storing the mapped value (in the internal state)
