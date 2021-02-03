@@ -1,5 +1,9 @@
 # Changelog
 
+### 0.12.0 \[...\]
+
+* Bugfix: pop state event processing – event itself was used as `state`
+
 ### 0.12.0 \[M1\]
 
 Update to Airstream `v0.12.0-M1`.

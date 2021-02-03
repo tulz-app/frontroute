@@ -5,6 +5,6 @@ import org.scalajs.dom
 
 class BrowserLocationProvider(popStateEvents: EventStream[dom.PopStateEvent]) extends LocationProvider {
 
-  val stream: EventStream[RouteLocation] = popStateEvents.map(RouteLocation(dom.window.location, _))
+  val stream: EventStream[RouteLocation] = popStateEvents.map(event => RouteLocation(dom.window.location, event.state))
 
 }
