@@ -2,16 +2,16 @@
 
 ### 0.12.0 \[...\]
 
-* Bugfix: pop state event processing – event itself was used as `state`
 
-### 0.12.0 \[M1\]
+### 0.12.0 \[M2\]
 
-Update to Airstream `v0.12.0-M1`.
+Update to Airstream `v0.12.0-M2`.
 
 * API: renamed `RouteLocationProvider` into `LocationProvider`
 * API: new `CustomLocationProvider`
 * API: renamed `completeN` into `complete`
 * API: new `state` directive
+* Bugfix: pop state event processing – event itself was used as `state`
 
 ### 0.11.7
 

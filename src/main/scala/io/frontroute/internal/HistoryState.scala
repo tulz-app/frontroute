@@ -29,7 +29,7 @@ object HistoryState {
       if (state.frontroute.contains("frontroute")) {
         Some(state)
       } else {
-        dom.console.warn("history state was set outside frontroute", state, state.isInstanceOf[HistoryState])
+        dom.console.debug("history state was set outside frontroute", state, state.isInstanceOf[HistoryState])
         None
       }
     }

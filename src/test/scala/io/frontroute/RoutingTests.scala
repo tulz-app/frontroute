@@ -1,8 +1,12 @@
 package io.frontroute
 
-import com.raquo.laminar.api.L._
+import com.raquo.airstream.core.EventStream
+import com.raquo.airstream.core.Observer
+import com.raquo.airstream.core.Signal
+import com.raquo.airstream.eventbus.EventBus
 import io.frontroute.testing._
 import com.raquo.airstream.ownership.Owner
+import com.raquo.airstream.state.Var
 import utest._
 
 import scala.collection.mutable.ListBuffer
@@ -20,6 +24,7 @@ object RoutingTests extends TestSuite {
   implicit val testOwner: Owner = new Owner {}
 
   case class Page(p: String)
+
   case class PageWithSignal(segment: Signal[String])
 
   class Probe[A] {
@@ -28,6 +33,7 @@ object RoutingTests extends TestSuite {
     def append(s: A): Unit = {
       val _ = buffer.append(s)
     }
+
     def toList: Seq[A] = buffer.toList
   }
 
@@ -39,7 +45,7 @@ object RoutingTests extends TestSuite {
     val locationProvider = new TestLocationProvider()
     val probe            = new Probe[String]
 
-    val sub = runRoute(route(probe), locationProvider)(unsafeWindowOwner)
+    val sub = runRoute(route(probe), locationProvider)(testOwner)
     val future = delayedFuture(wait).flatMap { _ =>
       try {
         checks(probe)
@@ -562,7 +568,7 @@ object RoutingTests extends TestSuite {
           p.success(list.reverse)
         }
       }
-    }(unsafeWindowOwner)
+    }(testOwner)
 
     setTimeout(wait) {
       if (!p.isCompleted) {
@@ -578,6 +584,7 @@ object RoutingTests extends TestSuite {
       case head :: rest =>
         val $var = Var(head)
         var ss   = rest
+
         def doNext(): Unit = ss match {
           case h :: tail =>
             ss = tail
@@ -587,6 +594,7 @@ object RoutingTests extends TestSuite {
             }
           case _ =>
         }
+
         val _ = setTimeout(interval) {
           doNext()
         }

@@ -18,7 +18,6 @@ lazy val root =
         Seq(
           "com.raquo"   %%% "airstream"    % BuildSettings.version.airstream,
           "app.tulz"    %%% "tuplez-apply" % BuildSettings.version.`tuplez-apply`,
-          "com.raquo"   %%% "laminar"      % BuildSettings.version.laminar % Test,
           "com.lihaoyi" %%% "utest"        % BuildSettings.version.utest   % Test
         ),
       testFrameworks += new TestFramework("utest.runner.Framework"),

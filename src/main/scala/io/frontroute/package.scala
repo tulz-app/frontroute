@@ -3,7 +3,6 @@ package io
 import com.raquo.airstream.core.EventStream
 import com.raquo.airstream.ownership.Owner
 import com.raquo.airstream.ownership.Subscription
-import io.frontroute.debug.Logging
 
 package object frontroute {
 
@@ -22,7 +21,6 @@ package object frontroute {
               Option.empty
             }
           case RouteResult.Rejected =>
-            Logging.debug(s"route: rejected ($location)")
             Option.empty
         }
       }
@@ -38,6 +36,6 @@ package object frontroute {
 
   type Route = (RouteLocation, RoutingState, RoutingState) => EventStream[RouteResult]
 
-  private[frontroute] def rejected: EventStream[RouteResult] = EventStream.fromValue(RouteResult.Rejected, emitOnce = false)
+  private[frontroute] def rejected: EventStream[RouteResult] = EventStream.fromValue(RouteResult.Rejected)
 
 }

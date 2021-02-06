@@ -2,13 +2,13 @@ package io.frontroute
 
 import com.raquo.airstream.core.EventStream
 import com.raquo.airstream.core.Signal
-import io.frontroute.debug.Logging
+import org.scalajs.dom
 
 import scala.scalajs.js
 
 trait Directives extends DirectiveApplyConverters {
 
-  def reject: Route = (_, _, _) => EventStream.fromValue(RouteResult.Rejected, emitOnce = false)
+  def reject: Route = (_, _, _) => rejected
 
   private[frontroute] def extractContext: Directive[RouteLocation] =
     Directive[RouteLocation](inner => (ctx, previous, state) => inner(ctx)(ctx, previous, state))
@@ -47,7 +47,7 @@ trait Directives extends DirectiveApplyConverters {
       (ctx, previous, state) => {
         ctx.params.get(name).flatMap(_.headOption) match {
           case Some(paramValue) => inner(paramValue)(ctx, previous, state.path(s"param($name)").setValue(paramValue))
-          case None             => EventStream.fromValue(RouteResult.Rejected, emitOnce = false)
+          case None             => rejected
         }
       }
     )
@@ -94,7 +94,7 @@ trait Directives extends DirectiveApplyConverters {
       (ctx, previous, state) => {
         m(ctx.unmatchedPath) match {
           case Right((t, rest)) => inner(t)(ctx.withUnmatchedPath(rest), previous, state.path(s"pathPrefix($m)").setValue(t))
-          case _                => EventStream.fromValue(RouteResult.Rejected, emitOnce = false)
+          case _                => rejected
         }
       }
     )
@@ -106,7 +106,7 @@ trait Directives extends DirectiveApplyConverters {
         if (ctx.unmatchedPath.isEmpty) {
           inner(())(ctx, previous, state.path("path-end"))
         } else {
-          EventStream.fromValue(RouteResult.Rejected, emitOnce = false)
+          rejected
         }
       }
     )
@@ -116,40 +116,33 @@ trait Directives extends DirectiveApplyConverters {
       (ctx, previous, state) => {
         m(ctx.unmatchedPath) match {
           case Right((t, Nil)) => inner(t)(ctx.withUnmatchedPath(List.empty), previous, state.path(s"path($m)").setValue(t))
-          case _               => EventStream.fromValue(RouteResult.Rejected, emitOnce = false)
+          case _               => rejected
         }
       }
     )
   }
 
-  def complete[T](events: EventStream[() => Unit]): Route = { (_, _, state) =>
-    EventStream.fromValue(
-      RouteResult.Complete(state, events),
-      emitOnce = false
-    )
-  }
+  def complete[T](events: EventStream[() => Unit]): Route = (_, _, state) => EventStream.fromValue(RouteResult.Complete(state, events))
 
-  def complete[T](action: => Unit): Route = { (_, _, state) =>
+  def complete[T](action: => Unit): Route = (_, _, state) =>
     EventStream.fromValue(
-      RouteResult.Complete(state, EventStream.fromValue(() => action, emitOnce = false)),
-      emitOnce = false
+      RouteResult.Complete(state, EventStream.fromValue(() => action))
     )
-  }
 
-  def debug(message: => String)(subRoute: Route): Route =
+  def debug(message: Any, optionalParams: Any*)(subRoute: Route): Route =
     (ctx, previous, state) => {
-      Logging.debug(message)
+      dom.console.debug(message, optionalParams: _*)
       subRoute(ctx, previous, state)
     }
 
   def concat(routes: Route*): Route = (ctx, previous, state) => {
     def findFirst(rs: List[(Route, Int)]): EventStream[RouteResult] =
       rs match {
-        case Nil => EventStream.fromValue(RouteResult.Rejected, emitOnce = false)
+        case Nil => rejected
         case (route, index) :: tail =>
           state.path(index.toString)
           route(ctx, previous, state).flatMap {
-            case complete: RouteResult.Complete => EventStream.fromValue(complete, emitOnce = false)
+            case complete: RouteResult.Complete => EventStream.fromValue(complete)
             case RouteResult.Rejected           => findFirst(tail)
           }
       }
