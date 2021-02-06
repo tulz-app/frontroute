@@ -4,7 +4,8 @@
 
 `frontroute` is a front-end router library for single-page application (SPA) built with [Scala.js](http://www.scala-js.org/), with an API inspired by [Akka HTTP](https://doc.akka.io/docs/akka-http/current/).
 
-Primarily designed for use with [raquo/Laminar](https://github.com/raquo/Laminar), though it's not a dependency and `frontroute` should fit nicely with any Scala.js library.
+`frontroute` is primarily designed for use with [raquo/Laminar](https://github.com/raquo/Laminar), 
+but it doesn't have Laminar as a dependency and should fit nicely with any Scala.js library.
 
 Built on top of:
 
