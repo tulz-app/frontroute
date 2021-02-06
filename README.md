@@ -8,18 +8,22 @@ Primarily designed for use with [raquo/Laminar](https://github.com/raquo/Laminar
 
 Built on top of:
 
-* [raquo/Airstream](https://github.com/raquo/Airstream) `v0.11.1` (`v0.12.0-M1`) 
-* [tulz-app/tuplez](https://github.com/tulz-app/tuplez/) `v0.3.3`
+* [raquo/Airstream](https://github.com/raquo/Airstream) `v0.12.0-M2` 
+* [tulz-app/tuplez](https://github.com/tulz-app/tuplez/) `v0.3.1`
 
 
 ### Getting started
 
-`frontroute` is available for [Scala.js](http://www.scala-js.org/) v1.3.1+ (published for Scala 2.12 and 2.13).
+`frontroute` is available for [Scala.js](http://www.scala-js.org/) `v1.4.0`+ (published for Scala 2.12 and 2.13).
+
+```scala
+libraryDependencies += "io.frontroute" %%% "frontroute" % "0.12.0-M2"
+```
+
+For Airstream `v0.11.x`:
 
 ```scala
 libraryDependencies += "io.frontroute" %%% "frontroute" % "0.11.7"
-// OR
-libraryDependencies += "io.frontroute" %%% "frontroute" % "0.12.0-M1"
 ```
 
 ```scala
