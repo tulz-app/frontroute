@@ -73,11 +73,11 @@ One can define most of the routing for the app using those, but it is possible (
 
 Directives are designed to be nested (as well as combined with `&` and `|`). 
 
-Whenever a directive matches it gives control to the nested directive, providing the value it "extracted" (if not `Unit`):
+Whenever a directive "matches", it gives control to the nested directive, providing the value it has "extracted":
 
 ```scala
 concat( // this is not "nesting", unlike most of the following "calls"
-  pathPrefix("public") { // provides no value, Unit — no need to type "_ =>"
+  pathPrefix("public") { // provides no value – Unit — thus no need to type "_ =>"
     concat( // not "nesting"
       pathPrefix("articles") { // no value
         path(segment) { articleId => // a String value provided 
@@ -86,12 +86,18 @@ concat( // this is not "nesting", unlike most of the following "calls"
       },
       (pathPrefix("books") & maybeParam("author") & maybeParam("title")) { 
         (maybeAuthor, maybeTitle) => 
-          // no value from the pathPrefix, combined with Option[String] value from the first param directive and Option[String] from the second one
+          // * no value from the pathPrefix,
+          // * combined with Option[String] value from the first param directive 
+          // * combined with Option[String] from the second one
+          //
           // the internal value is a 2—tuple — (Option[String], Option[String])
+          // 
           // but here, when nesting, you can provide either a single-parameter function that accepts the tuple — 
           //   Function1[  Tuple2[Option[String], Option[String]], ?  ]
+          //
           // or a 2-parameter function that accepts elements on the tuple —  
           //   Function2[  Option[String], Option[String], ?  ]
+          //
           // (this works with tuples of any size, see tuplez-apply)
           renderBookSearchPage(maybeAuthor, maybeTitle)
       }
@@ -116,7 +122,7 @@ val route =
   )
 ```
 
-you need to run the `runRoute` function, passing in the route and a `LocationProvider`. 
+you need to run the `runRoute` function, providing the route and an instance of `LocationProvider`. 
 
 `LocationProvider` is a simple trait:
 
@@ -126,25 +132,22 @@ trait LocationProvider {
 }
 ```
 
-and its single job is to provide the stream of `RouteLocation`. You can implement it depending on your needs (for tests, for example).
-
-But, most of the times, you will probably be using the provided `LocationProvider.browser` — it takes a stream of `PopStateEvent` and 
-parses the `dom.window.location` to produce the corresponding `RouteLocation`s.
-
-
+and its single job is to provide a stream of `RouteLocation`. You can implement it depending on your needs (for tests,
+for example), but most of the time you will probably be using the provided `LocationProvider.browser` — it takes 
+a stream of `PopStateEvent` and parses the `dom.window.location` to produce the corresponding `RouteLocation`s.
 
 ```scala
 val locationProvider: LocationProvider = LocationProvider.browser(windowEvents.onPopState) // windowEvents.onPopState is available if you are using Laminar 
 runRoute(route, locationProvider)
-BrowserNavigation.emitPopStateEvent() // this is most likely needed to force the first pop state event and make things happen 
+BrowserNavigation.emitPopStateEvent() // this is most likely needed to force the initial pop state event and make things happen 
 ```
 
-`runRoute` also requires an implicit `Owner` (`unsafeWindowOwner` will work perfectly fine most of the times).
+`runRoute` also requires an implicit `Owner` (`unsafeWindowOwner` will work perfectly fine most of the time).
 
-Under the hood,
+Under the hood
 
 * `runRoute` transforms a stream of `RouteLocation` (that you provide initially) into a stream 
-of `() => Unit` functions (those functions are provided when defining the route; this is described below),
+  of `() => Unit` functions (those functions are provided when defining the route; this is described below),
 * it subscribes to this stream, and executes those functions as they come through,
 * `runRoute` returns a `Subscription` which can be used to stop this process.
 
@@ -153,7 +156,6 @@ of `() => Unit` functions (those functions are provided when defining the route;
 So far we haven't touched on how to actually do anything when a particular route is matched. 
 
 Let's look at another small example:
-
 
 ```scala
 concat(
@@ -168,12 +170,12 @@ concat(
 
 ### The "complete" directive
 
-In a simple case, the "do something" here means "execute some code" (do `console.log`, update the "current page" signal , etc).
+In a simple case, the "do something" here means "execute some code" (do `console.log`, update the "current page" signal, etc).
 
 For that, there is a built-in directive — `complete`.
 
 > Side note: it is not really a directive, but rather a function that terminates a 
-tree of directives (by returning a `Route` which eventually gets used to build the root `Route`).
+tree of directives (by returning a `Route`, which eventually gets used to build the root `Route`).
 > But that is not important from a user's standpoint, 
 and it might be simpler to think about "complete" as of just another directive. 
 
@@ -196,23 +198,21 @@ concat(
 )
 ```
 
-### The "completeN" directive
-
-A more powerful version of `complete` is `completeN`:
+There is a more powerful version of `complete`:
 
 ```scala
-def completeN[T](events: EventStream[() => Unit]): Route
+def complete[T](events: EventStream[() => Unit]): Route
 ```
 
-* `completeN` accepts a stream of `() => Unit` functions
+This overload of `complete` accepts a **stream** of `() => Unit` functions.
 
 When the route is matched, `frontroute` subscribes to this stream and "executes" the functions emitted by the stream.
 
-As soon as the route changes (another `complete` or `completeN` is "triggered"), the subscription is cancelled.
+As soon as the route changes (another `complete` is "triggered"), this subscription gets cancelled.
 
-### How to use the "complete" directives
+### How to use the "complete" directive
 
-Let's look at an example of how you can do something useful with these "directives". 
+Let's look at an example of how you can do something useful with `complete`. 
 
 Say, for example, you have a `Signal` for your "current page", defined with a `Var`:
 
@@ -229,8 +229,8 @@ object Page {
 val currentPage = Var[Page](Page.Blank)
 ```
 
-You might define a custom "directive" (again, it will not be a real directive as we're going to build it using `complete`)
-that updates the value of the `currentPage`:
+You might define a custom "directive" (again, it will not be a real directive as we're going to build it 
+on top of `complete`) that updates the value of the `currentPage`:
 
 ```scala
 def render(page: Page): Route =
@@ -254,26 +254,28 @@ concat(
 
 ### A more complicated use case
 
-If you wanted to get some data from the back-end before rendering a page, you could use `completeN`.
-Also, this will prevent "this" action from taking effect when the call to the back-end returns after 
-the route has changed and another "complete" is in effect.
+If you wanted to get some data from the back-end before rendering a page, you could use `complete` that accepts a stream 
+of functions.
 
-For example, let's say we want to be displaying a "loading" screen while the data is being requested and after that — the actual page.
+This will also prevent "this" action from taking effect when the call to the back-end returns **after** 
+the route has changed and another `complete` is "in effect".
+
+For example, let's say we want to be displaying a "loading" screen while the data is being requested, and after that — 
+the actual page.
 
 ```scala
-...
+// ...
 final case object Loading extends Page
 final case class UserPage(data: UserData) extends Page
-...
+// ...
 ```
 
 ```scala
 def renderF(pageFuture: => Future[Page]): Route =
-  completeN {
+  complete {
     EventStream.merge(
       EventStream.fromValue(
-        () => currentPage.writer.onNext(Page.Loading), 
-        emitOnce = true
+        () => currentPage.writer.onNext(Page.Loading) 
       ), 
       EventStream.fromFuture(pageFuture).map { page =>
         () => currentPage.writer.onNext(page)
@@ -287,7 +289,7 @@ concat(
   // ...
   path("user" / segment) { userId =>
     renderF(
-      API.getUserData(userId).map ( userData => 
+      API.getUserData(userId)/*: Future[UserData]*/.map ( userData => 
         Page.UserPage(userData)
       )      
     )
@@ -296,7 +298,7 @@ concat(
 )
 ```
 
-As a side note, in order to keep the routes readable as they grow, it is recommended to extract 
+As a side note, in order to keep the route readable as it grows, it is recommended to extract 
 the "actions":
 
 ```scala
