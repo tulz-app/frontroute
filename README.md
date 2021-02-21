@@ -9,16 +9,19 @@ but it doesn't have Laminar as a dependency and should fit nicely with any Scala
 
 Built on top of:
 
-* [raquo/Airstream](https://github.com/raquo/Airstream) `v0.12.0-M2` 
+* [raquo/Airstream](https://github.com/raquo/Airstream) `v0.12.0-RC1` 
 * [tulz-app/tuplez](https://github.com/tulz-app/tuplez/) `v0.3.1`
 
+## Example project
+
+An example is available here: https://github.com/yurique/frontroute-example
 
 ### Getting started
 
-`frontroute` is available for [Scala.js](http://www.scala-js.org/) `v1.4.0`+ (published for Scala 2.12 and 2.13).
+`frontroute` is available for [Scala.js](http://www.scala-js.org/) `v1.5.0`+ (published for Scala 2.12 and 2.13).
 
 ```scala
-libraryDependencies += "io.frontroute" %%% "frontroute" % "0.12.0-M2"
+libraryDependencies += "io.frontroute" %%% "frontroute" % "0.12.0-RC1"
 ```
 
 For Airstream `v0.11.x`:
@@ -29,7 +32,6 @@ libraryDependencies += "io.frontroute" %%% "frontroute" % "0.11.7"
 
 ```scala
 import io.frontroute._
-import io.frontroute.directives._
 ```
 
 ## Overview
@@ -250,6 +252,39 @@ concat(
     render(Page.Page2)
   }
 )
+```
+
+### `makeRoute` 
+
+For cases like the one described above, there are two utility functions available:
+
+* `makeRoute[A](make: (A => Route) => Route): (Signal[Option[A]], Route)`
+* `makeRouteWithCallback[A](onRoute: () => Unit)(make: (A => Route) => Route): (Signal[Option[A]], Route)`
+
+Both return a tuple of a `Signal[Option[A]]` (where `A` is what you want to be a "result" of routing) and a `Route` which
+can be passed to the `runRoute`.
+
+`makeRouteWithCallback` accepts an additional parameter, `onRoute: () => Unit`, which will be called every time a route changes
+(and matches). Otherwise it works the same way as the `makeRoute` does.
+
+When using `makeRoute`, you build the route as you would without it, but it provides you with a "render" function, which you 
+call instead of `complete` and provide a value that ends up in the resulting signal (inside `Some()`).
+
+The example from the previous section can be rewritten as follows (traits and case classes are omitted for brevity):
+
+```scala
+val (routeResult, route) = makeRoute { render =>
+  concat(
+    path("page-1") {
+      render(Page.Page1)
+    },
+    path("page-2") {
+      render(Page.Page2)
+    }
+  )
+}
+val currentPage = routeResult.map(_.getOrElse(Page.Blank))
+// runRoute(route) ...
 ```
 
 ### A more complicated use case
@@ -760,141 +795,7 @@ It registers a click handler for all `<a>` elements on the page (existing and fu
 
 It also registers a global `window.routeTo` function with one parameter – `path`, which calls `BrowserNavigation.pushState(path = path)`.
 
-### A larger example 
-
-```scala
-import com.raquo.laminar.api.L._
-import io.frontroute._
-
-object App {
-
-  private val currentRender = Var[Element](
-    div("initializing...")
-  )
-
-  def start(): Unit = {
-    val route =
-      concat(
-        (pathEnd | path("index")) {
-          completeRender {
-            IndexPage()
-          }
-        },
-        pathPrefix("pages") {
-          concat(
-            path("page-1") {
-                completeRender {
-                  Page1()
-                }
-            },
-            path("page-2") {
-              completeRender {
-                Page2()
-              }
-            }
-          )
-        },
-        completeRender {
-          PageNotFound()
-        }
-      )
-    
-    runRoute(route, BrowserNavigation.locationProvider(windowEvents.onPopState))(unsafeWindowOwner)
-    BrowserNavigation.emitPopStateEvent() 
-  }
-
-  private def completeRender(r: => Element): Route =
-    complete {
-      currentRender.writer.onNext(r)
-      org.scalajs.dom.window.scrollTo(0, 0)
-    }
-
-
-}
-
-object Link {
-
-  def apply(
-    where: String,
-    mods: Modifier[HtmlElement]*
-  ): HtmlElement = {
-    a(
-      href := where,
-      onClick.preventDefault --> { _ =>
-        BrowserNavigation.pushState(null, null, where)
-      },
-      mods
-    )
-  }
-
-}
-
-object PageChrome {
-
-  private def navLink(where: String, mods: Mod[HtmlElement]*) =
-    Link(where,mods)
-
-  def apply($child: Signal[Element]): HtmlElement =
-    div(
-      div(
-        navLink("/index", "Index Page"),
-        navLink("/pages/page-1", "Page 1"),
-        navLink("/pages/page-2", "Page 2")
-       ),
-      div(
-        child <-- $child
-      )
-    )
-
-}
-
-
-object IndexPage {
-
-  def apply(): HtmlElement =
-    div(
-      "I'm the index page"
-    )
-
-}
-
-object Page1 {
-
-  def apply(): HtmlElement =
-    div(
-      "I'm Page 1"
-    )
-
-}
-
-object Page2 {
-
-  def apply(): HtmlElement =
-    div(
-      "I'm Page 2"
-    )
-
-}
-
-object PageNotFound {
-
-  def apply(): HtmlElement =
-    div(
-      "Not Found"
-    )
-
-}
-```
-
-
-
 ![Documentation is WIP](https://img.shields.io/static/v1?label=Documentation&message=WIP&color=orange)
-
-## An example project 
-
-An example is available: https://github.com/yurique/laminar-router-example
-
-
 
 ## Author
 

@@ -14,7 +14,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Promise
 import scala.scalajs.js.timers._
-import directives._
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration._

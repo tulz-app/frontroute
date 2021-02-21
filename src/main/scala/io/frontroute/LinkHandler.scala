@@ -18,7 +18,13 @@ object LinkHandler {
     findParent("A", event.target.asInstanceOf[dom.Node]).foreach { aParent =>
       val anchor = aParent.asInstanceOf[HTMLAnchorElement]
       val rel    = anchor.rel
-      if (js.isUndefined(rel) || rel == null || rel == "") {
+      val href   = anchor.href
+      val sameOrigin =
+        href.startsWith("/") ||
+          !href.startsWith("http://") && !href.startsWith("https://") ||
+          dom.window.location.origin.exists(origin => href.startsWith(origin))
+
+      if (sameOrigin && (js.isUndefined(rel) || rel == null || rel == "")) {
         event.preventDefault()
         BrowserNavigation.pushState(url = anchor.href)
       } else if (rel == "external") {

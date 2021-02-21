@@ -3,6 +3,7 @@ package io.frontroute
 import com.raquo.airstream.core.EventStream
 import com.raquo.airstream.core.Signal
 import com.raquo.airstream.state.Var
+import io.frontroute.internal.Util
 import io.frontroute.ops.DirectiveOfOptionOps
 
 class Directive[L](
@@ -58,7 +59,7 @@ class Directive[L](
           val mapped = f(value)
           inner(mapped)(location, previous, state.path(".collect").setValue(mapped))
         } else {
-          rejected
+          Util.rejected
         }
       }
     }
@@ -69,7 +70,7 @@ class Directive[L](
         if (predicate(value)) {
           inner(value)(location, previous, state.path(".filter"))
         } else {
-          rejected
+          Util.rejected
         }
       }
     }

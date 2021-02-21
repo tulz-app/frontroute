@@ -2,13 +2,14 @@ package io.frontroute
 
 import com.raquo.airstream.core.EventStream
 import com.raquo.airstream.core.Signal
+import io.frontroute.internal.Util
 import org.scalajs.dom
 
 import scala.scalajs.js
 
 trait Directives extends DirectiveApplyConverters {
 
-  def reject: Route = (_, _, _) => rejected
+  def reject: Route = (_, _, _) => Util.rejected
 
   private[frontroute] def extractContext: Directive[RouteLocation] =
     Directive[RouteLocation](inner => (ctx, previous, state) => inner(ctx)(ctx, previous, state))
@@ -47,7 +48,7 @@ trait Directives extends DirectiveApplyConverters {
       (ctx, previous, state) => {
         ctx.params.get(name).flatMap(_.headOption) match {
           case Some(paramValue) => inner(paramValue)(ctx, previous, state.path(s"param($name)").setValue(paramValue))
-          case None             => rejected
+          case None             => Util.rejected
         }
       }
     )
@@ -94,7 +95,7 @@ trait Directives extends DirectiveApplyConverters {
       (ctx, previous, state) => {
         m(ctx.unmatchedPath) match {
           case Right((t, rest)) => inner(t)(ctx.withUnmatchedPath(rest), previous, state.path(s"pathPrefix($m)").setValue(t))
-          case _                => rejected
+          case _                => Util.rejected
         }
       }
     )
@@ -106,7 +107,7 @@ trait Directives extends DirectiveApplyConverters {
         if (ctx.unmatchedPath.isEmpty) {
           inner(())(ctx, previous, state.path("path-end"))
         } else {
-          rejected
+          Util.rejected
         }
       }
     )
@@ -116,7 +117,7 @@ trait Directives extends DirectiveApplyConverters {
       (ctx, previous, state) => {
         m(ctx.unmatchedPath) match {
           case Right((t, Nil)) => inner(t)(ctx.withUnmatchedPath(List.empty), previous, state.path(s"path($m)").setValue(t))
-          case _               => rejected
+          case _               => Util.rejected
         }
       }
     )
@@ -138,7 +139,7 @@ trait Directives extends DirectiveApplyConverters {
   def concat(routes: Route*): Route = (ctx, previous, state) => {
     def findFirst(rs: List[(Route, Int)]): EventStream[RouteResult] =
       rs match {
-        case Nil => rejected
+        case Nil => Util.rejected
         case (route, index) :: tail =>
           state.path(index.toString)
           route(ctx, previous, state).flatMap {

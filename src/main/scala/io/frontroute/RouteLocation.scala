@@ -37,7 +37,7 @@ object RouteLocation {
       host = location.host,
       origin = location.origin.toOption,
       unmatchedPath = extractPath(location),
-      params = extractParams(location),
+      params = LocationUtils.parseLocationParams(location),
       state = HistoryState.tryParse(state)
     )
 
@@ -45,21 +45,6 @@ object RouteLocation {
 
   private def extractPath(location: raw.Location): List[String] = {
     location.pathname.dropWhile(_ == '/').split('/').toList.dropWhile(_.isEmpty)
-  }
-
-  private def extractParams(location: raw.Location): Map[String, Seq[String]] = {
-    val vars   = location.search.dropWhile(_ == '?').split('&')
-    val result = scala.collection.mutable.Map[String, Seq[String]]()
-    vars.foreach { entry =>
-      entry.split('=') match {
-        case Array(key, value) =>
-          val decodedKey   = js.URIUtils.decodeURIComponent(key)
-          val decodedValue = js.URIUtils.decodeURIComponent(value)
-          result(decodedKey) = result.getOrElse(decodedKey, Seq.empty) :+ decodedValue
-        case _ =>
-      }
-    }
-    result.toMap
   }
 
 }

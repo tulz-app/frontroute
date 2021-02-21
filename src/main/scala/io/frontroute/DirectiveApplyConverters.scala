@@ -1,6 +1,7 @@
 package io.frontroute
 
 import app.tulz.tuplez._
+import Types.Route
 
 trait DirectiveApplyConverters extends ApplyConverters[Route] {
 

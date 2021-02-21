@@ -1,41 +1,10 @@
 package io
 
-import com.raquo.airstream.core.EventStream
-import com.raquo.airstream.ownership.Owner
-import com.raquo.airstream.ownership.Subscription
+package object frontroute extends Directives with PathMatchers with RunRoute with MakeRoute {
 
-package object frontroute {
+  type Directive0   = Types.Directive0
+  type PathMatcher0 = Types.PathMatcher0
 
-  object directives extends Directives with PathMatchers
-
-  def runRoute(route: Route, locationProvider: LocationProvider)(implicit owner: Owner): Subscription = {
-    var current = RoutingState.empty.path("!")
-    locationProvider.stream
-      .flatMap { location =>
-        route(location, current.resetPath, RoutingState.withPersistentData(current.persistent)).map {
-          case RouteResult.Complete(next, action) =>
-            if (next != current) {
-              current = next
-              Some(action)
-            } else {
-              Option.empty
-            }
-          case RouteResult.Rejected =>
-            Option.empty
-        }
-      }
-      .collect { case Some(events) =>
-        events
-      }
-      .flatten
-      .foreach(_())
-  }
-
-  type Directive0   = Directive[Unit]
-  type PathMatcher0 = PathMatcher[Unit]
-
-  type Route = (RouteLocation, RoutingState, RoutingState) => EventStream[RouteResult]
-
-  private[frontroute] def rejected: EventStream[RouteResult] = EventStream.fromValue(RouteResult.Rejected)
+  type Route = Types.Route
 
 }
