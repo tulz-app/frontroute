@@ -13,7 +13,7 @@ Update to Airstream `v0.12.0-RC1`.
 * Util: new `LocationUtils` object with `parseLocationParams` and `encodeLocationParams` functions
 * Bugfix: pop state event processing – event itself was used as `state`
 * Bugfix: link handler was not verifying if the link was pointing to the URL within the same origin, caused errors 
-  (changing then origin when pushing state is not allowed)
+  (changing the origin when pushing state is not allowed)
 
 ### 0.11.7
 
