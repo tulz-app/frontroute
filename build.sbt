@@ -1,9 +1,6 @@
 ThisBuild / scalaVersion := ScalaVersions.v213
 ThisBuild / crossScalaVersions := Seq(
-  /*
   ScalaVersions.v3RC1,
-  ScalaVersions.v3M3,
-   */
   ScalaVersions.v213,
   ScalaVersions.v212
 )
@@ -16,9 +13,9 @@ lazy val root =
       name := "frontroute",
       libraryDependencies ++=
         Seq(
-          "com.raquo"   %%% "airstream"    % BuildSettings.version.airstream,
-          "app.tulz"    %%% "tuplez-apply" % BuildSettings.version.`tuplez-apply`,
-          "com.lihaoyi" %%% "utest"        % BuildSettings.version.utest   % Test
+          ("com.raquo"   %%% "airstream"    % BuildSettings.version.airstream).withDottyCompat(scalaVersion.value),
+          "app.tulz"     %%% "tuplez-apply" % BuildSettings.version.`tuplez-apply`,
+          ("com.lihaoyi" %%% "utest"        % BuildSettings.version.utest % Test).withDottyCompat(scalaVersion.value)
         ),
       testFrameworks += new TestFramework("utest.runner.Framework"),
       scalacOptions ~= (
@@ -32,7 +29,7 @@ lazy val root =
           )
         )
       ),
-      Test / scalacOptions := (Compile / scalacOptions).value.filterNot(_.startsWith("-Wunused:")).filterNot(_.startsWith("-Ywarn-unused")),
+      Test / scalacOptions ~= (_.filterNot(_.startsWith("-Wunused:")).filterNot(_.startsWith("-Ywarn-unused"))),
       scalacOptions in (Compile, doc) ~= (_.filterNot(
         Set(
           "-scalajs",
