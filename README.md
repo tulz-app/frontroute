@@ -9,8 +9,8 @@ but it doesn't have Laminar as a dependency and should fit nicely with any Scala
 
 Built on top of:
 
-* [raquo/Airstream](https://github.com/raquo/Airstream) `v0.12.0-RC1` 
-* [tulz-app/tuplez](https://github.com/tulz-app/tuplez/) `v0.3.1`
+* [raquo/Airstream](https://github.com/raquo/Airstream) `v0.12.0` 
+* [tulz-app/tuplez](https://github.com/tulz-app/tuplez/) `v0.3.4`
 
 ## Example project
 
@@ -18,10 +18,10 @@ An example is available here: https://github.com/yurique/frontroute-example
 
 ### Getting started
 
-`frontroute` is available for [Scala.js](http://www.scala-js.org/) `v1.5.0`+ (published for Scala 2.12 and 2.13).
+`frontroute` is available for [Scala.js](http://www.scala-js.org/) `v1.5.0`+ (published for Scala 2.12, 2.13 and 3.0.0-RC1).
 
 ```scala
-libraryDependencies += "io.frontroute" %%% "frontroute" % "0.12.0-RC1"
+libraryDependencies += "io.frontroute" %%% "frontroute" % "0.12.0"
 ```
 
 For Airstream `v0.11.x`:
@@ -789,7 +789,7 @@ io.frontroute.LinkHandler.install()
 ```
 
 It registers a click handler for all `<a>` elements on the page (existing and future):
-* when `rel` is empty or not set – calls `BrowserNavigation.pushState` with the anchor's `href`
+* when `rel` is empty or not set, and if the target origin is the same – calls `BrowserNavigation.pushState` with the anchor's `href`
 * when `rel` is `external` – opens the anchor's `href` in a new tab (`dom.window.open(anchor.href)`)
 * when `res` has a different non-empty value – the click event is propagated.
 

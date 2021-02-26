@@ -1,8 +1,8 @@
 # Changelog
 
-### 0.12.0-RC1
+### 0.12.0
 
-Update to Airstream `v0.12.0-RC1`.
+Update to Airstream `v0.12.0`. Publishing for Scala 3.0.0-RC1
 
 * Breaking: the `io.frontroute.directives._` no longer exists and importing it is not needed anymore
 * API: renamed `RouteLocationProvider` into `LocationProvider`
