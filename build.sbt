@@ -13,9 +13,9 @@ lazy val root =
       name := "frontroute",
       libraryDependencies ++=
         Seq(
-          ("com.raquo"   %%% "airstream"    % BuildSettings.version.airstream).withDottyCompat(scalaVersion.value),
-          "app.tulz"     %%% "tuplez-apply" % BuildSettings.version.`tuplez-apply`,
-          ("com.lihaoyi" %%% "utest"        % BuildSettings.version.utest % Test).withDottyCompat(scalaVersion.value)
+          ("com.raquo"   %%% "airstream"    % LibraryVersions.airstream).withDottyCompat(scalaVersion.value),
+          "app.tulz"     %%% "tuplez-apply" % LibraryVersions.`tuplez-apply`,
+          ("com.lihaoyi" %%% "utest"        % LibraryVersions.utest % Test).withDottyCompat(scalaVersion.value)
         ),
       testFrameworks += new TestFramework("utest.runner.Framework"),
       scalacOptions ~= (
