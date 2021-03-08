@@ -5,5 +5,5 @@ ThisBuild / licenses += "MIT" -> url("https://github.com/tulz-app/frontroute/blo
 ThisBuild / developers += Developer("yurique", "Iurii Malchenko", "i@yurique.com", url("https://github.com/yurique"))
 ThisBuild / publishTo := sonatypePublishToBundle.value
 ThisBuild / sonatypeProfileName := "yurique"
-ThisBuild / publishArtifact in Test := false
+(ThisBuild / Test / publishArtifact) := false
 ThisBuild / description := "Router library based for Laminar with DSL inspired by Akka HTTP."

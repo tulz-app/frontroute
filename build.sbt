@@ -30,7 +30,7 @@ lazy val root =
         )
       ),
       Test / scalacOptions ~= (_.filterNot(_.startsWith("-Wunused:")).filterNot(_.startsWith("-Ywarn-unused"))),
-      scalacOptions in (Compile, doc) ~= (_.filterNot(
+      (Compile / doc / scalacOptions) ~= (_.filterNot(
         Set(
           "-scalajs",
           "-deprecation",
