@@ -3,21 +3,18 @@ inThisBuild(
     organization := "io.frontroute",
     homepage := Some(url("https://github.com/tulz-app/frontroute")),
     licenses := List("MIT" -> url("https://github.com/tulz-app/frontroute/blob/main/LICENSE.md")),
-    ThisBuild / scmInfo := Some(ScmInfo(url("https://github.com/tulz-app/frontroute"), "scm:git@github.com/tulz-app/frontroute.git")),
-    developers := List(Developer("yurique", "Iurii Malchenko", "i@yurique.com", url("https://github.com/yurique")))
-  )
-)
-
-inThisBuild(
-  List(
+    scmInfo := Some(ScmInfo(url("https://github.com/tulz-app/frontroute"), "scm:git@github.com/tulz-app/frontroute.git")),
+    developers := List(Developer("yurique", "Iurii Malchenko", "i@yurique.com", url("https://github.com/yurique"))),
     description := "Router library based for Laminar with DSL inspired by Akka HTTP.",
     Test / publishArtifact := false,
+    versionScheme := Some("early-semver"),
     scalaVersion := ScalaVersions.v213,
     crossScalaVersions := Seq(
       ScalaVersions.v3RC1,
       ScalaVersions.v213,
       ScalaVersions.v212
-    )
+    ),
+    versionPolicyIntention := Compatibility.BinaryCompatible
   )
 )
 
@@ -28,38 +25,11 @@ lazy val root =
     .settings(
       name := "frontroute",
       libraryDependencies ++=
-        Seq(
-          ("com.raquo"  %%% "airstream"    % LibraryVersions.airstream).withDottyCompat(scalaVersion.value),
-          "app.tulz"    %%% "tuplez-apply" % LibraryVersions.`tuplez-apply`,
-          "com.lihaoyi" %%% "utest"        % LibraryVersions.utest % Test
+        Seq.concat(
+          Dependencies.airstream.value,
+          Dependencies.`tuplez-apply`.value,
+          Dependencies.`utest`.value
         ),
       testFrameworks += new TestFramework("utest.runner.Framework"),
-      scalacOptions ~= (
-        _.filterNot(
-          Set(
-            "-Wdead-code",
-            "-Ywarn-dead-code",
-            "-Wunused:params",
-            "-Ywarn-unused:params",
-            "-Wunused:explicits"
-          )
-        )
-      ),
-      Test / scalacOptions ~= (_.filterNot(_.startsWith("-Wunused:")).filterNot(_.startsWith("-Ywarn-unused"))),
-      (Compile / doc / scalacOptions) ~= (_.filterNot(
-        Set(
-          "-scalajs",
-          "-deprecation",
-          "-explain-types",
-          "-explain",
-          "-feature",
-          "-language:existentials,experimental.macros,higherKinds,implicitConversions",
-          "-unchecked",
-          "-Xfatal-warnings",
-          "-Ykind-projector",
-          "-from-tasty",
-          "-encoding",
-          "utf8"
-        )
-      ))
+      ScalaOptions.fixOptions
     )
