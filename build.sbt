@@ -14,7 +14,11 @@ inThisBuild(
       ScalaVersions.v213,
       ScalaVersions.v212
     ),
-    versionPolicyIntention := Compatibility.BinaryCompatible
+    versionPolicyIntention := Compatibility.BinaryCompatible,
+    githubWorkflowBuild += WorkflowStep.Sbt(List("versionPolicyCheck")),
+    githubWorkflowTargetTags ++= Seq("v*"),
+    githubWorkflowPublishTargetBranches += RefPredicate.StartsWith(Ref.Tag("v")),
+    githubWorkflowPublish := Seq(WorkflowStep.Sbt(List("ci-release")))
   )
 )
 
