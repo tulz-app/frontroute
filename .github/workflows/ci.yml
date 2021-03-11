@@ -55,8 +55,6 @@ jobs:
       - name: Build project
         run: sbt ++${{ matrix.scala }} test
 
-      - run: sbt ++${{ matrix.scala }} versionPolicyCheck
-
       - name: Compress target directories
         run: tar cf targets.tar target project/target
 

@@ -15,7 +15,8 @@ inThisBuild(
       ScalaVersions.v212
     ),
     versionPolicyIntention := Compatibility.BinaryCompatible,
-    githubWorkflowBuild += WorkflowStep.Sbt(List("versionPolicyCheck")),
+//  https://github.com/scalacenter/sbt-version-policy/issues/62
+//    githubWorkflowBuild += WorkflowStep.Sbt(List("versionPolicyCheck")),
     githubWorkflowTargetTags ++= Seq("v*"),
     githubWorkflowPublishTargetBranches += RefPredicate.StartsWith(Ref.Tag("v")),
     githubWorkflowPublish := Seq(WorkflowStep.Sbt(List("ci-release")))
@@ -32,7 +33,7 @@ lazy val root =
         Seq.concat(
           Dependencies.airstream.value,
           Dependencies.`tuplez-apply`.value,
-          Dependencies.`utest`.value
+          Dependencies.utest.value
         ),
       testFrameworks += new TestFramework("utest.runner.Framework"),
       ScalaOptions.fixOptions

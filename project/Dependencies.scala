@@ -17,7 +17,7 @@ object Dependencies {
     )
   }
 
-  val `utest`: Def.Initialize[Seq[ModuleID]] = Def.setting {
+  val utest: Def.Initialize[Seq[ModuleID]] = Def.setting {
     Seq(
       "com.lihaoyi" %%% "utest" % DependencyVersions.utest % Test
     )
