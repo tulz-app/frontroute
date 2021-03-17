@@ -19,7 +19,13 @@ inThisBuild(
 //    githubWorkflowBuild += WorkflowStep.Sbt(List("versionPolicyCheck")),
     githubWorkflowTargetTags ++= Seq("v*"),
     githubWorkflowPublishTargetBranches += RefPredicate.StartsWith(Ref.Tag("v")),
-    githubWorkflowPublish := Seq(WorkflowStep.Sbt(List("ci-release")))
+    githubWorkflowPublish := Seq(WorkflowStep.Sbt(List("ci-release"))),
+    githubWorkflowEnv ~= (_ ++ Map(
+      "PGP_PASSPHRASE"    -> s"$${{ secrets.PGP_PASSPHRASE }}",
+      "PGP_SECRET"        -> s"$${{ secrets.PGP_SECRET }}",
+      "SONATYPE_PASSWORD" -> s"$${{ secrets.SONATYPE_PASSWORD }}",
+      "SONATYPE_USERNAME" -> s"$${{ secrets.SONATYPE_USERNAME }}"
+    ))
   )
 )
 
