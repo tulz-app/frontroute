@@ -9,8 +9,8 @@ but it doesn't have Laminar as a dependency and should fit nicely with any Scala
 
 Built on top of:
 
-* [raquo/Airstream](https://github.com/raquo/Airstream) `v0.12.0` 
-* [tulz-app/tuplez](https://github.com/tulz-app/tuplez/) `v0.3.4`
+* [raquo/Airstream](https://github.com/raquo/Airstream) `v0.12.2` 
+* [tulz-app/tuplez](https://github.com/tulz-app/tuplez) `v0.3.5`
 
 ## Example project
 
@@ -18,10 +18,10 @@ An example is available here: https://github.com/yurique/frontroute-example
 
 ### Getting started
 
-`frontroute` is available for [Scala.js](http://www.scala-js.org/) `v1.5.0`+ (published for Scala 2.12, 2.13 and 3.0.0-RC1).
+`frontroute` is available for [Scala.js](http://www.scala-js.org/) `v1.5.0`+ (published for Scala 2.12 and 2.13).
 
 ```scala
-libraryDependencies += "io.frontroute" %%% "frontroute" % "0.12.0"
+libraryDependencies += "io.frontroute" %%% "frontroute" % "0.12.2"
 ```
 
 For Airstream `v0.11.x`:

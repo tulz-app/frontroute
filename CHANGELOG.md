@@ -1,5 +1,11 @@
 # Changelog
 
+### 0.12.2
+
+Update to Airstream `v0.12.2`. No longer publishing for Scala 3.0.0-RC1.
+
+* Bugfix: historyState directive was returning `undefined` due to emitted pop state events did not include the state value
+
 ### 0.12.0
 
 Update to Airstream `v0.12.0`. Publishing for Scala 3.0.0-RC1
