@@ -7,7 +7,7 @@ object Dependencies {
 
   val airstream: Def.Initialize[Seq[ModuleID]] = Def.setting {
     Seq(
-      ("com.raquo" %%% "airstream" % DependencyVersions.airstream).withDottyCompat(scalaVersion.value)
+      "com.raquo" %%% "airstream" % DependencyVersions.airstream
     )
   }
 

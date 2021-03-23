@@ -55,11 +55,11 @@ trait Directives extends DirectiveApplyConverters {
   }
 
   def historyState: Directive[Option[js.Any]] = {
-    extractContext.map(_.state.flatMap(_.user.toOption))
+    extractContext.map(_.parsedState.flatMap(_.user.toOption))
   }
 
   def historyScroll: Directive[Option[ScrollPosition]] = {
-    extractContext.map(_.state.flatMap(_.internal.toOption).flatMap(_.scroll.toOption).map { scroll =>
+    extractContext.map(_.parsedState.flatMap(_.internal.toOption).flatMap(_.scroll.toOption).map { scroll =>
       ScrollPosition(
         scrollX = scroll.scrollX.toOption.map(_.round.toInt),
         scrollY = scroll.scrollY.toOption.map(_.round.toInt)

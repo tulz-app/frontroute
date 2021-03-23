@@ -8,6 +8,7 @@ import io.frontroute.internal.HistoryStateScrollPosition
 import org.scalajs.dom
 
 import scala.scalajs.js
+import scala.scalajs.js.Dynamic
 
 object BrowserNavigation {
 
@@ -70,7 +71,7 @@ object BrowserNavigation {
         )
     }
     if (popStateEvent) {
-      emitPopStateEvent()
+      emitPopStateEvent(state)
     }
   }
 
@@ -96,13 +97,14 @@ object BrowserNavigation {
     }
 
     if (popStateEvent) {
-      emitPopStateEvent()
+      emitPopStateEvent(state)
     }
   }
 
-  def emitPopStateEvent(): Unit = {
-    val event = js.Dynamic.newInstance(js.Dynamic.global.Event)("popstate").asInstanceOf[dom.PopStateEvent]
-    val _     = dom.window.dispatchEvent(event)
+  def emitPopStateEvent(state: js.Any = js.undefined): Unit = {
+    val event = js.Dynamic.newInstance(js.Dynamic.global.Event)("popstate").asInstanceOf[Dynamic]
+    event.state = state
+    val _ = dom.window.dispatchEvent(event.asInstanceOf[dom.PopStateEvent])
   }
 
   def restoreScroll(): Unit = {

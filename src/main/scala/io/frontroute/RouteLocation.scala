@@ -13,10 +13,12 @@ final case class RouteLocation(
   origin: Option[String],
   unmatchedPath: List[String],
   params: Map[String, Seq[String]],
-  state: Option[HistoryState]
+  state: js.UndefOr[js.Any]
 ) {
 
   @inline def withUnmatchedPath(path: List[String]): RouteLocation = this.copy(unmatchedPath = path)
+
+  private[frontroute] val parsedState = HistoryState.tryParse(state)
 
   override def toString: String =
     s"${unmatchedPath.mkString("/")}${if (params.nonEmpty) "?" else ""}${params
@@ -38,7 +40,7 @@ object RouteLocation {
       origin = location.origin.toOption,
       unmatchedPath = extractPath(location),
       params = LocationUtils.parseLocationParams(location),
-      state = HistoryState.tryParse(state)
+      state = state
     )
 
   }

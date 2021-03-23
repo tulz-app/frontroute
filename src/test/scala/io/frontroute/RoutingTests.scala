@@ -7,6 +7,7 @@ import com.raquo.airstream.eventbus.EventBus
 import io.frontroute.testing._
 import com.raquo.airstream.ownership.Owner
 import com.raquo.airstream.state.Var
+import io.frontroute.internal.HistoryState
 import utest._
 
 import scala.collection.mutable.ListBuffer
@@ -14,9 +15,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Promise
 import scala.scalajs.js.timers._
-
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration._
+import scala.scalajs.js
+import scala.scalajs.js.JSON
 
 object RoutingTests extends TestSuite {
 
@@ -533,6 +535,24 @@ object RoutingTests extends TestSuite {
       }
     }
 
+    test("historyState") {
+      routeTest(
+        route = probe =>
+          historyState { state =>
+            complete {
+              probe.append(JSON.stringify(state.getOrElse("NO-STATE")))
+            }
+          },
+        init = locationProvider => {
+          locationProvider.path("state-test")
+          locationProvider.state(js.Dynamic.literal(a = "test"))
+          locationProvider.state(js.Dynamic.literal(a = "test", b = "something"))
+        }
+      ) { probe =>
+        probe.toList ==> List(""""NO-STATE"""", """{"a":"test"}""", """{"a":"test","b":"something"}""")
+      }
+    }
+
   }
 
   def nthSignal[T](n: Int, s: Signal[T], waitTime: FiniteDuration = 1.second): Future[T] = {
@@ -612,6 +632,7 @@ class TestLocationProvider extends LocationProvider {
   private var currentPort                              = "443"
   private var currentPath: List[String]                = List.empty
   private var currentParams: Map[String, List[String]] = Map.empty
+  private var currentState: js.UndefOr[HistoryState]   = js.undefined
 
   private val bus = new EventBus[RouteLocation]
 
@@ -648,6 +669,11 @@ class TestLocationProvider extends LocationProvider {
     emit()
   }
 
+  def state(userState: js.UndefOr[js.Any]): Unit = {
+    currentState = new HistoryState(internal = js.undefined, user = userState)
+    emit()
+  }
+
   def emit(): Unit = {
     bus.writer.onNext(
       RouteLocation(
@@ -658,7 +684,7 @@ class TestLocationProvider extends LocationProvider {
         origin = Some(s"${currentProtocol}://${currentHostname}:${currentPort}"),
         unmatchedPath = currentPath,
         params = currentParams,
-        state = None
+        state = currentState
       )
     )
   }
