@@ -1,7 +1,5 @@
 import sbt._
-import sbt.Keys._
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
-import dotty.tools.sbtplugin.DottyPlugin.autoImport._
 
 object Dependencies {
 
