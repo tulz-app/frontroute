@@ -31,8 +31,8 @@ final case class RouteLocation(
 
 object RouteLocation {
 
-  def apply(location: raw.Location, state: js.Any): RouteLocation = {
-    RouteLocation(
+  def apply(location: raw.Location, state: js.Any): RouteLocation =
+    new RouteLocation(
       hostname = location.hostname,
       port = location.port,
       protocol = location.protocol,
@@ -42,8 +42,6 @@ object RouteLocation {
       params = LocationUtils.parseLocationParams(location),
       state = state
     )
-
-  }
 
   private def extractPath(location: raw.Location): List[String] = {
     location.pathname.dropWhile(_ == '/').split('/').toList.dropWhile(_.isEmpty)
