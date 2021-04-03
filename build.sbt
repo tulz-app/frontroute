@@ -15,8 +15,8 @@ inThisBuild(
       ScalaVersions.v212
     ),
     versionPolicyIntention := Compatibility.BinaryCompatible,
-//  https://github.com/scalacenter/sbt-version-policy/issues/62
-//    githubWorkflowBuild += WorkflowStep.Sbt(List("versionPolicyCheck")),
+    githubWorkflowJavaVersions := Seq("openjdk@1.11.0"),
+    githubWorkflowBuild += WorkflowStep.Sbt(List("versionPolicyCheck")),
     githubWorkflowTargetTags ++= Seq("v*"),
     githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v"))),
     githubWorkflowPublish := Seq(WorkflowStep.Sbt(List("ci-release"))),

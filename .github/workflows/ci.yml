@@ -28,7 +28,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         scala: [3.0.0-RC2, 2.13.5, 2.12.13]
-        java: [adopt@1.8]
+        java: [openjdk@1.11.0]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout current branch (full)
@@ -59,6 +59,8 @@ jobs:
       - name: Build project
         run: sbt ++${{ matrix.scala }} test
 
+      - run: sbt ++${{ matrix.scala }} versionPolicyCheck
+
       - name: Compress target directories
         run: tar cf targets.tar target project/target
 
@@ -71,12 +73,12 @@ jobs:
   publish:
     name: Publish Artifacts
     needs: [build]
-    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v'))
     strategy:
       matrix:
         os: [ubuntu-latest]
         scala: [2.13.5]
-        java: [adopt@1.8]
+        java: [openjdk@1.11.0]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout current branch (full)
