@@ -16,7 +16,7 @@ inThisBuild(
     ),
     versionPolicyIntention := Compatibility.BinaryCompatible,
     githubWorkflowJavaVersions := Seq("openjdk@1.11.0"),
-    githubWorkflowBuild += WorkflowStep.Sbt(List("versionPolicyCheck")),
+//    githubWorkflowBuild += WorkflowStep.Sbt(List("versionPolicyCheck")),
     githubWorkflowTargetTags ++= Seq("v*"),
     githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v"))),
     githubWorkflowPublish := Seq(WorkflowStep.Sbt(List("ci-release"))),
