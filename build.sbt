@@ -18,7 +18,7 @@ inThisBuild(
 //  https://github.com/scalacenter/sbt-version-policy/issues/62
 //    githubWorkflowBuild += WorkflowStep.Sbt(List("versionPolicyCheck")),
     githubWorkflowTargetTags ++= Seq("v*"),
-    githubWorkflowPublishTargetBranches += RefPredicate.StartsWith(Ref.Tag("v")),
+    githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v"))),
     githubWorkflowPublish := Seq(WorkflowStep.Sbt(List("ci-release"))),
     githubWorkflowEnv ~= (_ ++ Map(
       "PGP_PASSPHRASE"    -> s"$${{ secrets.PGP_PASSPHRASE }}",
