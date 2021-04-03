@@ -21,7 +21,7 @@ private[frontroute] class HistoryState(
 
 object HistoryState {
 
-  def tryParse(raw: js.Any): Option[HistoryState] = {
+  def tryParse(raw: js.UndefOr[js.Any]): Option[HistoryState] = {
     if (js.isUndefined(raw) || raw == null) {
       Some(new HistoryState(js.undefined, js.undefined))
     } else {
