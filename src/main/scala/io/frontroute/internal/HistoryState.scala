@@ -10,7 +10,8 @@ private[frontroute] class HistoryStateScrollPosition(
 ) extends js.Object
 
 private[frontroute] class FrontrouteHistoryState(
-  var scroll: js.UndefOr[HistoryStateScrollPosition] = js.undefined
+  val title: String,
+  val scroll: js.UndefOr[HistoryStateScrollPosition]
 ) extends js.Object
 
 private[frontroute] class HistoryState(

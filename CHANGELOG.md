@@ -1,5 +1,25 @@
 # Changelog
 
+### 0.13.0-M2
+
+Update to Airstream `v0.13.0-M1`. Publishing for Scala 3.0.0-RC2.
+
+History and title behavior updates.
+
+* API: `LinkHandler` now looks at the `data-title` attribute of anchors and uses it when pushing state
+* API: `LinkHandler.install` now accepts a `defaultTitle: String = ""` argument to use when the `data-title` is missing
+* Change: `LinkHandler` will not be pushing state when the current path, search query and hash are equal to the ones in the 
+  anchor
+* API: new `BrowserNavigation.replaceTitle(title: String)` function, that replaces the document title (and, optionally,
+  the `<title>` element in the `<head>`) and stores the new title in the history state.
+
+`LocationProvider.browser` now has three new parameters: 
+
+* `setTitleOnPopStateEvents: Boolean = true` – if `true`, it will be updating the document title with the title saved by frontroute in 
+  the PopState event state
+* `updateTitleElement: Boolean = true` – if `true`, it will also be updating the content of the head/title element
+* `ignoreEmptyTitle: Boolean = false` – if `true`, it will not be doing anything if the `title` is empty
+
 ### 0.12.2
 
 Update to Airstream `v0.12.2`. No longer publishing for Scala 3.0.0-RC1.

@@ -11,7 +11,18 @@ trait LocationProvider {
 
 object LocationProvider {
 
-  @inline def browser(popStateEvents: EventStream[dom.PopStateEvent]): LocationProvider = new BrowserLocationProvider(popStateEvents)
-  @inline def custom(locations: EventStream[String])                                    = new CustomLocationProvider(locations)
+  @inline def browser(
+    popStateEvents: EventStream[dom.PopStateEvent],
+    setTitleOnPopStateEvents: Boolean = true,
+    updateTitleElement: Boolean = true,
+    ignoreEmptyTitle: Boolean = false
+  ): LocationProvider = new BrowserLocationProvider(
+    popStateEvents = popStateEvents,
+    setTitleOnPopStateEvents = setTitleOnPopStateEvents,
+    updateTitleElement = updateTitleElement,
+    ignoreEmptyTitle = ignoreEmptyTitle
+  )
+
+  @inline def custom(locations: EventStream[String]) = new CustomLocationProvider(locations)
 
 }
