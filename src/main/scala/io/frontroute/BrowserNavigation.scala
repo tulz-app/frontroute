@@ -1,7 +1,7 @@
 package io.frontroute
 
-import io.frontroute.domext.HistoryWithTitle
 import io.frontroute.domext.WindowWithScrollXY
+import io.frontroute.internal.DocumentTitle
 import io.frontroute.internal.FrontrouteHistoryState
 import io.frontroute.internal.HistoryState
 import io.frontroute.internal.HistoryStateScrollPosition
@@ -16,22 +16,32 @@ object BrowserNavigation {
 
   private var preserveScroll = true
 
-  def preserveScroll(keep: Boolean): Unit =
+  def preserveScroll(keep: Boolean): Unit = {
     this.preserveScroll = keep
+  }
 
-  private def getScrollPosition = {
+  private def currentScrollPosition(): HistoryStateScrollPosition = {
     new HistoryStateScrollPosition(
       scrollX = windowWithScrollXY.scrollX,
       scrollY = windowWithScrollXY.scrollY
     )
   }
 
-  private def createHistoryState(data: js.UndefOr[js.Any]): HistoryState = {
-    val internal = new FrontrouteHistoryState()
-    if (preserveScroll) {
-      internal.scroll = getScrollPosition
-    }
-    new HistoryState(internal, data)
+  private def createHistoryState(
+    user: js.UndefOr[js.Any],
+    title: String,
+    saveCurrentScrollPosition: Boolean
+  ): HistoryState = {
+    val internal = new FrontrouteHistoryState(
+      title = title,
+      scroll = if (saveCurrentScrollPosition) {
+        currentScrollPosition()
+      } else {
+        js.undefined
+      }
+    )
+
+    new HistoryState(internal = internal, user = user)
   }
 
   def pushState(
@@ -41,22 +51,30 @@ object BrowserNavigation {
     popStateEvent: Boolean = true
   ): Unit = {
     if (preserveScroll) {
-      HistoryState
-        .tryParse(dom.window.history.state)
-        .foreach { currentState =>
-          val newInternal = currentState.internal.getOrElse(new FrontrouteHistoryState())
-          val newState = new HistoryState(
-            internal = newInternal,
-            user = currentState.user
+      val newState = HistoryState.tryParse(dom.window.history.state) match {
+        case Some(currentState) =>
+          createHistoryState(
+            user = currentState.user,
+            title = currentState.internal.fold("")(_.title),
+            saveCurrentScrollPosition = true
           )
-          newInternal.scroll = getScrollPosition
-          dom.window.history.replaceState(
-            statedata = newState,
-            title = dom.window.history.asInstanceOf[HistoryWithTitle].title.getOrElse("")
+        case None =>
+          createHistoryState(
+            user = js.undefined,
+            title = "",
+            saveCurrentScrollPosition = true
           )
-        }
+      }
+      dom.window.history.replaceState(
+        statedata = newState,
+        title = newState.internal.fold("")(_.title)
+      )
     }
-    val state = createHistoryState(data)
+    val state = createHistoryState(
+      user = data,
+      title = title,
+      saveCurrentScrollPosition = false
+    )
     url.toOption match {
       case Some(url) =>
         dom.window.history.pushState(
@@ -81,7 +99,11 @@ object BrowserNavigation {
     data: js.Any = js.undefined,
     popStateEvent: Boolean = true
   ): Unit = {
-    val state = createHistoryState(data)
+    val state = createHistoryState(
+      user = data,
+      title = title,
+      saveCurrentScrollPosition = false
+    )
     url.toOption match {
       case Some(url) =>
         dom.window.history.replaceState(
@@ -95,9 +117,39 @@ object BrowserNavigation {
           title = title
         )
     }
-
     if (popStateEvent) {
       emitPopStateEvent(state)
+    }
+  }
+
+  def replaceTitle(
+    title: String,
+    popStateEvent: Boolean = false,
+    updateTitleElement: Boolean = true
+  ): Unit = {
+    val newState = HistoryState.tryParse(dom.window.history.state) match {
+      case Some(currentState) =>
+        val newInternal = new FrontrouteHistoryState(title = title, scroll = currentState.internal.flatMap(_.scroll))
+        new HistoryState(
+          internal = newInternal,
+          user = currentState.user
+        )
+      case None =>
+        new HistoryState(
+          internal = new FrontrouteHistoryState(title = title, scroll = js.undefined),
+          user = js.undefined
+        )
+    }
+    dom.window.history.replaceState(
+      statedata = newState,
+      title = title
+    )
+    DocumentTitle.updateTitle(
+      title = title,
+      updateTitleElement = updateTitleElement
+    )
+    if (popStateEvent) {
+      emitPopStateEvent(newState)
     }
   }
 

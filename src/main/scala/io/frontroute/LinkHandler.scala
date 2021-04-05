@@ -1,5 +1,6 @@
 package io.frontroute
 
+import io.frontroute.internal.UrlString
 import org.scalajs.dom
 import org.scalajs.dom.raw._
 
@@ -14,11 +15,12 @@ object LinkHandler {
     var routeTo: js.UndefOr[js.Function1[String, Unit]] = js.native
   }
 
-  private val clickListener: js.Function1[Event, Unit] = event => {
+  private def clickListener(defaultTitle: String): js.Function1[Event, Unit] = event => {
     findParent("A", event.target.asInstanceOf[dom.Node]).foreach { aParent =>
       val anchor = aParent.asInstanceOf[HTMLAnchorElement]
       val rel    = anchor.rel
       val href   = anchor.href
+      val title  = anchor.dataset.get("title")
       val sameOrigin =
         href.startsWith("/") ||
           !href.startsWith("http://") && !href.startsWith("https://") ||
@@ -26,7 +28,14 @@ object LinkHandler {
 
       if (sameOrigin && (js.isUndefined(rel) || rel == null || rel == "")) {
         event.preventDefault()
-        BrowserNavigation.pushState(url = anchor.href)
+        val shouldPush = UrlString.unapply(anchor.href).fold(true) { location =>
+          location.pathname != dom.window.location.pathname ||
+          location.search != dom.window.location.search ||
+          location.hash != dom.window.location.hash
+        }
+        if (shouldPush) {
+          BrowserNavigation.pushState(url = anchor.href, title = title.getOrElse(defaultTitle))
+        }
       } else if (rel == "external") {
         event.preventDefault()
         dom.window.open(anchor.href)
@@ -36,14 +45,20 @@ object LinkHandler {
 
   private val routeTo: js.Function1[String, Unit] = (path: String) => BrowserNavigation.pushState(url = path)
 
-  def install(): Unit = {
+  def install(
+    defaultTitle: String = ""
+  ): js.Function1[Event, Unit] = {
     WindowWithRouteTo.routeTo = routeTo
-    dom.document.addEventListener("click", clickListener)
+    val listener = clickListener(defaultTitle)
+    dom.document.addEventListener("click", listener)
+    listener
   }
 
-  def uninstall(): Unit = {
+  def uninstall(
+    listener: js.Function1[Event, Unit]
+  ): Unit = {
     WindowWithRouteTo.routeTo = js.undefined
-    dom.document.removeEventListener("click", clickListener)
+    dom.document.removeEventListener("click", listener)
   }
 
   @scala.annotation.tailrec
