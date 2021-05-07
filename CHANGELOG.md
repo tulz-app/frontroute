@@ -1,8 +1,8 @@
 # Changelog
 
-### 0.13.0-M2
+### 0.13.0
 
-Update to Airstream `v0.13.0-M1`. Publishing for Scala 3.0.0-RC2.
+Update to Airstream `v0.13.0`. Publishing for Scala 3.0.0-RC3.
 
 History and title behavior updates.
 
