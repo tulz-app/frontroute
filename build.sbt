@@ -11,8 +11,7 @@ inThisBuild(
     scalaVersion := ScalaVersions.v213,
     crossScalaVersions := Seq(
       ScalaVersions.v3RC3,
-      ScalaVersions.v213,
-      ScalaVersions.v212
+      ScalaVersions.v213
     ),
     versionPolicyIntention := Compatibility.BinaryCompatible,
     githubWorkflowJavaVersions := Seq("openjdk@1.11.0"),
