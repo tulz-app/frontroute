@@ -1,4 +1,6 @@
 target
 .idea
+.vscode
+.metals
 .bsp
-
+node_modules

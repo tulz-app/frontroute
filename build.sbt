@@ -30,9 +30,9 @@ inThisBuild(
   )
 )
 
-lazy val root =
+lazy val frontroute =
   project
-    .in(file("."))
+    .in(file("modules/frontroute"))
     .enablePlugins(ScalaJSPlugin, ScalaJSJUnitPlugin)
     .settings(
       name := "frontroute",
@@ -45,3 +45,46 @@ lazy val root =
       testFrameworks += new TestFramework("utest.runner.Framework"),
       ScalaOptions.fixOptions
     )
+
+lazy val website = project
+  .in(file("website"))
+  .enablePlugins(ScalaJSPlugin)
+  .enablePlugins(EmbeddedFilesPlugin)
+  .settings(ScalaOptions.fixOptions)
+  .settings(noPublish)
+  .settings(
+    githubWorkflowTargetTags := Seq.empty,
+    publish / skip := true,
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
+    scalaJSLinkerConfig ~= { _.withESFeatures(_.withUseECMAScript2015(false)) },
+    Compile / scalaJSLinkerConfig ~= { _.withSourceMap(false) },
+    scalaJSUseMainModuleInitializer := true,
+    //    scalaJSLinkerConfig ~= (_.withModuleSplitStyle(org.scalajs.linker.interface.ModuleSplitStyle.FewestModules)),
+    libraryDependencies ++= Seq.concat(
+      Dependencies.laminext.value,
+      Dependencies.`embedded-files-macro`.value,
+      Dependencies.sourcecode.value
+    ),
+    embedTextGlobs := Seq("**/*.md"),
+    embedDirectories ++= (Compile / unmanagedSourceDirectories).value,
+    (Compile / sourceGenerators) += embedFiles
+  )
+  .dependsOn(
+    frontroute
+  )
+
+lazy val noPublish = Seq(
+  publishLocal / skip := true,
+  publish / skip := true,
+  publishTo := Some(Resolver.file("Unused transient repository", file("target/unusedrepo")))
+)
+
+lazy val root = project
+  .in(file("."))
+  .settings(noPublish)
+  .settings(
+    name := "frontroute"
+  )
+  .aggregate(
+    frontroute
+  )

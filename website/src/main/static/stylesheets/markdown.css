@@ -1,0 +1,22 @@
+.prose {
+    & code:not(.hljs) {
+        @apply text-gray-900;
+        @apply font-medium;
+        /*@apply text-sm;*/
+        @apply bg-gray-200;
+
+        &::before, &::after {
+            content: " ";
+        }
+    }
+
+    & h1, & h2, & h3, & h4, & h5 {
+        & code:not(.hljs) {
+            @apply bg-white;
+            @apply text-blue-700;
+            &::before, &::after {
+                content: "";
+            }
+        }
+    }
+}

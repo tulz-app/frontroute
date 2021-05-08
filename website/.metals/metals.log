@@ -1,0 +1,10 @@
+[0m2021.02.27 19:53:53 INFO  Started: Metals version 0.9.10 in workspace '/Users/yurique/git/GitHub/tulz-app/laminext/website' for client vscode 1.53.2.[0m
+[0m2021.02.27 19:53:53 INFO  time: initialize in 0.37s[0m
+[0m2021.02.27 19:53:54 WARN  Build server is not auto-connectable.[0m
+[0m2021.02.27 19:53:54 WARN  no build tool detected in workspace '/Users/yurique/git/GitHub/tulz-app/laminext/website'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+[0m2021.03.01 10:47:56 INFO  shutting down Metals[0m
+[0m2021.03.30 17:22:58 INFO  Started: Metals version 0.9.10 in workspace '/Users/yurique/git/GitHub/tulz-app/laminext/website' for client vscode 1.54.3.[0m
+[0m2021.03.30 17:22:58 INFO  time: initialize in 0.35s[0m
+[0m2021.03.30 17:22:59 WARN  Build server is not auto-connectable.[0m
+[0m2021.03.30 17:22:59 WARN  no build tool detected in workspace '/Users/yurique/git/GitHub/tulz-app/laminext/website'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+[0m2021.03.30 17:23:11 INFO  shutting down Metals[0m

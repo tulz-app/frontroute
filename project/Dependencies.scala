@@ -21,4 +21,29 @@ object Dependencies {
     )
   }
 
+  // wesite
+
+  val laminext: Def.Initialize[Seq[ModuleID]] = Def.setting {
+    Seq(
+      "io.laminext" %%% "core"                   % DependencyVersions.laminext,
+      "io.laminext" %%% "highlight"              % DependencyVersions.laminext,
+      "io.laminext" %%% "markdown"               % DependencyVersions.laminext,
+      "io.laminext" %%% "ui"                     % DependencyVersions.laminext,
+      "io.laminext" %%% "tailwind"               % DependencyVersions.laminext,
+      "io.laminext" %%% "tailwind-default-theme" % DependencyVersions.laminext
+    )
+  }
+
+  val `embedded-files-macro`: Def.Initialize[Seq[ModuleID]] = Def.setting {
+    Seq(
+      "com.yurique" %%% "embedded-files-macro" % DependencyVersions.`embedded-files-macro`
+    )
+  }
+
+  val sourcecode: Def.Initialize[Seq[ModuleID]] = Def.setting {
+    Seq(
+      "com.lihaoyi" %%% "sourcecode" % DependencyVersions.sourcecode
+    )
+  }
+
 }
