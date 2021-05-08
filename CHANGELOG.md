@@ -1,5 +1,9 @@
 # Changelog
 
+### 0.13.1
+
+* API: new implicit conversion from `Regex` to a path matcher
+
 ### 0.13.0
 
 Update to Airstream `v0.13.0`. Publishing for Scala 3.0.0-RC3.
