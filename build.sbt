@@ -10,7 +10,7 @@ inThisBuild(
     versionScheme := Some("early-semver"),
     scalaVersion := ScalaVersions.v213,
     crossScalaVersions := Seq(
-      ScalaVersions.v3RC3,
+      ScalaVersions.v3,
       ScalaVersions.v213
     ),
     versionPolicyIntention := Compatibility.BinaryCompatible,
