@@ -8,9 +8,8 @@ object ScalaOptions {
         Set(
           "-Wdead-code",
           "-Ywarn-dead-code",
-          "-Wunused:params",
-          "-Ywarn-unused:params",
-          "-Wunused:explicits"
+          "-source",
+          "future"
         )
       )
     ),
