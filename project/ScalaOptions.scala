@@ -7,29 +7,11 @@ object ScalaOptions {
       _.filterNot(
         Set(
           "-Wdead-code",
-          "-Ywarn-dead-code",
-          "-source",
-          "future"
+          "-Ywarn-dead-code"
         )
       )
     ),
-    Test / scalacOptions ~= (_.filterNot(_.startsWith("-Wunused:")).filterNot(_.startsWith("-Ywarn-unused"))),
-    (Compile / doc / scalacOptions) ~= (_.filterNot(
-      Set(
-        "-scalajs",
-        "-deprecation",
-        "-explain-types",
-        "-explain",
-        "-feature",
-        "-language:existentials,experimental.macros,higherKinds,implicitConversions",
-        "-unchecked",
-        "-Xfatal-warnings",
-        "-Ykind-projector",
-        "-from-tasty",
-        "-encoding",
-        "utf8"
-      )
-    ))
+    Test / scalacOptions ~= (_.filterNot(_.startsWith("-Wunused:")).filterNot(_.startsWith("-Ywarn-unused")))
   )
 
 }
