@@ -1,5 +1,9 @@
 # Changelog
 
+### 0.13.2
+
+Sourcemaps are now pointing to GitHub.
+
 ### 0.13.1
 
 * API: new implicit conversion from `Regex` to a path matcher
