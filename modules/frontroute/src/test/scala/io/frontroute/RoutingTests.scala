@@ -83,6 +83,31 @@ object RoutingTests extends TestSuite {
       }
     }
 
+    test("revisit previous match") {
+      routeTest(
+        route = probe =>
+          concat(
+            pathEnd {
+              complete {
+                probe.append("end")
+              }
+            },
+            path("path1") {
+              complete {
+                probe.append("path1")
+              }
+            }
+          ),
+        init = locationProvider => {
+          locationProvider.path()
+          locationProvider.path("path1")
+          locationProvider.path()
+        }
+      ) { probe =>
+        probe.toList ==> List("end", "path1", "end")
+      }
+    }
+
     test("extractHostname") {
       routeTest(
         route = probe =>

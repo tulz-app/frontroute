@@ -1,5 +1,12 @@
 # Changelog
 
+### 0.13.3
+
+* Breaking: one of the `complete` overloads is now `completeN`
+
+The reason for the change is that its argument needs to be by-name (same as the other overload),
+and the two overloads would end up having the same byte-code signature.
+
 ### 0.13.2
 
 Sourcemaps are now pointing to GitHub.

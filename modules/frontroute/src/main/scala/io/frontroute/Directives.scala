@@ -123,7 +123,7 @@ trait Directives extends DirectiveApplyConverters {
     )
   }
 
-  def complete[T](events: EventStream[() => Unit]): Route = (_, _, state) => EventStream.fromValue(RouteResult.Complete(state, events))
+  def completeN[T](events: => EventStream[() => Unit]): Route = (_, _, state) => EventStream.fromValue(RouteResult.Complete(state, events))
 
   def complete[T](action: => Unit): Route = (_, _, state) =>
     EventStream.fromValue(
