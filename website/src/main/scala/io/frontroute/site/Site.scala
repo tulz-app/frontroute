@@ -78,6 +78,7 @@ object Site {
         examplePage(io.frontroute.site.examples.ex_params.ParamsExample),
         examplePage(io.frontroute.site.examples.ex_custom_directives.CustomDirectivesExample),
         examplePage(io.frontroute.site.examples.ex_signal.SignalExample),
+        examplePage(io.frontroute.site.examples.ex_memoize.MemoizeExample),
         examplePage(io.frontroute.site.examples.ex_auth.AuthExample),
         examplePage(io.frontroute.site.examples.ex_tabs.TabsExample)
       )

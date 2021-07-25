@@ -42,3 +42,5 @@ Let's define the directive now:
 > Now, this is an extremely simple example, but most directives, no matter how complicated, can be
 derived as easily from the more powerful existing directives and more powerful combinators (like, for example, 
 the `signal` directive or the `flatMap` combinator).
+
+[Live example](/examples/custom-directives) 

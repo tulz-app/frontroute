@@ -9,15 +9,18 @@ private[frontroute] object RoutingState {
   val empty: RoutingState = new RoutingState(
     path = RoutingPath.initial,
     data = Map.empty,
-    persistent = Map.empty
+    persistent = Map.empty,
+    async = Map.empty
   )
 
   def withPersistentData(
-    persistentData: Map[RoutingPath.Key, Any]
+    persistentData: Map[RoutingPath.Key, Any],
+    asyncData: Map[(RoutingPath.Key, Map[RoutingPath.Key, Any]), Any]
   ): RoutingState = new RoutingState(
     path = RoutingPath.empty,
     data = Map.empty,
-    persistent = persistentData
+    persistent = persistentData,
+    async = asyncData
   )
 
 }
@@ -25,17 +28,20 @@ private[frontroute] object RoutingState {
 final private[frontroute] class RoutingState private (
   val path: RoutingPath,
   val data: Map[RoutingPath.Key, Any],
-  val persistent: Map[RoutingPath.Key, Any]
+  val persistent: Map[RoutingPath.Key, Any],
+  val async: Map[(RoutingPath.Key, Map[RoutingPath.Key, Any]), Any]
 ) {
 
   def copy(
     path: RoutingPath = path,
     data: Map[RoutingPath.Key, Any] = data,
-    persistent: Map[RoutingPath.Key, Any] = persistent
+    persistent: Map[RoutingPath.Key, Any] = persistent,
+    async: Map[(RoutingPath.Key, Map[RoutingPath.Key, Any]), Any] = async
   ): RoutingState = new RoutingState(
     path = path,
     data = data,
-    persistent = persistent
+    persistent = persistent,
+    async = async
   )
 
   def resetPath: RoutingState = this.copy(path = RoutingPath.empty)

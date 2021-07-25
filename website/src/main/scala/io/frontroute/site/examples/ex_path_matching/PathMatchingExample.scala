@@ -97,9 +97,7 @@ object PathMatchingExample
           )
         ),
         onMountCallback { ctx =>
-          /* <focus> */
           val _ = runRoute(route, locationProvider)(ctx.owner)
-          /* </focus> */
         }
       )
     })

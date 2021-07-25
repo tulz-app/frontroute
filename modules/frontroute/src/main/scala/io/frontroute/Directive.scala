@@ -36,17 +36,17 @@ class Directive[L](
   def &[R](magnet: ConjunctionMagnet[L]): magnet.Out = magnet(this)
 
   def |[U >: L](other: Directive[L]): Directive[L] = {
-    Directive[L] { inner => (ctx, previous, state) =>
+    Directive[L] { inner => (location, previous, state) =>
       self
-        .tapply { value => (ctx, previous, state) =>
-          inner(value)(ctx, previous, state.leaveDisjunction)
-        }(ctx, previous, state.enterDisjunction)
+        .tapply { value => (location, previous, state) =>
+          inner(value)(location, previous, state.leaveDisjunction)
+        }(location, previous, state.enterDisjunction)
         .flatMap {
           case complete: RouteResult.Complete => EventStream.fromValue(complete)
           case RouteResult.Rejected =>
-            other.tapply { value => (ctx, previous, state) =>
-              inner(value)(ctx, previous, state.leaveDisjunction)
-            }(ctx, previous, state.enterDisjunction)
+            other.tapply { value => (location, previous, state) =>
+              inner(value)(location, previous, state.leaveDisjunction)
+            }(location, previous, state.enterDisjunction)
         }
     }
 
@@ -76,20 +76,20 @@ class Directive[L](
     }
 
   def signal: Directive[Signal[L]] =
-    new Directive[Signal[L]]({ inner => (ctx, previous, state) =>
+    new Directive[Signal[L]]({ inner => (location, previous, state) =>
       this.tapply {
         value => // TODO figure this out, when this is run, enter is not yet called
-          (ctx, previous, state) =>
+          (location, previous, state) =>
             val next = state.unsetValue().enter
             previous.getValue[Var[L]](next.path.key) match {
               case None =>
                 val newVar = Var(value)
-                inner(newVar.signal)(ctx, previous, next.setValue(newVar))
+                inner(newVar.signal)(location, previous, next.setValue(newVar))
               case Some(existingVar) =>
                 existingVar.set(value)
-                inner(existingVar.signal)(ctx, previous, next.setValue(existingVar))
+                inner(existingVar.signal)(location, previous, next.setValue(existingVar))
             }
-      }(ctx, previous, state)
+      }(location, previous, state)
     })
 
 }
@@ -98,12 +98,12 @@ object Directive {
 
   def apply[L](f: (L => Route) => Route): Directive[L] = {
     new Directive[L](inner =>
-      (ctx, previous, state) =>
+      (location, previous, state) =>
         f(value =>
-          (ctx, previous, state) => {
-            inner(value)(ctx, previous, state)
+          (location, previous, state) => {
+            inner(value)(location, previous, state)
           }
-        )(ctx, previous, state)
+        )(location, previous, state)
     )
   }
 

@@ -10,7 +10,11 @@ trait RunRoute {
     var current = RoutingState.empty
     locationProvider.stream
       .flatMap { location =>
-        route(location, current.resetPath, RoutingState.withPersistentData(current.persistent)).map {
+        route(
+          location,
+          current.resetPath,
+          RoutingState.withPersistentData(current.persistent, current.async)
+        ).map {
           case RouteResult.Complete(next, action) =>
             if (next != current) {
               current = next

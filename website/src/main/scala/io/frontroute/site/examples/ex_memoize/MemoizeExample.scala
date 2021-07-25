@@ -1,4 +1,4 @@
-package io.frontroute.site.examples.ex_tabs
+package io.frontroute.site.examples.ex_memoize
 
 import io.frontroute.site.examples.CodeExample
 import com.yurique.embedded.FileAsString
@@ -7,50 +7,48 @@ import io.laminext.AmAny
 import io.laminext.AmendedHtmlTag
 import org.scalajs.dom
 
-object TabsExample
+import scala.scalajs.js
+
+object MemoizeExample
     extends CodeExample(
-      id = "tabs",
-      title = "Tabs",
+      id = "memoize",
+      title = "Memoize",
       description = FileAsString("description.md")
     )((locationProvider: LocationProvider, a: AmendedHtmlTag[dom.html.Anchor, AmAny]) => {
       import io.frontroute._
-      import io.laminext.syntax.core._
+      import io.laminext.fetch._
       import com.raquo.laminar.api.L.{a => _, _}
+
+      /* <focus> */
+      def fetchData(something: String): EventStream[String] =
+        Fetch
+          .get(url("https://httpbin.org/get").withParams("something" -> s"give it back: $something"))
+          .json
+          .map { response =>
+            if (response.ok) {
+              response.data.asInstanceOf[js.Dynamic].args.something.asInstanceOf[String]
+            } else {
+              s"non-okay response: ${response.status}"
+            }
+
+          }
+      /* </focus> */
 
       val (renders, route) = makeRoute[HtmlElement] { render =>
         concat(
-          /* <focus> */
-          (pathEnd.mapTo("tab-1") | path(Set("tab-1", "tab-2"))).signal { tab =>
-            /* </focus> */
-            render {
-              div(
-                cls := "space-y-2",
+          pathEnd {
+            render { div(cls := "text-2xl", "Index page.") }
+          },
+          path("memoize" / segment) { value =>
+            /* <focus> */
+            memoize(() => fetchData(value)) { fetched =>
+              /* </focus> */
+              render {
                 div(
-                  cls := "flex space-x-2",
-                  a(
-                    href := "/tab-1",
-                    "Tab 1",
-                    cls := "text-xl p-1 rounded",
-                    cls.toggle("bg-blue-400 text-blue-100") <-- tab.signal.valueIs("tab-1")
-                  ),
-                  a(
-                    href := "/tab-2",
-                    "Tab 2",
-                    cls := "text-xl p-1 rounded",
-                    cls.toggle("bg-blue-400 text-blue-100") <-- tab.signal.valueIs("tab-2")
-                  )
-                ),
-                div(
-                  div(
-                    cls.toggle("hidden") <-- !tab.signal.valueIs("tab-1"),
-                    textArea("tab-1 text area", cls := "bg-blue-100 text-blue-500")
-                  ),
-                  div(
-                    cls.toggle("hidden") <-- !tab.signal.valueIs("tab-2"),
-                    textArea("tab-2 text area", cls := "bg-blue-100 text-blue-500")
-                  )
+                  div(cls := "text-2xl", "Index page."),
+                  div(s"Fetched value: $fetched")
                 )
-              )
+              }
             }
           },
           extractUnmatchedPath { unmatched =>
@@ -62,7 +60,6 @@ object TabsExample
             }
           }
         )
-
       }
 
       div(
@@ -85,18 +82,18 @@ object TabsExample
             ),
             a(
               cls := "text-blue-300 hover:text-blue-100",
-              href := "/tab-1",
-              "➜ /tab-1"
+              href := "/memoize/dog",
+              "➜ /memoize/dog"
             ),
             a(
               cls := "text-blue-300 hover:text-blue-100",
-              href := "/tab-2",
-              "➜ /tab-2"
+              href := "/memoize/cat",
+              "➜ /memoize/cat"
             ),
             a(
               cls := "text-blue-300 hover:text-blue-100",
-              href := "/some-page",
-              "➜ /some-page"
+              href := "/memoize/lizard",
+              "➜ /memoize/lizard"
             )
           )
         ),

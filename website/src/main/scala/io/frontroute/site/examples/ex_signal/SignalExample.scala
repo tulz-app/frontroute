@@ -88,9 +88,7 @@ object SignalExample
           )
         ),
         onMountCallback { ctx =>
-          /* <focus> */
           val _ = runRoute(route, locationProvider)(ctx.owner)
-          /* </focus> */
         }
       )
     })

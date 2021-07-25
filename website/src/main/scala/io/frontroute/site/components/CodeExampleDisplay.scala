@@ -93,7 +93,7 @@ object CodeExampleDisplay {
           Highlight.highlightElement(ctx.thisNode.ref.childNodes.head)
           hideFocusMarkers(ctx.thisNode.ref.childNodes.head.asInstanceOf[html.Element])
           if (hasContext) {
-            js.timers.setTimeout(100) {
+            val _ = js.timers.setTimeout(100) {
               val _ = js.timers.setTimeout(0) {
                 val updatedNode = setOpacityRecursively(theCode.ref, 0, dim)
                 val _           = ctx.thisNode.ref.replaceChild(updatedNode, ctx.thisNode.ref.childNodes.head)

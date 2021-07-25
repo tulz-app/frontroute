@@ -11,6 +11,7 @@
   * `segment(oneOf: Set[String])`
 * API new: implicit conversion from `Set[String]` and `Seq[String]` to `PathMatcher[String]`
 * API new: `testPath` and `testPathPrefix` directives (same as `path` and `pathPrefix` but preserving the unmatched path)
+* API new: `memoize` directive ([example](https://frontroute.dev/examples/memoize))
 
 ### 0.13.3
 

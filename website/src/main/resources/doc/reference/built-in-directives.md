@@ -1,39 +1,36 @@
-###  `reject: Route`
+### `reject: Route`
 
 Always rejects.
 
-###  `provide[L](value: L): Directive[L]`
+### `provide[L](value: L): Directive[L]`
 
-Always matches.
-Provides the given value.
+Always matches. Provides the given value.
 
-###  `complete[T](events: EventStream[() => Unit]): Route`
+### `complete[T](events: EventStream[() => Unit]): Route`
 
 Completes the route with the given stream of actions.
 
-###  `complete[T](action: => Unit): Route`
+### `complete[T](action: => Unit): Route`
 
 Completes the route with a stream emitting the given action.
 
-###  `debug(message: Any, optionalParams: Any*)(subRoute: Route): Route`
+### `debug(message: Any, optionalParams: Any*)(subRoute: Route): Route`
 
-Always matches.
-Prints a debug message (using the `Logging` utility) before invoking `subRoute`.
+Always matches. Prints a debug message (using the `Logging` utility) before invoking `subRoute`.
 
 See also: [Debugging](/overview/debugging).
 
-###  `pathEnd: Directive0`
+### `pathEnd: Directive0`
 
 Matches if the unmatched path is empty.
 
-###  `pathPrefix[T](m: PathMatcher[T]): Directive[T]`
+### `pathPrefix[T](m: PathMatcher[T]): Directive[T]`
 
-Matches if the given path matcher matches the unmatched path.
-Provides the value provided by the path matcher.
-Removes the parts matched by the path matcher from unmatched path for the nested route.
+Matches if the given path matcher matches the unmatched path. Provides the value provided by the path matcher. Removes
+the parts matched by the path matcher from unmatched path for the nested route.
 
 ```scala
-pathPrefix("user") 
+pathPrefix("user")
 // directive matches if the "unmatched path" starts with a "user" segment
 // this is a Directive0 as the constant string path matcher doesn't provide a value
 
@@ -42,72 +39,103 @@ pathPrefix("user" / segment)
 // this is a Directive[String] because the 'segment' path matcher is a PathMatcher[String] 
 ```
 
-###  `path[T](m: PathMatcher[T]): Directive[T]`
+### `path[T](m: PathMatcher[T]): Directive[T]`
 
 Effectively the same as `pathPrefix(m) & pathEnd`
 
-###  `param(name: String): Directive[String]`
+### `param(name: String): Directive[String]`
 
-Matches if the search query contains the given parameter.
-Provides the value of the parameter in the search query.
+Matches if the search query contains the given parameter. Provides the value of the parameter in the search query.
 
-###  `maybeParam(name: String): Directive[Option[String]]`
+### `maybeParam(name: String): Directive[Option[String]]`
 
-Always matches.
-If the search query contains the given parameter, provides its value in a `Some()`. Otherwise, provides `None`.
+Always matches. If the search query contains the given parameter, provides its value in a `Some()`. Otherwise,
+provides `None`.
 
-###  `state[T](initial: => T): Directive[T]`
+### `state[T](initial: => T): Directive[T]`
 
-Always matches.
-The first time this directive is hit, creates the state value provided by `initial` and memoizes it.
+Always matches. The first time this directive is hit, creates the state value provided by `initial` and memoizes it.
 Provides the memoized value.
 
-###  `signal[T](signal: Signal[T]): Directive[T]`
+### `signal[T](signal: Signal[T]): Directive[T]`
 
-Always matches.
-Provides the value inside the signal. Whenever the signal value changes, forces the route to be re-evaluated.
+Always matches. Provides the value inside the signal. Whenever the signal value changes, forces the route to be
+re-evaluated.
 
-###  `historyState: Directive[Option[js.Any]]`
+See [example](/examples/signal).
 
-Always matches.
-Provides the history state if it was set by `pushState` or `replaceState`. Otherwise, provides `None`.
+### `memoize[T](retrieve: () => EventStream[T]): Directive[T]`
 
-Extracts the history state (will only work if [BrowserNavigation](/overview/navigation) is used for `pushState`/`replaceState`).
+[EXPERIMENTAL]
 
-###  `historyScroll: Directive[Option[ScrollPosition]]`
+Always matches. Executes the provided event stream and provides its FIRST emitted value as a result of the directive.
 
-Always matches.
-Provides the window scroll position if it was stored in the state. Otherwise, provides `None`.
+The value emitted by the event stream is memoized for the set of all values provided by the previously executed
+directives.
 
-When [BrowserNavigation](/overview/navigation) is used for `pushState`/`replaceState`, it can preserve the window scroll position when navigating
+For example, if you have a route like the following:
+
+```scala
+
+def fetchData(v1: String, v2: String): EventStream[String] = ???
+
+path(segment) { value1 =>
+  path(segment) { value2 =>
+    memoize(() => fetchData(value1, value2)) { fetched =>
+      ???
+    }
+  }
+}
+```
+
+the `fetchData` will be called at most once per the distinct pair of `value1` and `value2`.
+
+So if the locations are as follows:
+
+`/A/B`, `/A/C`, `/A/B`, `/A/D`, `/A/C`
+
+The `fetchData` will be called 3 times:
+`fetchData("A", "B")`, `fetchData("A", "C")`, `fetchData("A", "D")`
+
+For the subsequent "hits" of `/A/B` and `/A/C` the memoized value will be provided.
+
+See [example](/examples/memoize). 
+
+### `historyState: Directive[Option[js.Any]]`
+
+Always matches. Provides the history state if it was set by `pushState` or `replaceState`. Otherwise, provides `None`.
+
+Extracts the history state (will only work if [BrowserNavigation](/overview/navigation) is used for `pushState`
+/`replaceState`).
+
+### `historyScroll: Directive[Option[ScrollPosition]]`
+
+Always matches. Provides the window scroll position if it was stored in the state. Otherwise, provides `None`.
+
+When [BrowserNavigation](/overview/navigation) is used for `pushState`/`replaceState`, it can preserve the window scroll
+position when navigating
 (enabled by default). This directive returns the preserved window scroll position (if any).
 
-###  `extractUnmatchedPath: Directive[List[String]]`
+### `extractUnmatchedPath: Directive[List[String]]`
 
-Always matches.
-Provides the unmatched path without "consuming" (see [Path-matching](/overview/path-matcher)) it.
+Always matches. Provides the unmatched path without "consuming" (see [Path-matching](/overview/path-matcher)) it.
 
-###  `extractHostname: Directive[String]`
+### `extractHostname: Directive[String]`
 
-Always matches.
-Provides the `hostname` part of the location (`window.location.hostname`).
+Always matches. Provides the `hostname` part of the location (`window.location.hostname`).
 
-###  `extractPort: Directive[String]`
+### `extractPort: Directive[String]`
 
-Always matches.
-Provides the `port` part of the location (`window.location.port`).
+Always matches. Provides the `port` part of the location (`window.location.port`).
 
-###  `extractHost: Directive[String]`
+### `extractHost: Directive[String]`
 
-Always matches.
-Provides the `host` part of the location (`window.location.host` – `hostname:port`)).
+Always matches. Provides the `host` part of the location (`window.location.host` – `hostname:port`)).
 
-###  `extractProtocol: Directive[String]`
+### `extractProtocol: Directive[String]`
 
-Always matches.
-Provides the `protocol` part of the location (`window.location.protocol`).
+Always matches. Provides the `protocol` part of the location (`window.location.protocol`).
 
-###  `extractOrigin: Directive[String]`
+### `extractOrigin: Directive[String]`
 
-Always matches.
-Provides the `origin` part of the location (`window.location.origin`).
+Always matches. Provides the `origin` part of the location (`window.location.origin`).
