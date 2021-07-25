@@ -17,7 +17,7 @@ object ConjunctionMagnet {
           underlying.tapply { prefix => (location, previous, state) =>
             other.tapply { suffix =>
               inner(composition.compose(prefix, suffix))
-            }(location, previous, state.path("&"))
+            }(location, previous, state.enterConjunction)
           }(location, previous, state)
         }
     }

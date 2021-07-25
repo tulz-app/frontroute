@@ -1,5 +1,16 @@
 # Changelog
 
+### 0.14.0
+
+* Internal implementation refactoring.
+* API breaking: `pathMatcher` combinators (`.map`, `.filter`, etc) no longer accept a `description` parameter
+* API new: `.recover`, `.emap` and `.tryParse` for `PathMatchers`
+* API breaking: `fromTry` path matcher has been removed
+* API new: new path matchers
+  * `segment(oneOf: Seq[String])`
+  * `segment(oneOf: Set[String])`
+* API new: `testPath` and `testPathPrefix` directives (same as `path` and `pathPrefix` but preserving the unmatched path)
+
 ### 0.13.3
 
 * Breaking: one of the `complete` overloads is now `completeN`

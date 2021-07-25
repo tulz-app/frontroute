@@ -1,6 +1,7 @@
 package io.frontroute
 
 import com.raquo.airstream.core.EventStream
+import io.frontroute.internal.RoutingState
 
 sealed trait RouteResult extends Product with Serializable
 

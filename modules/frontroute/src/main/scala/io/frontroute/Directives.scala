@@ -2,6 +2,7 @@ package io.frontroute
 
 import com.raquo.airstream.core.EventStream
 import com.raquo.airstream.core.Signal
+import io.frontroute.internal.PathMatchResult
 import io.frontroute.internal.Util
 import org.scalajs.dom
 
@@ -20,8 +21,8 @@ trait Directives extends DirectiveApplyConverters {
   def state[T](initial: => T): Directive[T] = {
     Directive[T](inner =>
       (ctx, previous, state) => {
-        val next = state.path("state")
-        state.getPersistentValue[T](next.path) match {
+        val next = state.enter
+        state.getPersistentValue[T](next.path.key) match {
           case None =>
             val newStateValue = initial
             inner(newStateValue)(ctx, previous, next.setPersistentValue(newStateValue))
@@ -37,7 +38,7 @@ trait Directives extends DirectiveApplyConverters {
     Directive[T](inner =>
       (ctx, previous, state) => {
         signal.flatMap { extracted =>
-          inner(extracted)(ctx, previous, state.path(".signal").setValue(extracted))
+          inner(extracted)(ctx, previous, state.enterAndSet(extracted))
         }
       }
     )
@@ -47,7 +48,7 @@ trait Directives extends DirectiveApplyConverters {
     Directive[String](inner =>
       (ctx, previous, state) => {
         ctx.params.get(name).flatMap(_.headOption) match {
-          case Some(paramValue) => inner(paramValue)(ctx, previous, state.path(s"param($name)").setValue(paramValue))
+          case Some(paramValue) => inner(paramValue)(ctx, previous, state.enterAndSet(paramValue))
           case None             => Util.rejected
         }
       }
@@ -71,7 +72,7 @@ trait Directives extends DirectiveApplyConverters {
     Directive[Option[String]](inner =>
       (ctx, previous, state) => {
         val maybeParamValue = ctx.params.get(name).flatMap(_.headOption)
-        inner(maybeParamValue)(ctx, previous, state.path(s"maybeParam($name)").setValue(maybeParamValue))
+        inner(maybeParamValue)(ctx, previous, state.enterAndSet(maybeParamValue))
       }
     )
 
@@ -88,14 +89,25 @@ trait Directives extends DirectiveApplyConverters {
   def extractOrigin: Directive[Option[String]] = extract(_.origin)
 
   def provide[L](value: L): Directive[L] =
-    Directive(inner => (ctx, previous, state) => inner(value)(ctx, previous, state.path(".provide").setValue(value)))
+    Directive(inner => (ctx, previous, state) => inner(value)(ctx, previous, state.enterAndSet(value)))
 
   def pathPrefix[T](m: PathMatcher[T]): Directive[T] = {
     Directive[T](inner =>
       (ctx, previous, state) => {
         m(ctx.unmatchedPath) match {
-          case Right((t, rest)) => inner(t)(ctx.withUnmatchedPath(rest), previous, state.path(s"pathPrefix($m)").setValue(t))
-          case _                => Util.rejected
+          case PathMatchResult.Match(t, rest) => inner(t)(ctx.withUnmatchedPath(rest), previous, state.enterAndSet(t))
+          case _                              => Util.rejected
+        }
+      }
+    )
+  }
+
+  def testPathPrefix[T](m: PathMatcher[T]): Directive[T] = {
+    Directive[T](inner =>
+      (ctx, previous, state) => {
+        m(ctx.unmatchedPath) match {
+          case PathMatchResult.Match(t, _) => inner(t)(ctx, previous, state.enterAndSet(t))
+          case _                           => Util.rejected
         }
       }
     )
@@ -105,7 +117,7 @@ trait Directives extends DirectiveApplyConverters {
     Directive[Unit](inner =>
       (ctx, previous, state) => {
         if (ctx.unmatchedPath.isEmpty) {
-          inner(())(ctx, previous, state.path("path-end"))
+          inner(())(ctx, previous, state.enter)
         } else {
           Util.rejected
         }
@@ -116,8 +128,19 @@ trait Directives extends DirectiveApplyConverters {
     Directive[T](inner =>
       (ctx, previous, state) => {
         m(ctx.unmatchedPath) match {
-          case Right((t, Nil)) => inner(t)(ctx.withUnmatchedPath(List.empty), previous, state.path(s"path($m)").setValue(t))
-          case _               => Util.rejected
+          case PathMatchResult.Match(t, Nil) => inner(t)(ctx.withUnmatchedPath(List.empty), previous, state.enterAndSet(t))
+          case _                             => Util.rejected
+        }
+      }
+    )
+  }
+
+  def testPath[T](m: PathMatcher[T]): Directive[T] = {
+    Directive[T](inner =>
+      (ctx, previous, state) => {
+        m(ctx.unmatchedPath) match {
+          case PathMatchResult.Match(t, Nil) => inner(t)(ctx, previous, state.enterAndSet(t))
+          case _                             => Util.rejected
         }
       }
     )
@@ -141,8 +164,7 @@ trait Directives extends DirectiveApplyConverters {
       rs match {
         case Nil => Util.rejected
         case (route, index) :: tail =>
-          state.path(index.toString)
-          route(ctx, previous, state).flatMap {
+          route(ctx, previous, state.enterConcat(index)).flatMap {
             case complete: RouteResult.Complete => EventStream.fromValue(complete)
             case RouteResult.Rejected           => findFirst(tail)
           }

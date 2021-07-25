@@ -14,7 +14,7 @@ class Directive[L](
   def flatMap[R](next: L => Directive[R]): Directive[R] = {
     Directive[R] { inner =>
       self.tapply { value => (location, previous, state) =>
-        next(value).tapply(inner)(location, previous, state.path(".flatMap"))
+        next(value).tapply(inner)(location, previous, state.enter)
       }
     }
   }
@@ -23,7 +23,7 @@ class Directive[L](
     Directive[R] { inner =>
       self.tapply { value => (location, previous, state) =>
         val mapped = f(value)
-        inner(mapped)(location, previous, state.path(".map").setValue(mapped))
+        inner(mapped)(location, previous, state.enterAndSet(mapped))
       }
     }
 
@@ -39,14 +39,14 @@ class Directive[L](
     Directive[L] { inner => (ctx, previous, state) =>
       self
         .tapply { value => (ctx, previous, state) =>
-          inner(value)(ctx, previous, state.leaveDisjunction())
-        }(ctx, previous, state.enterDisjunction())
+          inner(value)(ctx, previous, state.leaveDisjunction)
+        }(ctx, previous, state.enterDisjunction)
         .flatMap {
           case complete: RouteResult.Complete => EventStream.fromValue(complete)
           case RouteResult.Rejected =>
             other.tapply { value => (ctx, previous, state) =>
-              inner(value)(ctx, previous, state.leaveDisjunction())
-            }(ctx, previous, state.enterDisjunction())
+              inner(value)(ctx, previous, state.leaveDisjunction)
+            }(ctx, previous, state.enterDisjunction)
         }
     }
 
@@ -57,7 +57,7 @@ class Directive[L](
       self.tapply { value => (location, previous, state) =>
         if (f.isDefinedAt(value)) {
           val mapped = f(value)
-          inner(mapped)(location, previous, state.path(".collect").setValue(mapped))
+          inner(mapped)(location, previous, state.enterAndSet(mapped))
         } else {
           Util.rejected
         }
@@ -68,7 +68,7 @@ class Directive[L](
     Directive[L] { inner =>
       self.tapply { value => (location, previous, state) =>
         if (predicate(value)) {
-          inner(value)(location, previous, state.path(".filter"))
+          inner(value)(location, previous, state.enter)
         } else {
           Util.rejected
         }
@@ -80,13 +80,13 @@ class Directive[L](
       this.tapply {
         value => // TODO figure this out, when this is run, enter is not yet called
           (ctx, previous, state) =>
-            val next = state.unsetValue().path(".signal")
-            previous.getValue[Var[L]](next.path) match {
+            val next = state.unsetValue().enter
+            previous.getValue[Var[L]](next.path.key) match {
               case None =>
                 val newVar = Var(value)
                 inner(newVar.signal)(ctx, previous, next.setValue(newVar))
               case Some(existingVar) =>
-                existingVar.writer.onNext(value)
+                existingVar.set(value)
                 inner(existingVar.signal)(ctx, previous, next.setValue(existingVar))
             }
       }(ctx, previous, state)

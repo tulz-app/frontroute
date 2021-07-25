@@ -6,121 +6,161 @@ import scala.util.Try
 import scala.util.matching.Regex
 import scala.util.matching.Regex.Match
 import app.tulz.tuplez.Composition
+import io.frontroute.internal.PathMatchResult
 
-abstract class PathMatcher[T](val description: String) {
+abstract class PathMatcher[T] {
   self =>
 
-  def apply(path: List[String]): Either[(String, List[String]), (T, List[String])]
+  def apply(path: List[String]): PathMatchResult[T]
 
-  def map[V](f: T => V): PathMatcher[V] = new PathMatcher[V](self.description) {
-    override def apply(in: List[String]): Either[(String, List[String]), (V, List[String])] =
-      self(in).map { case (t, out) =>
-        f(t) -> out
+  def map[V](f: T => V): PathMatcher[V] =
+    (in: List[String]) => self(in).map(f)
+
+  @inline def mapTo[V](value: => V): PathMatcher[V] = self.map((_: T) => value)
+
+  def emap[V](f: T => Either[String, V]): PathMatcher[V] =
+    (in: List[String]) =>
+      self(in) match {
+        case PathMatchResult.NoMatch        => PathMatchResult.NoMatch
+        case PathMatchResult.Rejected(tail) => PathMatchResult.Rejected(tail)
+        case PathMatchResult.Match(value, tail) =>
+          f(value) match {
+            case Right(result) => PathMatchResult.Match(result, tail)
+            case Left(_)       => PathMatchResult.Rejected(tail)
+          }
       }
-  }
 
-  def flatMap[V](description: String)(f: T => PathMatcher[V]): PathMatcher[V] = new PathMatcher[V](description) {
-    override def apply(path: List[String]): Either[(String, List[String]), (V, List[String])] =
-      self(path).flatMap { case (t, out) =>
-        f(t).apply(out)
+  def tryParse[V](f: T => V): PathMatcher[V] =
+    (in: List[String]) =>
+      self(in) match {
+        case PathMatchResult.NoMatch        => PathMatchResult.NoMatch
+        case PathMatchResult.Rejected(tail) => PathMatchResult.Rejected(tail)
+        case PathMatchResult.Match(value, tail) =>
+          Try(f(value)) match {
+            case Success(result) => PathMatchResult.Match(result, tail)
+            case Failure(_)      => PathMatchResult.Rejected(tail)
+          }
       }
-  }
 
-  def filter(description: String)(f: T => Boolean): PathMatcher[T] = this.flatMap(description) { t =>
-    if (f(t)) {
-      PathMatcher.provide(t)
-    } else {
-      PathMatcher.fail("filter failed")
-    }
-  }
+  def flatMap[V](f: T => PathMatcher[V]): PathMatcher[V] =
+    (path: List[String]) =>
+      self(path) match {
+        case PathMatchResult.NoMatch            => PathMatchResult.NoMatch
+        case PathMatchResult.Rejected(tail)     => PathMatchResult.Rejected(tail)
+        case PathMatchResult.Match(value, tail) => f(value).apply(tail)
+      }
 
-  def collect[V](description: String)(f: PartialFunction[T, V]): PathMatcher[V] = this.flatMap(description) { t =>
-    if (f.isDefinedAt(t)) {
-      PathMatcher.provide(f(t))
-    } else {
-      PathMatcher.fail("collect failed")
-    }
-  }
+  def filter(f: T => Boolean): PathMatcher[T] =
+    (in: List[String]) =>
+      self(in) match {
+        case PathMatchResult.NoMatch        => PathMatchResult.NoMatch
+        case PathMatchResult.Rejected(tail) => PathMatchResult.Rejected(tail)
+        case PathMatchResult.Match(value, tail) =>
+          if (f(value)) {
+            PathMatchResult.Match(value, tail)
+          } else {
+            PathMatchResult.Rejected(tail)
+          }
+      }
 
-  def withFilter(description: String)(f: T => Boolean): PathMatcher[T] = this.filter(description)(f)
+  def collect[V](f: PartialFunction[T, V]): PathMatcher[V] =
+    (in: List[String]) =>
+      self(in) match {
+        case PathMatchResult.NoMatch        => PathMatchResult.NoMatch
+        case PathMatchResult.Rejected(tail) => PathMatchResult.Rejected(tail)
+        case PathMatchResult.Match(value, tail) =>
+          if (f.isDefinedAt(value)) {
+            PathMatchResult.Match(f(value), tail)
+          } else {
+            PathMatchResult.Rejected(tail)
+          }
+      }
+
+  def recover[V >: T](default: => V): PathMatcher[V] =
+    (in: List[String]) =>
+      self(in) match {
+        case PathMatchResult.NoMatch            => PathMatchResult.NoMatch
+        case PathMatchResult.Rejected(tail)     => PathMatchResult.Match(default, tail)
+        case PathMatchResult.Match(value, tail) => PathMatchResult.Match(value, tail)
+      }
+
+  @inline def withFilter(f: T => Boolean): PathMatcher[T] = this.filter(f)
 
   def /[V](other: PathMatcher[V])(implicit compose: Composition[T, V]): PathMatcher[compose.Composed] =
-    self.flatMap(s"${self.description}/${other.description}") { t1 =>
+    self.flatMap { t1 =>
       other.map { v =>
         compose.compose(t1, v)
       }
     }
 
-  def as[O](f: T => O): PathMatcher[O] = self.map(f)
+  @inline def as[O](f: T => O): PathMatcher[O] = self.map(f)
 
-  def void: PathMatcher[Unit] = this.map(_ => ())
+  @inline def void: PathMatcher[Unit] = this.mapTo(())
 
-  def unary_! : PathMatcher[Unit] = new PathMatcher[Unit](s"!${self.description}") {
-    override def apply(path: List[String]): Either[(String, List[String]), (Unit, List[String])] =
-      self(path) match {
-        case Right((_, rest)) => Left("not !matched" -> rest)
-        case Left((_, rest))  => Right(() -> rest)
-      }
-  }
-
-  override def toString: String = description
+  def unary_! : PathMatcher[Unit] = (path: List[String]) =>
+    self(path) match {
+      case PathMatchResult.NoMatch        => PathMatchResult.NoMatch
+      case PathMatchResult.Rejected(tail) => PathMatchResult.Match((), tail)
+      case PathMatchResult.Match(_, tail) => PathMatchResult.Rejected(tail)
+    }
 
 }
 
 object PathMatcher {
 
-  val unit: PathMatcher[Unit] = new PathMatcher[Unit]("unit") {
-    override def apply(path: List[String]): Either[(String, List[String]), (Unit, List[String])] =
-      Right(() -> path)
-  }
+  val unit: PathMatcher[Unit] = (path: List[String]) => PathMatchResult.Match((), path)
 
   def provide[V](v: V): PathMatcher[V] = unit.map(_ => v)
 
-  def fail[T](msg: String): PathMatcher[T] = new PathMatcher[T]("fail") {
-    override def apply(path: List[String]): Either[(String, List[String]), (T, List[String])] =
-      Left(msg -> path)
-  }
+  def fail[T]: PathMatcher[T] = (path: List[String]) => PathMatchResult.Rejected(path)
 
 }
 
 trait PathMatchers {
 
-  def segment: PathMatcher[String] = new PathMatcher[String]("segment") {
-
-    override def apply(path: List[String]): Either[(String, List[String]), (String, List[String])] =
-      path match {
-        case head :: tail => Right(head -> tail)
-        case Nil          => Left(s"unexpected end of path" -> Nil)
-      }
-
+  def segment: PathMatcher[String] = {
+    case head :: tail => PathMatchResult.Match(head, tail)
+    case Nil          => PathMatchResult.NoMatch
   }
 
-  def segment(s: String): PathMatcher0 = segment.filter(s)(_ == s).void
+  def segment(oneOf: Seq[String]): PathMatcher[String] = {
+    case head :: tail =>
+      if (oneOf.contains(head)) {
+        PathMatchResult.Match(head, tail)
+      } else {
+        PathMatchResult.Rejected(tail)
+      }
+    case Nil => PathMatchResult.NoMatch
+  }
+
+  def segment(oneOf: Set[String]): PathMatcher[String] = {
+    case head :: tail =>
+      if (oneOf.contains(head)) {
+        PathMatchResult.Match(head, tail)
+      } else {
+        PathMatchResult.Rejected(tail)
+      }
+    case Nil => PathMatchResult.NoMatch
+  }
+
+  def segment(s: String): PathMatcher0 = {
+    case head :: tail =>
+      if (head == s) {
+        PathMatchResult.Match((), tail)
+      } else {
+        PathMatchResult.Rejected(tail)
+      }
+    case Nil => PathMatchResult.NoMatch
+  }
 
   def regex(r: Regex): PathMatcher[Match] =
     segment
-      .map(s => r.findFirstMatchIn(s))
-      .collect(s"regex($r)") { case Some(m) => m }
+      .map { s => r.findFirstMatchIn(s) }
+      .collect { case Some(m) => m }
 
-  def fromTry[V](t: Try[V]): PathMatcher[V] = new PathMatcher[V]("fromTry") {
-    override def apply(path: List[String]): Either[(String, List[String]), (V, List[String])] =
-      t match {
-        case Success(value) =>
-          Right(value -> path)
-        case Failure(exception) =>
-          Left(exception.getMessage -> path)
-      }
-  }
+  def long: PathMatcher[Long] = segment.tryParse(_.toLong)
 
-  def tryParse[V](t: => V): PathMatcher[V] = fromTry(Try(t))
-
-  def long: PathMatcher[Long] = segment.flatMap("long") { matched =>
-    tryParse(matched.toLong)
-  }
-
-  def double: PathMatcher[Double] = segment.flatMap("double") { matched =>
-    tryParse(matched.toDouble)
-  }
+  def double: PathMatcher[Double] = segment.tryParse(_.toDouble)
 
   implicit def stringToSegment(s: String): PathMatcher[Unit]    = segment(s)
   implicit def regexToPathMatcher(r: Regex): PathMatcher[Match] = regex(r)

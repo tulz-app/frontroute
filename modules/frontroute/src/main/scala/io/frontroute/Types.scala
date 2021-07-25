@@ -1,6 +1,7 @@
 package io.frontroute
 
 import com.raquo.airstream.core.EventStream
+import io.frontroute.internal.RoutingState
 
 object Types {
 
