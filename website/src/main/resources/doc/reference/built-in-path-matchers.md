@@ -65,6 +65,19 @@ path("some-page") {
 }
 ```
 
+## `segment(oneOf: Seq[String]): PathMatcher[String]` and `segment(oneOf: Set[String]): PathMatcher[String]` 
+
+* Matches (and consumes) a single segment if it is contained in the provided `oneOf` collection.
+* Rejects if the segment doesn't match the provided string.
+* Provides the matched segment.
+* Rejects if there are no more unmatched segments left.
+
+```scala
+path(segment(Seq("some-page", "another-page"))) { matched =>   
+  ???
+}
+```
+
 ## `regex(e: Regex): PathMatcher[Regex.Match]`
 
 * Matches (and consumes) a single segment of the unmatched path if it matches 
@@ -90,17 +103,7 @@ path("\\w".r) { (m: Regex.Match) =>
 }
 ```
 
-## `fromTry[V](t: Try[V]): PathMatcher[V]`
-
-Doesn't consume any segments from the URI path.
-Matches or rejects depending on whether the `Try` is successful.
-
-## `tryParse[V](t: => V): PathMatcher[V]`
-
-Wraps the computation of `t` in a `Try` and passes it to `fromTry`.
-Effectively catching exceptions and rejecting if any.
-
-## `PathMatcher.unit: PathMatcher[Unit]`
+## `PathMatcher.unit: PathMatcher0`
 
 Always matches.
 
@@ -108,6 +111,6 @@ Always matches.
 
 Always matches, provides the specified value.
 
-## `PathMatcher.fail[T](msg: String): PathMatcher[T]`
+## `PathMatcher.fail[T]: PathMatcher[T]`
 
 Always rejects.

@@ -1,6 +1,7 @@
 package io.frontroute.site.components
 
 import com.raquo.laminar.api.L._
+import io.frontroute.LocationProvider
 import io.laminext.syntax.core._
 import io.laminext.syntax.tailwind._
 import io.laminext.syntax.markdown._
@@ -9,6 +10,7 @@ import io.frontroute.site.examples.CodeExample
 import io.laminext.tailwind.theme
 import io.frontroute.site.Styles
 import io.frontroute.site.TemplateVars
+import io.laminext.util.UrlString
 import org.scalajs.dom
 import org.scalajs.dom.ext._
 import org.scalajs.dom.html
@@ -37,46 +39,65 @@ object CodeExampleDisplay {
 
   private val collapseTransition = theme.Theme.current.transition.resize.customize(
     hidden = _ :+ "max-h-32",
+    showing = _ :+ "max-h-[400px]",
     enterFrom = _ :+ "max-h-32",
-    enterTo = _ => Seq.empty,
-    leaveFrom = _ => Seq.empty,
-    leaveTo = _ :+ "max-h-32",
-    onEnterFrom = el => {
-      el.style.maxHeight = null
-    },
-    onEnterTo = el => {
-      el.style.maxHeight = s"${el.scrollHeight}px"
-    },
-    onLeaveFrom = el => {
-      el.style.maxHeight = s"${el.scrollHeight}px"
-    },
-    onLeaveTo = el => {
-      el.style.maxHeight = null
-    },
-    onReset = (el, _) => {
-      el.style.maxHeight = null
-    }
+    enterTo = _ :+ "max-h-[400px]",
+    leaveFrom = _ :+ "max-h-[400px]",
+    leaveTo = _ :+ "max-h-32"
   )
 
   def apply(example: CodeExample): Element = {
-    val sourceCollapsed = storedBoolean(example.id, initial = false)
-    val dimContext      = storedBoolean("dim-context", initial = false)
-    val hasContext      = example.code.source.contains("/* <focus> */")
+    val sourceCollapsed  = storedBoolean(example.id, initial = true)
+    val dimContext       = storedBoolean("dim-context", initial = true)
+    val hasContext       = example.code.source.contains("/* <focus> */")
+    val locations        = new EventBus[String]
+    val currentLocation  = locations.events.toSignal("")
+    val locationProvider = LocationProvider.custom(locations.events)
+
+    val urlInput = input(
+      value <-- locations,
+      tpe := "url",
+      placeholder := "https://site.nowhere/path"
+    )
+
+    val amendedA = a.amend[AmAny](
+      thisEvents(onClick.preventDefault.stopPropagation)
+        .withCurrentValueOf(currentLocation)
+        .map { case (e, current) =>
+          val href            = e.target.getAttribute("href")
+          val anchorLocation  = UrlString.parse(href)
+          val currentLocation = UrlString.parse(current)
+          if (!href.contains("://")) {
+            currentLocation.search = anchorLocation.search
+            if (href.startsWith("/")) {
+              currentLocation.pathname = anchorLocation.pathname
+            } else {
+              currentLocation.pathname = currentLocation.pathname.reverse.dropWhile(_ != '/').reverse + href
+            }
+            val search = currentLocation.search
+            s"${currentLocation.protocol}//${currentLocation.hostname}${currentLocation.pathname}${search}"
+          } else {
+            anchorLocation.href
+          }
+        } --> locations
+    )
 
     val codeNode = (dim: Boolean) => {
       val theCode = pre(
         cls := "w-full text-sm",
-        fixIndentation(example.code.source)
+        fixIndentation(example.code.source.replace("import com.raquo.laminar.api.L.{a => _, _}", "import com.raquo.laminar.api.L._"))
       )
       div(
         theCode,
         onMountCallback { ctx =>
-          Highlight.highlightBlock(ctx.thisNode.ref.childNodes.head)
+          Highlight.highlightElement(ctx.thisNode.ref.childNodes.head)
+          hideFocusMarkers(ctx.thisNode.ref.childNodes.head.asInstanceOf[html.Element])
           if (hasContext) {
-            hideFocusMarkers(ctx.thisNode.ref.childNodes.head.asInstanceOf[html.Element])
-            val _ = js.timers.setTimeout(0) {
-              val updatedNode = setOpacityRecursively(theCode.ref, 0, dim)
-              val _           = ctx.thisNode.ref.replaceChild(updatedNode, ctx.thisNode.ref.childNodes.head)
+            js.timers.setTimeout(100) {
+              val _ = js.timers.setTimeout(0) {
+                val updatedNode = setOpacityRecursively(theCode.ref, 0, dim)
+                val _           = ctx.thisNode.ref.replaceChild(updatedNode, ctx.thisNode.ref.childNodes.head)
+              }
             }
           }
         }
@@ -96,7 +117,7 @@ object CodeExampleDisplay {
         unsafeMarkdown := TemplateVars(example.description),
         onMountCallback { ctx =>
           ctx.thisNode.ref.querySelectorAll("pre > code").foreach { codeElement =>
-            Highlight.highlightBlock(codeElement)
+            Highlight.highlightElement(codeElement)
           }
         }
       ),
@@ -169,11 +190,26 @@ object CodeExampleDisplay {
         ),
         div(
           cls := "border-4 border-dashed border-blue-400 bg-blue-300 text-blue-900 rounded-lg -m-2 p-4",
+          div(
+            cls := "-mx-4 -mt-4 p-4 bg-blue-500 flex space-x-1",
+            urlInput.amend(
+              cls := "flex-1",
+              thisEvents(onKeyDown.filter(_.key == "Enter").preventDefault.stopPropagation).sample(urlInput.value) --> locations
+            ),
+            button(
+              cls := "btn-md-outline-white",
+              "Go",
+              thisEvents(onClick).sample(urlInput.value) --> locations
+            )
+          ),
           onMountUnmountCallbackWithState(
-            mount = ctx => render(ctx.thisNode.ref, example.code.value()),
+            mount = ctx => render(ctx.thisNode.ref, example.code.value(locationProvider, amendedA)),
             unmount = (_, root: Option[RootNode]) => root.foreach(_.unmount())
           )
-        )
+        ),
+        onMountCallback { _ =>
+          locations.emit("https://site.nowhere/")
+        }
       )
     )
   }

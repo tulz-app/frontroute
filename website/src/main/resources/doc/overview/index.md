@@ -147,5 +147,3 @@ For other matchers see the [reference](/reference/path-matchers).
 
 It is highly recommended getting familiar with the concept of the [directives](/overview/directive).
 
-* [Custom Directives](/overview/custom-directives)
-

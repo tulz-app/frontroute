@@ -9,6 +9,7 @@
 * API new: new path matchers
   * `segment(oneOf: Seq[String])`
   * `segment(oneOf: Set[String])`
+* API new: implicit conversion from `Set[String]` and `Seq[String]` to `PathMatcher[String]`
 * API new: `testPath` and `testPathPrefix` directives (same as `path` and `pathPrefix` but preserving the unmatched path)
 
 ### 0.13.3

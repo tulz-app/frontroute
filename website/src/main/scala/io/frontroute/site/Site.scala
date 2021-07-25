@@ -2,14 +2,16 @@ package io.frontroute.site
 
 //import io.frontroute.site.examples.CodeExample
 //import io.frontroute.site.pages.CodeExamplePage
+import io.frontroute.site.pages.CodeExamplePage
 import io.frontroute.site.pages.DocumentationPage
 import com.yurique.embedded.FileAsString
+import io.frontroute.site.examples.CodeExample
 
 object Site {
 
-//  private def examplePage(
-//    example: CodeExample
-//  ): Page = Page(example.id, example.title, CodeExamplePage(example))
+  private def examplePage(
+    example: CodeExample
+  ): Page = Page(example.id, example.title, CodeExamplePage(example))
 
   private def docPage(
     path: String,
@@ -53,17 +55,31 @@ object Site {
         docPage("concat", "concat", FileAsString("/doc/reference/concat.md"))
       ),
       "Directives" -> Seq(
-        docPage("directives", "Built-in directive", FileAsString("/doc/reference/built-in-directives.md")),
+        docPage("directives", "Built-in directives", FileAsString("/doc/reference/built-in-directives.md")),
         docPage("signal-directive", ".signal directive", FileAsString("/doc/reference/signal-directive.md")),
         docPage("injecting-external-signal", "Injecting external signal", FileAsString("/doc/reference/injecting-external-signal.md")),
         docPage("conjunction", "conjunction (&)", FileAsString("/doc/reference/conjunction.md")),
         docPage("disjunction", "disjunction (|)", FileAsString("/doc/reference/disjunction.md"))
       ),
       "Path Matchers" -> Seq(
-        docPage("path-matchers", "Built-in path matchers", FileAsString("/doc/reference/built-in-path-matchers.md"))
+        docPage("path-matchers", "Built-in path matchers", FileAsString("/doc/reference/built-in-path-matchers.md")),
+        docPage("path-matcher-combinators", "Path matcher combinators", FileAsString("/doc/reference/path-matcher-combinators.md"))
       ),
       "Other Classes" -> Seq(
         docPage("route-result", "Route Result", FileAsString("/doc/reference/route-result.md"))
+      )
+    ),
+    SiteModule(
+      path = "examples",
+      index = docPage("", "Examples", FileAsString("/doc/examples/index.md")),
+      "" -> Seq(
+        examplePage(io.frontroute.site.examples.ex_basic.BasicRoutingExample),
+        examplePage(io.frontroute.site.examples.ex_path_matching.PathMatchingExample),
+        examplePage(io.frontroute.site.examples.ex_params.ParamsExample),
+        examplePage(io.frontroute.site.examples.ex_custom_directives.CustomDirectivesExample),
+        examplePage(io.frontroute.site.examples.ex_signal.SignalExample),
+        examplePage(io.frontroute.site.examples.ex_auth.AuthExample),
+        examplePage(io.frontroute.site.examples.ex_tabs.TabsExample)
       )
     )
   )

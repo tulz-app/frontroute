@@ -28,57 +28,7 @@ module.exports = (api) => {
             '"Courier New"',
             'monospace',
           ],
-        },
-        spacing: {
-          '96': '24rem',
-          '112': '28rem',
-          '128': '32rem',
-          '144': '36rem',
-          '1000': '250rem',
-          '4000': '1000rem'
-        },
-        minHeight: {
-          '96': '24rem',
-          '112': '28rem',
-          '128': '32rem',
-          '144': '36rem',
-        },
-        animation: {
-          'spin-slow': 'spin 3s linear infinite',
-          'wiggle': 'wiggle .5s ease-in-out infinite'
-        },
-        keyframes: {
-          'wiggle': {
-            '0%, 100%': {
-              transform: 'translateX(0px)',
-              'timing-function': 'ease-in',
-            },
-            '37%': {
-              transform: 'translateX(5px)',
-              'timing-function': 'ease-out',
-            },
-            '55%': {
-              transform: 'translateX(-5px)',
-              'timing-function': 'ease-in',
-            },
-            '73%': {
-              transform: 'translateX(4px)',
-              'timing-function': 'ease-out',
-            },
-            '82%': {
-              transform: 'translateX(-4px)',
-              'timing-function': 'ease-in',
-            },
-            '91%': {
-              transform: 'translateX(2px)',
-              'timing-function': 'ease-out',
-            },
-            '96%': {
-              transform: 'translateX(-2px)',
-              'timing-function': 'ease-in',
-            },
-          },
-        },
+        }
       },
     },
     variants: {
@@ -97,7 +47,8 @@ module.exports = (api) => {
     },
     corePlugins: {},
     plugins: [
-      require('@tailwindcss/typography')
+      require('@tailwindcss/typography'),
+      require('@tailwindcss/forms'),
     ],
   }
 }

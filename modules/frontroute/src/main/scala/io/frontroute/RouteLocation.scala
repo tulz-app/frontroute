@@ -31,7 +31,7 @@ final case class RouteLocation(
 
 object RouteLocation {
 
-  def apply(location: raw.Location, state: js.Any): RouteLocation =
+  def apply(location: raw.Location, state: js.UndefOr[js.Any]): RouteLocation =
     new RouteLocation(
       hostname = location.hostname,
       port = location.port,

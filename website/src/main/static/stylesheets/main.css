@@ -1,7 +1,32 @@
 @import './tailwind.css';
 @import './fonts.css';
 @import './markdown.css';
+@import './buttons.css';
 
-body {
-    @apply font-serif;
+
+@layer base {
+
+    body {
+        @apply font-serif;
+    }
+
+    [type='text'],
+    [type='email'],
+    [type='url'],
+    [type='password'],
+    [type='number'],
+    [type='date'],
+    [type='datetime-local'],
+    [type='month'],
+    [type='search'],
+    [type='tel'],
+    [type='time'],
+    [type='week'],
+    [multiple],
+    textarea,
+    select {
+        @apply shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-1 border-blue-300 rounded-md bg-blue-50 text-blue-700 placeholder-blue-400 font-mono;
+    }
+
 }
+

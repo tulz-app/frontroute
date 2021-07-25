@@ -17,16 +17,12 @@ const devServerPort = 30098;
 const devServer = _.mergeWith(
   {
     hot: true,
-    injectHot: true,
-    injectClient: true,
-    transportMode: 'ws',
     port: devServerPort,
     host: devServerHost,
     historyApiFallback: {
       index: ''
     }
-  },
-  // require('./devserver.config.js')
+  }
 )
 
 
