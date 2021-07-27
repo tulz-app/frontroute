@@ -1,3 +1,4 @@
+import org.scalajs.linker.interface.ESVersion
 inThisBuild(
   List(
     organization := "io.frontroute",
@@ -67,7 +68,7 @@ lazy val website = project
     githubWorkflowTargetTags := Seq.empty,
     publish / skip := true,
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
-    scalaJSLinkerConfig ~= { _.withESFeatures(_.withUseECMAScript2015(false)) },
+    scalaJSLinkerConfig ~= { _.withESFeatures(_.withESVersion(ESVersion.ES5_1)) },
     Compile / scalaJSLinkerConfig ~= { _.withSourceMap(false) },
     scalaJSUseMainModuleInitializer := true,
     //    scalaJSLinkerConfig ~= (_.withModuleSplitStyle(org.scalajs.linker.interface.ModuleSplitStyle.FewestModules)),

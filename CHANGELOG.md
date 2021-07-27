@@ -3,6 +3,7 @@
 ### 0.14.0
 
 * Internal implementation refactoring.
+* Scala.js 1.6.0+
 * API breaking: `pathMatcher` combinators (`.map`, `.filter`, etc) no longer accept a `description` parameter
 * API new: `.recover`, `.emap` and `.tryParse` for `PathMatchers`
 * API breaking: `fromTry` path matcher has been removed
