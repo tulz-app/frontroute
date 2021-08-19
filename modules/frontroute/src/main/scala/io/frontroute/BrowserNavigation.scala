@@ -6,7 +6,6 @@ import io.frontroute.internal.FrontrouteHistoryState
 import io.frontroute.internal.HistoryState
 import io.frontroute.internal.HistoryStateScrollPosition
 import org.scalajs.dom
-
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic
 

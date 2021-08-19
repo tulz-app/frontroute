@@ -5,7 +5,6 @@ import com.raquo.airstream.core.Signal
 import io.frontroute.internal.PathMatchResult
 import io.frontroute.internal.Util
 import org.scalajs.dom
-
 import scala.scalajs.js
 
 trait Directives extends DirectiveApplyConverters {

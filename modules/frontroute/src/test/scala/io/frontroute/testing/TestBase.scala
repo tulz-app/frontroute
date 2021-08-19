@@ -7,7 +7,6 @@ import com.raquo.airstream.state.Var
 import io.frontroute.Route
 import io.frontroute.runRoute
 import utest.TestSuite
-
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import scala.concurrent.Promise

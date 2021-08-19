@@ -90,7 +90,7 @@ object AuthExample
           ),
           div(
             input(
-              tpe := "text",
+              tpe         := "text",
               placeholder := "Input a user ID and hit enter...",
               onKeyDown.filter(_.key == "Enter").stopPropagation.mapToValue.map { userId =>
                 if (userId.isEmpty) {
@@ -108,12 +108,12 @@ object AuthExample
           div(
             cls := "flex flex-col",
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/",
               "➜ /"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/private/profile",
               "➜ /private/profile"
             )

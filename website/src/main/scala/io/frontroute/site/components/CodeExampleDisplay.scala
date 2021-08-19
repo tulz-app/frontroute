@@ -14,7 +14,6 @@ import io.laminext.util.UrlString
 import org.scalajs.dom
 import org.scalajs.dom.ext._
 import org.scalajs.dom.html
-
 import scala.scalajs.js
 
 object CodeExampleDisplay {
@@ -56,7 +55,7 @@ object CodeExampleDisplay {
 
     val urlInput = input(
       value <-- locations,
-      tpe := "url",
+      tpe         := "url",
       placeholder := "https://site.nowhere/path"
     )
 
@@ -113,7 +112,7 @@ object CodeExampleDisplay {
         )
       ),
       div(
-        cls := "prose max-w-none",
+        cls            := "prose max-w-none",
         unsafeMarkdown := TemplateVars(example.description),
         onMountCallback { ctx =>
           ctx.thisNode.ref.querySelectorAll("pre > code").foreach { codeElement =>

@@ -1,7 +1,6 @@
 package io.frontroute
 
 import org.scalajs.dom.raw
-
 import scala.scalajs.js.URIUtils.encodeURIComponent
 import scala.scalajs.js.URIUtils.decodeURIComponent
 

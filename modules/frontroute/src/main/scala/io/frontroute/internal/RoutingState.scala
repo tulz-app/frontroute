@@ -1,7 +1,6 @@
 package io.frontroute.internal
 
 import com.raquo.airstream.state.Var
-
 import scala.scalajs.js
 
 private[frontroute] object RoutingState {

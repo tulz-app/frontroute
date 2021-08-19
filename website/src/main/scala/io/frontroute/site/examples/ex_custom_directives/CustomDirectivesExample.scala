@@ -60,22 +60,22 @@ object CustomDirectivesExample
           div(
             cls := "flex flex-col",
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/",
               "➜ /"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/movie?id=1",
               "➜ /movie?id=1"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/movie?id=2",
               "➜ /movie?id=2"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/movie?id=not-long",
               "➜ /movie?id=not-long"
             )

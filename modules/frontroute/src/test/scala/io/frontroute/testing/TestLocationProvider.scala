@@ -5,7 +5,6 @@ import com.raquo.airstream.eventbus.EventBus
 import io.frontroute.LocationProvider
 import io.frontroute.RouteLocation
 import io.frontroute.internal.HistoryState
-
 import scala.scalajs.js
 
 class TestLocationProvider extends LocationProvider {

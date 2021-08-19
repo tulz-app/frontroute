@@ -3,7 +3,6 @@ package io.frontroute
 import io.frontroute.internal.PathMatchResult
 import io.frontroute.testing._
 import utest._
-
 import scala.scalajs.js
 import scala.scalajs.js.JSON
 
