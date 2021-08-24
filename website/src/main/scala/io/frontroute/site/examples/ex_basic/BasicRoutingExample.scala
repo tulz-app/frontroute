@@ -61,27 +61,27 @@ object BasicRoutingExample
           div(
             cls := "flex flex-col",
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/",
               "➜ /"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/new-path",
               "➜ /new-path"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/legacy-path",
               "➜ /legacy-path"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/some-section/some-page",
               "➜ /some-section/some-page"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/some-section/another-page",
               "➜ /some-section/another-page"
             )

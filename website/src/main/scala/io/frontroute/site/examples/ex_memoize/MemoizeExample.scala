@@ -6,7 +6,6 @@ import io.frontroute.LocationProvider
 import io.laminext.AmAny
 import io.laminext.AmendedHtmlTag
 import org.scalajs.dom
-
 import scala.scalajs.js
 
 object MemoizeExample
@@ -76,22 +75,22 @@ object MemoizeExample
           div(
             cls := "flex flex-col",
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/",
               "➜ /"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/memoize/dog",
               "➜ /memoize/dog"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/memoize/cat",
               "➜ /memoize/cat"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/memoize/lizard",
               "➜ /memoize/lizard"
             )

@@ -3,7 +3,6 @@ package io.frontroute.internal
 import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLAnchorElement
 import org.scalajs.dom.raw.Location
-
 import scala.scalajs.js
 
 object UrlString {

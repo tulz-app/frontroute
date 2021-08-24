@@ -3,7 +3,6 @@ package io.frontroute
 import io.frontroute.internal.UrlString
 import org.scalajs.dom
 import org.scalajs.dom.raw._
-
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal
 

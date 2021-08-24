@@ -55,42 +55,42 @@ object PathMatchingExample
           div(
             cls := "flex flex-col",
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/",
               "➜ /"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/user/1",
               "➜ /user/1"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/user/2",
               "➜ /user/2"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/user/not-long",
               "➜ /user/not-long"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/page-1",
               "➜ /page-1"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/page-2",
               "➜ /page-2"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/page-3",
               "➜ /page-3"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/page-4",
               "➜ /page-4"
             )

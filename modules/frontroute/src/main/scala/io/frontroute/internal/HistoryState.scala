@@ -1,7 +1,6 @@
 package io.frontroute.internal
 
 import org.scalajs.dom
-
 import scala.scalajs.js
 
 private[frontroute] class HistoryStateScrollPosition(

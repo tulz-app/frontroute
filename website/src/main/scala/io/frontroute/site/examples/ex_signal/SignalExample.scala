@@ -64,7 +64,7 @@ object SignalExample
           ),
           div(
             input(
-              tpe := "text",
+              tpe         := "text",
               placeholder := "Input a value and hit enter...",
               onKeyDown.filter(_.key == "Enter").stopPropagation.mapToValue --> mySignal
             )
@@ -76,12 +76,12 @@ object SignalExample
           div(
             cls := "flex flex-col",
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/",
               "➜ /"
             ),
             a(
-              cls := "text-blue-300 hover:text-blue-100",
+              cls  := "text-blue-300 hover:text-blue-100",
               href := "/some-page",
               "➜ /some-page"
             )

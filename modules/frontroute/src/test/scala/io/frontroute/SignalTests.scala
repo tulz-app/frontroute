@@ -3,7 +3,6 @@ package io.frontroute
 import com.raquo.airstream.core.Signal
 import io.frontroute.testing._
 import utest._
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._

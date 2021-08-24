@@ -2,7 +2,6 @@ package io.frontroute
 
 import io.frontroute.testing._
 import utest._
-
 import scala.scalajs.js
 import scala.scalajs.js.JSON
 

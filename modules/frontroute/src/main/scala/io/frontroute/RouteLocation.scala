@@ -2,7 +2,6 @@ package io.frontroute
 
 import io.frontroute.internal.HistoryState
 import org.scalajs.dom.raw
-
 import scala.scalajs.js
 
 final case class RouteLocation(
