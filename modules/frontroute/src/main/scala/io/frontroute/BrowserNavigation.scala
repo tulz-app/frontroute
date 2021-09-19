@@ -57,7 +57,7 @@ object BrowserNavigation {
             title = currentState.internal.fold("")(_.title),
             saveCurrentScrollPosition = true
           )
-        case None =>
+        case None               =>
           createHistoryState(
             user = js.undefined,
             title = "",
@@ -81,7 +81,7 @@ object BrowserNavigation {
           title = title,
           url = url
         )
-      case None =>
+      case None      =>
         dom.window.history.pushState(
           statedata = state,
           title = title
@@ -110,7 +110,7 @@ object BrowserNavigation {
           title = title,
           url = url
         )
-      case None =>
+      case None      =>
         dom.window.history.replaceState(
           statedata = state,
           title = title
@@ -133,7 +133,7 @@ object BrowserNavigation {
           internal = newInternal,
           user = currentState.user
         )
-      case None =>
+      case None               =>
         new HistoryState(
           internal = new FrontrouteHistoryState(title = title, scroll = js.undefined),
           user = js.undefined
@@ -155,7 +155,7 @@ object BrowserNavigation {
   def emitPopStateEvent(state: js.Any = js.undefined): Unit = {
     val event = js.Dynamic.newInstance(js.Dynamic.global.Event)("popstate").asInstanceOf[Dynamic]
     event.state = state
-    val _ = dom.window.dispatchEvent(event.asInstanceOf[dom.PopStateEvent])
+    val _     = dom.window.dispatchEvent(event.asInstanceOf[dom.PopStateEvent])
   }
 
   def restoreScroll(): Unit = {

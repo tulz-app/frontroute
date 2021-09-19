@@ -41,7 +41,7 @@ abstract class TestBase extends TestSuite {
     val locationProvider = new TestLocationProvider()
     val probe            = new Probe[String]
 
-    val sub = runRoute(route(probe), locationProvider)(testOwner)
+    val sub    = runRoute(route(probe), locationProvider)(testOwner)
     val future = delayedFuture(wait).flatMap { _ =>
       try {
         checks(probe)
@@ -115,14 +115,14 @@ abstract class TestBase extends TestSuite {
             val _ = setTimeout(interval) {
               doNext()
             }
-          case _ =>
+          case _         =>
         }
 
         val _ = setTimeout(interval) {
           doNext()
         }
         $var.signal
-      case _ =>
+      case _            =>
         throw new RuntimeException("generate signals - empty")
     }
   }

@@ -43,7 +43,7 @@ class Directive[L](
         }(location, previous, state.enterDisjunction)
         .flatMap {
           case complete: RouteResult.Complete => EventStream.fromValue(complete)
-          case RouteResult.Rejected =>
+          case RouteResult.Rejected           =>
             other.tapply { value => (location, previous, state) =>
               inner(value)(location, previous, state.leaveDisjunction)
             }(location, previous, state.enterDisjunction)
@@ -82,7 +82,7 @@ class Directive[L](
           (location, previous, state) =>
             val next = state.unsetValue().enter
             previous.getValue[Var[L]](next.path.key) match {
-              case None =>
+              case None              =>
                 val newVar = Var(value)
                 inner(newVar.signal)(location, previous, next.setValue(newVar))
               case Some(existingVar) =>

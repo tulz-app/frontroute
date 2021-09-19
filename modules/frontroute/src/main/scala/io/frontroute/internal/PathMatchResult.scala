@@ -15,10 +15,10 @@ object PathMatchResult {
   case object NoMatch extends PathMatchResult[Nothing]
   case class Rejected[T](
     tail: List[String]
-  ) extends PathMatchResult[T]
+  )                   extends PathMatchResult[T]
   case class Match[T](
     value: T,
     tail: List[String]
-  ) extends PathMatchResult[T]
+  )                   extends PathMatchResult[T]
 
 }

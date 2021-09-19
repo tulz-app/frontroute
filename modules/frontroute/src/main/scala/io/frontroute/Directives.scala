@@ -49,7 +49,7 @@ trait Directives extends DirectiveApplyConverters {
         state.async.get((state.path.key, state.data)) match {
           case Some(value) =>
             inner(value.asInstanceOf[T])(location, previous, state.enterAndSet(value.asInstanceOf[T]))
-          case _ =>
+          case _           =>
             var retrieved = 0
             retrieve()
               .filter { _ =>
@@ -185,7 +185,7 @@ trait Directives extends DirectiveApplyConverters {
   def concat(routes: Route*): Route = (location, previous, state) => {
     def findFirst(rs: List[(Route, Int)]): EventStream[RouteResult] =
       rs match {
-        case Nil => Util.rejected
+        case Nil                    => Util.rejected
         case (route, index) :: tail =>
           route(location, previous, state.enterConcat(index)).flatMap {
             case complete: RouteResult.Complete => EventStream.fromValue(complete)

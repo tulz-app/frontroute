@@ -47,7 +47,7 @@ object PathMatcherTests extends TestBase {
         case PathMatchResult.Match(m, tail) =>
           m.group(0) ==> "a"
           tail ==> List("b")
-        case other =>
+        case other                          =>
           throw new java.lang.AssertionError(s"not a match: $other")
       }
     }

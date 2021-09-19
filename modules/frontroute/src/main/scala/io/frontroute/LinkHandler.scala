@@ -16,10 +16,10 @@ object LinkHandler {
 
   private def clickListener(defaultTitle: String): js.Function1[Event, Unit] = event => {
     findParent("A", event.target.asInstanceOf[dom.Node]).foreach { aParent =>
-      val anchor = aParent.asInstanceOf[HTMLAnchorElement]
-      val rel    = anchor.rel
-      val href   = anchor.href
-      val title  = anchor.dataset.get("title")
+      val anchor     = aParent.asInstanceOf[HTMLAnchorElement]
+      val rel        = anchor.rel
+      val href       = anchor.href
+      val title      = anchor.dataset.get("title")
       val sameOrigin =
         href.startsWith("/") ||
           !href.startsWith("http://") && !href.startsWith("https://") ||

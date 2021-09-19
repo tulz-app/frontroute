@@ -15,7 +15,7 @@ object LocationUtils {
           val decodedKey   = decodeURIComponent(key)
           val decodedValue = decodeURIComponent(value)
           result(decodedKey) = result.getOrElse(decodedKey, Seq.empty) :+ decodedValue
-        case _ =>
+        case _                 =>
       }
     }
     result.toMap

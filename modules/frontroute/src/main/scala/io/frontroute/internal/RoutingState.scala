@@ -70,7 +70,7 @@ final private[frontroute] class RoutingState private (
           path = newPath,
           data = data.removedAll(dropped).updated(newPath.key, value)
         )
-      case None =>
+      case None                     =>
         this
     }
   }
@@ -120,7 +120,7 @@ final private[frontroute] class RoutingState private (
       .map {
         case (key, value: Var[_]) =>
           s"  $key -> $value (${value.signal.now()})"
-        case (key, value) =>
+        case (key, value)         =>
           s"  $key -> $value"
       }
       .mkString("\n")}"""
@@ -131,7 +131,7 @@ final private[frontroute] class RoutingState private (
       path == that.path &&
         data == that.data &&
         persistent == that.persistent
-    case _ => false
+    case _                  => false
   }
 
   override def hashCode(): Int = {

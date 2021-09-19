@@ -22,7 +22,7 @@ trait RunRoute {
             } else {
               Option.empty
             }
-          case RouteResult.Rejected =>
+          case RouteResult.Rejected               =>
             Option.empty
         }
       }

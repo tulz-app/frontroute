@@ -167,9 +167,9 @@ object SignalTests extends TestBase {
                        Some("value-2-3")
                      )
                  }
-          _ = probe.toList ==> List(
-                "prefix1/prefix2"
-              )
+          _  = probe.toList ==> List(
+                 "prefix1/prefix2"
+               )
         } yield ()
       }
     }

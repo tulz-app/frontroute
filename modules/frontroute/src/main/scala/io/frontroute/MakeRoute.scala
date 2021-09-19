@@ -7,7 +7,7 @@ trait MakeRoute {
 
   def makeRoute[A](make: (A => Route) => Route): (Signal[Option[A]], Route) = {
     val routeVar = Var[Option[A]](Option.empty)
-    val route = make(a =>
+    val route    = make(a =>
       complete {
         routeVar.writer.onNext(Some(a))
       }

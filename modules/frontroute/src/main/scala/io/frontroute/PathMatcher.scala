@@ -21,8 +21,8 @@ abstract class PathMatcher[T] {
   def emap[V](f: T => Either[String, V]): PathMatcher[V] =
     (in: List[String]) =>
       self(in) match {
-        case PathMatchResult.NoMatch        => PathMatchResult.NoMatch
-        case PathMatchResult.Rejected(tail) => PathMatchResult.Rejected(tail)
+        case PathMatchResult.NoMatch            => PathMatchResult.NoMatch
+        case PathMatchResult.Rejected(tail)     => PathMatchResult.Rejected(tail)
         case PathMatchResult.Match(value, tail) =>
           f(value) match {
             case Right(result) => PathMatchResult.Match(result, tail)
@@ -33,8 +33,8 @@ abstract class PathMatcher[T] {
   def tryParse[V](f: T => V): PathMatcher[V] =
     (in: List[String]) =>
       self(in) match {
-        case PathMatchResult.NoMatch        => PathMatchResult.NoMatch
-        case PathMatchResult.Rejected(tail) => PathMatchResult.Rejected(tail)
+        case PathMatchResult.NoMatch            => PathMatchResult.NoMatch
+        case PathMatchResult.Rejected(tail)     => PathMatchResult.Rejected(tail)
         case PathMatchResult.Match(value, tail) =>
           Try(f(value)) match {
             case Success(result) => PathMatchResult.Match(result, tail)
@@ -53,8 +53,8 @@ abstract class PathMatcher[T] {
   def filter(f: T => Boolean): PathMatcher[T] =
     (in: List[String]) =>
       self(in) match {
-        case PathMatchResult.NoMatch        => PathMatchResult.NoMatch
-        case PathMatchResult.Rejected(tail) => PathMatchResult.Rejected(tail)
+        case PathMatchResult.NoMatch            => PathMatchResult.NoMatch
+        case PathMatchResult.Rejected(tail)     => PathMatchResult.Rejected(tail)
         case PathMatchResult.Match(value, tail) =>
           if (f(value)) {
             PathMatchResult.Match(value, tail)
@@ -66,8 +66,8 @@ abstract class PathMatcher[T] {
   def collect[V](f: PartialFunction[T, V]): PathMatcher[V] =
     (in: List[String]) =>
       self(in) match {
-        case PathMatchResult.NoMatch        => PathMatchResult.NoMatch
-        case PathMatchResult.Rejected(tail) => PathMatchResult.Rejected(tail)
+        case PathMatchResult.NoMatch            => PathMatchResult.NoMatch
+        case PathMatchResult.Rejected(tail)     => PathMatchResult.Rejected(tail)
         case PathMatchResult.Match(value, tail) =>
           if (f.isDefinedAt(value)) {
             PathMatchResult.Match(f(value), tail)
@@ -130,7 +130,7 @@ trait PathMatchers {
       } else {
         PathMatchResult.Rejected(tail)
       }
-    case Nil => PathMatchResult.NoMatch
+    case Nil          => PathMatchResult.NoMatch
   }
 
   def segment(oneOf: Set[String]): PathMatcher[String] = {
@@ -140,7 +140,7 @@ trait PathMatchers {
       } else {
         PathMatchResult.Rejected(tail)
       }
-    case Nil => PathMatchResult.NoMatch
+    case Nil          => PathMatchResult.NoMatch
   }
 
   def segment(s: String): PathMatcher0 = {
@@ -150,7 +150,7 @@ trait PathMatchers {
       } else {
         PathMatchResult.Rejected(tail)
       }
-    case Nil => PathMatchResult.NoMatch
+    case Nil          => PathMatchResult.NoMatch
   }
 
   def regex(r: Regex): PathMatcher[Match] =
@@ -158,7 +158,7 @@ trait PathMatchers {
       .map { s => r.findFirstMatchIn(s) }
       .collect { case Some(m) => m }
 
-  def long: PathMatcher[Long] = segment.tryParse(_.toLong)
+  def long: PathMatcher[Long]             = segment.tryParse(_.toLong)
 
   def double: PathMatcher[Double] = segment.tryParse(_.toDouble)
 
