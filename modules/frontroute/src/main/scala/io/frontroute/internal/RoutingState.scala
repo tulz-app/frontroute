@@ -115,7 +115,7 @@ final private[frontroute] class RoutingState private (
     this.copy(persistent = persistent.removed(path.key))
   }
 
-  override def toString: String = {
+  override def toString: String               = {
     s"""matched: $path\n${data
       .map {
         case (key, value: Var[_]) =>
@@ -126,7 +126,7 @@ final private[frontroute] class RoutingState private (
       .mkString("\n")}"""
   }
 
-  override def equals(other: Any): Boolean = other match {
+  override def equals(other: Any): Boolean    = other match {
     case that: RoutingState =>
       path == that.path &&
         data == that.data &&
@@ -134,7 +134,7 @@ final private[frontroute] class RoutingState private (
     case _                  => false
   }
 
-  override def hashCode(): Int = {
+  override def hashCode(): Int                = {
     val state = Seq(path, data, persistent)
     state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }

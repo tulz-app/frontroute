@@ -60,7 +60,7 @@ lazy val frontroute =
       }
     )
 
-lazy val website = project
+lazy val website    = project
   .in(file("website"))
   .enablePlugins(ScalaJSPlugin)
   .enablePlugins(EmbeddedFilesPlugin)
@@ -87,13 +87,13 @@ lazy val website = project
     frontroute
   )
 
-lazy val noPublish = Seq(
+lazy val noPublish  = Seq(
   publishLocal / skip := true,
   publish / skip      := true,
   publishTo           := Some(Resolver.file("Unused transient repository", file("target/unusedrepo")))
 )
 
-lazy val root = project
+lazy val root       = project
   .in(file("."))
   .settings(noPublish)
   .settings(

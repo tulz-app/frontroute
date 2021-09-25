@@ -11,7 +11,7 @@ trait Directives extends DirectiveApplyConverters {
 
   def reject: Route = (_, _, _) => Util.rejected
 
-  private[frontroute] def extractContext: Directive[RouteLocation] =
+  private[frontroute] def extractContext: Directive[RouteLocation]        =
     Directive[RouteLocation](inner => (location, previous, state) => inner(location)(location, previous, state))
 
   private[frontroute] def extract[T](f: RouteLocation => T): Directive[T] =
@@ -182,7 +182,7 @@ trait Directives extends DirectiveApplyConverters {
       subRoute(location, previous, state)
     }
 
-  def concat(routes: Route*): Route = (location, previous, state) => {
+  def concat(routes: Route*): Route                       = (location, previous, state) => {
     def findFirst(rs: List[(Route, Int)]): EventStream[RouteResult] =
       rs match {
         case Nil                    => Util.rejected

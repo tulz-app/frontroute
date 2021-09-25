@@ -12,7 +12,7 @@ trait DirectiveApplyConverters extends ApplyConverters[Route] {
         result
       }
 
-  implicit def addNullaryDirectiveApply(directive: Directive0): Route => Route =
+  implicit def addNullaryDirectiveApply(directive: Directive0): Route => Route                                        =
     subRoute =>
       (ctx, previous, state) => {
         val result = directive.tapply(_ => subRoute)(ctx, previous, state)

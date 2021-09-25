@@ -42,7 +42,7 @@ object RouteLocation {
       state = state
     )
 
-  private def extractPath(location: raw.Location): List[String] = {
+  private def extractPath(location: raw.Location): List[String]               = {
     location.pathname.dropWhile(_ == '/').split('/').toList.dropWhile(_.isEmpty)
   }
 

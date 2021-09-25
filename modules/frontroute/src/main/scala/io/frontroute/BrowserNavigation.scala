@@ -15,7 +15,7 @@ object BrowserNavigation {
 
   private var preserveScroll = true
 
-  def preserveScroll(keep: Boolean): Unit = {
+  def preserveScroll(keep: Boolean): Unit                         = {
     this.preserveScroll = keep
   }
 

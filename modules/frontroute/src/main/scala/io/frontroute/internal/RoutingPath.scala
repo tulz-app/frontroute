@@ -43,14 +43,14 @@ class RoutingPath private (
     leave(path, Nil)
   }
 
-  override def toString: String = path.reverse.mkString(" ")
+  override def toString: String                                        = path.reverse.mkString(" ")
 
   override def equals(other: Any): Boolean = other match {
     case that: RoutingPath => path == that.path
     case _                 => false
   }
 
-  override def hashCode(): Int = path.hashCode()
+  override def hashCode(): Int             = path.hashCode()
 
 }
 

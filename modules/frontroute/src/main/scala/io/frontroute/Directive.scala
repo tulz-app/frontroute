@@ -19,7 +19,7 @@ class Directive[L](
     }
   }
 
-  def map[R](f: L => R): Directive[R] =
+  def map[R](f: L => R): Directive[R]    =
     Directive[R] { inner =>
       self.tapply { value => (location, previous, state) =>
         val mapped = f(value)
@@ -96,7 +96,7 @@ class Directive[L](
 
 object Directive {
 
-  def apply[L](f: (L => Route) => Route): Directive[L] = {
+  def apply[L](f: (L => Route) => Route): Directive[L]                                               = {
     new Directive[L](inner =>
       (location, previous, state) =>
         f(value =>

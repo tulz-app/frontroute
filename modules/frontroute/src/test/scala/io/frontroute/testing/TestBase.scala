@@ -60,7 +60,7 @@ abstract class TestBase extends TestSuite {
     init: TestLocationProvider => Unit
   )(checks: Probe[String] => T): Future[T] = routeTestF[T](route, wait, init)(probe => Future.successful(checks(probe)))
 
-  def nthSignal[T](n: Int, s: Signal[T], waitTime: FiniteDuration = 1.second): Future[T] = {
+  def nthSignal[T](n: Int, s: Signal[T], waitTime: FiniteDuration = 1.second): Future[T]            = {
     val p     = Promise[T]()
     var count = n
     s.addObserver(Observer { t =>
@@ -102,7 +102,7 @@ abstract class TestBase extends TestSuite {
     p.future
   }
 
-  protected def generateSignals[T](s: List[T], interval: FiniteDuration = 10.millis): Signal[T] = {
+  protected def generateSignals[T](s: List[T], interval: FiniteDuration = 10.millis): Signal[T]     = {
     s match {
       case head :: rest =>
         val $var = Var(head)

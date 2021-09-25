@@ -13,7 +13,7 @@ abstract class PathMatcher[T] {
 
   def apply(path: List[String]): PathMatchResult[T]
 
-  def map[V](f: T => V): PathMatcher[V] =
+  def map[V](f: T => V): PathMatcher[V]             =
     (in: List[String]) => self(in).map(f)
 
   @inline def mapTo[V](value: => V): PathMatcher[V] = self.map((_: T) => value)
@@ -76,7 +76,7 @@ abstract class PathMatcher[T] {
           }
       }
 
-  def recover[V >: T](default: => V): PathMatcher[V] =
+  def recover[V >: T](default: => V): PathMatcher[V]      =
     (in: List[String]) =>
       self(in) match {
         case PathMatchResult.NoMatch            => PathMatchResult.NoMatch
@@ -93,7 +93,7 @@ abstract class PathMatcher[T] {
       }
     }
 
-  @inline def as[O](f: T => O): PathMatcher[O] = self.map(f)
+  @inline def as[O](f: T => O): PathMatcher[O]                                                        = self.map(f)
 
   @inline def void: PathMatcher[Unit] = this.mapTo(())
 
@@ -158,7 +158,7 @@ trait PathMatchers {
       .map { s => r.findFirstMatchIn(s) }
       .collect { case Some(m) => m }
 
-  def long: PathMatcher[Long]             = segment.tryParse(_.toLong)
+  def long: PathMatcher[Long] = segment.tryParse(_.toLong)
 
   def double: PathMatcher[Double] = segment.tryParse(_.toDouble)
 

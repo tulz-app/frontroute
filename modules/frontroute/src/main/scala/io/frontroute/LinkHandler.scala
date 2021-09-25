@@ -42,7 +42,7 @@ object LinkHandler {
     }
   }
 
-  private val routeTo: js.Function1[String, Unit] = (path: String) => BrowserNavigation.pushState(url = path)
+  private val routeTo: js.Function1[String, Unit]                            = (path: String) => BrowserNavigation.pushState(url = path)
 
   def install(
     defaultTitle: String = ""
