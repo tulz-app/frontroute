@@ -30,13 +30,13 @@ object TabsExample
                   a(
                     href := "/tab-1",
                     "Tab 1",
-                    cls := "text-xl p-1 rounded",
+                    cls  := "text-xl p-1 rounded",
                     cls.toggle("bg-blue-400 text-blue-100") <-- tab.signal.valueIs("tab-1")
                   ),
                   a(
                     href := "/tab-2",
                     "Tab 2",
-                    cls := "text-xl p-1 rounded",
+                    cls  := "text-xl p-1 rounded",
                     cls.toggle("bg-blue-400 text-blue-100") <-- tab.signal.valueIs("tab-2")
                   )
                 ),
