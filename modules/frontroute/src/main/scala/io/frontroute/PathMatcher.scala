@@ -158,7 +158,7 @@ trait PathMatchers {
       .map { s => r.findFirstMatchIn(s) }
       .collect { case Some(m) => m }
 
-  def long: PathMatcher[Long]             = segment.tryParse(_.toLong)
+  def long: PathMatcher[Long] = segment.tryParse(_.toLong)
 
   def double: PathMatcher[Double] = segment.tryParse(_.toDouble)
 
