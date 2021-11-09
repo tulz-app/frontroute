@@ -80,7 +80,7 @@ final private[frontroute] class RoutingState private (
   }
 
   private def updateData[T](data: Map[RoutingPath.Key, Any], path: RoutingPath.Key, nv: T) =
-    //noinspection ComparingUnrelatedTypes
+    // noinspection ComparingUnrelatedTypes
     if (nv != ((): Unit)) {
       val v = {
         if (js.isUndefined(nv)) {
