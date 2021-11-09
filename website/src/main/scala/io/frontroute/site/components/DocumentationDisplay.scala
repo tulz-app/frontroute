@@ -4,7 +4,6 @@ import io.laminext.highlight.Highlight
 import com.raquo.laminar.api.L._
 import io.laminext.syntax.markdown._
 import io.frontroute.site.TemplateVars
-import org.scalajs.dom.ext._
 
 object DocumentationDisplay {
 

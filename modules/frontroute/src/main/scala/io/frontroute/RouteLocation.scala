@@ -1,7 +1,7 @@
 package io.frontroute
 
 import io.frontroute.internal.HistoryState
-import org.scalajs.dom.raw
+import org.scalajs.dom
 import scala.scalajs.js
 
 final case class RouteLocation(
@@ -30,7 +30,7 @@ final case class RouteLocation(
 
 object RouteLocation {
 
-  def apply(location: raw.Location, state: js.UndefOr[js.Any]): RouteLocation =
+  def apply(location: dom.Location, state: js.UndefOr[js.Any]): RouteLocation =
     new RouteLocation(
       hostname = location.hostname,
       port = location.port,
@@ -42,7 +42,7 @@ object RouteLocation {
       state = state
     )
 
-  private def extractPath(location: raw.Location): List[String] = {
+  private def extractPath(location: dom.Location): List[String] = {
     location.pathname.dropWhile(_ == '/').split('/').toList.dropWhile(_.isEmpty)
   }
 

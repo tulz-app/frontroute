@@ -2,7 +2,6 @@ package io.frontroute
 
 import io.frontroute.internal.UrlString
 import org.scalajs.dom
-import org.scalajs.dom.raw._
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal
 
@@ -14,9 +13,9 @@ object LinkHandler {
     var routeTo: js.UndefOr[js.Function1[String, Unit]] = js.native
   }
 
-  private def clickListener(defaultTitle: String): js.Function1[Event, Unit] = event => {
+  private def clickListener(defaultTitle: String): js.Function1[dom.Event, Unit] = event => {
     findParent("A", event.target.asInstanceOf[dom.Node]).foreach { aParent =>
-      val anchor     = aParent.asInstanceOf[HTMLAnchorElement]
+      val anchor     = aParent.asInstanceOf[dom.HTMLAnchorElement]
       val rel        = anchor.rel
       val href       = anchor.href
       val title      = anchor.dataset.get("title")
@@ -46,7 +45,7 @@ object LinkHandler {
 
   def install(
     defaultTitle: String = ""
-  ): js.Function1[Event, Unit] = {
+  ): js.Function1[dom.Event, Unit] = {
     WindowWithRouteTo.routeTo = routeTo
     val listener = clickListener(defaultTitle)
     dom.document.addEventListener("click", listener)
@@ -54,14 +53,14 @@ object LinkHandler {
   }
 
   def uninstall(
-    listener: js.Function1[Event, Unit]
+    listener: js.Function1[dom.Event, Unit]
   ): Unit = {
     WindowWithRouteTo.routeTo = js.undefined
     dom.document.removeEventListener("click", listener)
   }
 
   @scala.annotation.tailrec
-  private def findParent(nodeName: String, element: Node): js.UndefOr[Node] = {
+  private def findParent(nodeName: String, element: dom.Node): js.UndefOr[dom.Node] = {
     if (js.isUndefined(element) || element == null) {
       js.undefined
     } else {

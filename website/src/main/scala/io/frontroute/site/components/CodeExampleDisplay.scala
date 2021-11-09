@@ -12,7 +12,6 @@ import io.frontroute.site.Styles
 import io.frontroute.site.TemplateVars
 import io.laminext.util.UrlString
 import org.scalajs.dom
-import org.scalajs.dom.ext._
 import org.scalajs.dom.html
 import scala.scalajs.js
 

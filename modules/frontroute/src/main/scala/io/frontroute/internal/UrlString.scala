@@ -1,14 +1,12 @@
 package io.frontroute.internal
 
 import org.scalajs.dom
-import org.scalajs.dom.raw.HTMLAnchorElement
-import org.scalajs.dom.raw.Location
 import scala.scalajs.js
 
 object UrlString {
 
-  def unapply(url: String): Some[Location] = {
-    val l = dom.document.createElement("a").asInstanceOf[HTMLAnchorElement]
+  def unapply(url: String): Some[dom.Location] = {
+    val l = dom.document.createElement("a").asInstanceOf[dom.HTMLAnchorElement]
     l.href = url
     Some(
       js.Dynamic
@@ -22,7 +20,7 @@ object UrlString {
           pathname = l.pathname,
           host = l.host
         )
-        .asInstanceOf[Location]
+        .asInstanceOf[dom.Location]
     )
   }
 

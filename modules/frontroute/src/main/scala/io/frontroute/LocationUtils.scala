@@ -1,12 +1,12 @@
 package io.frontroute
 
-import org.scalajs.dom.raw
+import org.scalajs.dom
 import scala.scalajs.js.URIUtils.encodeURIComponent
 import scala.scalajs.js.URIUtils.decodeURIComponent
 
 object LocationUtils {
 
-  def parseLocationParams(location: raw.Location): Map[String, Seq[String]] = {
+  def parseLocationParams(location: dom.Location): Map[String, Seq[String]] = {
     val vars   = location.search.dropWhile(_ == '?').split('&')
     val result = scala.collection.mutable.Map[String, Seq[String]]()
     vars.foreach { entry =>
