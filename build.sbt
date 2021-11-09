@@ -1,5 +1,7 @@
 import org.scalajs.linker.interface.ESVersion
 
+val disableWebsiteOnCI = true
+
 inThisBuild(
   List(
     organization                        := "io.frontroute",
@@ -22,13 +24,31 @@ inThisBuild(
     githubWorkflowTargetTags ++= Seq("v*"),
     githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v"))),
     githubWorkflowPublish               := Seq(WorkflowStep.Sbt(List("ci-release"))),
-    githubWorkflowBuild                 := Seq(WorkflowStep.Sbt(List("test" /*, "website/fastLinkJS"*/ ))),
+    githubWorkflowBuild                 := Seq(WorkflowStep.Sbt(List("test") ++ List("website/fastLinkJS").filterNot(_ => disableWebsiteOnCI))),
     githubWorkflowEnv ~= (_ ++ Map(
       "PGP_PASSPHRASE"    -> s"$${{ secrets.PGP_PASSPHRASE }}",
       "PGP_SECRET"        -> s"$${{ secrets.PGP_SECRET }}",
       "SONATYPE_PASSWORD" -> s"$${{ secrets.SONATYPE_PASSWORD }}",
       "SONATYPE_USERNAME" -> s"$${{ secrets.SONATYPE_USERNAME }}"
-    ))
+    )),
+    githubWorkflowGeneratedUploadSteps ~= { steps =>
+      if (disableWebsiteOnCI) {
+        steps.map {
+          case run: WorkflowStep.Run =>
+            run.copy(commands = run.commands.map { command =>
+              if (command.startsWith("tar cf targets.tar")) {
+                command.replace("website/target", "")
+              } else {
+                command
+              }
+
+            })
+          case other                 => other
+        }
+      } else {
+        steps
+      }
+    }
   )
 )
 
