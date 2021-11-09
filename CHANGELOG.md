@@ -1,5 +1,9 @@
 # Changelog
 
+### 0.15.0
+
+Airstream `v0.14.0` and `scala-js-dom` `v2.0.0`.
+
 ### 0.14.0
 
 * Internal implementation refactoring.
