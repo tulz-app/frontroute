@@ -1,6 +1,6 @@
 import org.scalajs.linker.interface.ESVersion
 
-val disableWebsiteOnCI = true
+val disableWebsiteOnCI = false
 
 inThisBuild(
   List(
