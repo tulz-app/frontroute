@@ -1,6 +1,5 @@
 package io.frontroute.site.layout
 
-import io.frontroute.site.ExampleModalContent
 import io.frontroute.site.Page
 import io.frontroute.site.Site
 import io.frontroute.site.SiteModule
@@ -50,7 +49,6 @@ object PageWrap {
         ),
         PageFooter()
       ),
-      TW.modal(ExampleModalContent.modalContent.signal),
       $pageAndResult.bind {
         case Some((_, Right((_, theTitle)))) =>
           titleElement.textContent = s"$theTitle - laminext"

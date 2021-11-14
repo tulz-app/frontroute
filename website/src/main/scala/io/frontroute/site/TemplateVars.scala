@@ -3,7 +3,7 @@ package io.frontroute.site
 object TemplateVars {
 
   val vars = Seq(
-    "frontrouteVersion" -> "0.15.0"
+    "frontrouteVersion" -> "0.15.2"
   )
 
   def apply(s: String): String =
