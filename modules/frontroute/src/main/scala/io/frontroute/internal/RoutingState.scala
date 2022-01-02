@@ -129,8 +129,8 @@ final private[frontroute] class RoutingState private (
   override def equals(other: Any): Boolean = other match {
     case that: RoutingState =>
       path == that.path &&
-        data == that.data &&
-        persistent == that.persistent
+      data == that.data &&
+      persistent == that.persistent
     case _                  => false
   }
 
