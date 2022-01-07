@@ -75,6 +75,7 @@ object Site {
       ""                   -> Seq(
         examplePage(io.frontroute.site.examples.ex_basic.BasicRoutingExample),
         examplePage(io.frontroute.site.examples.ex_path_matching.PathMatchingExample),
+        examplePage(io.frontroute.site.examples.ex_recursive_path_matching.RecursivePathMatchingExample),
         examplePage(io.frontroute.site.examples.ex_params.ParamsExample),
         examplePage(io.frontroute.site.examples.ex_custom_directives.CustomDirectivesExample),
         examplePage(io.frontroute.site.examples.ex_signal.SignalExample),
