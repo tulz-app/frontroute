@@ -21,10 +21,10 @@ final case class RouteLocation(
 
   override def toString: String =
     s"${unmatchedPath.mkString("/")}${if (params.nonEmpty) "?" else ""}${params
-      .flatMap { case (name, values) =>
-        values.map(value => s"$name=$value")
-      }
-      .mkString("&")}"
+        .flatMap { case (name, values) =>
+          values.map(value => s"$name=$value")
+        }
+        .mkString("&")}"
 
 }
 

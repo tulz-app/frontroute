@@ -26,11 +26,11 @@ object LocationUtils {
       ""
     } else {
       s"?${params
-        .flatMap { case (name, values) =>
-          values.map { value =>
-            s"${encodeURIComponent(name)}=${encodeURIComponent(value)}"
-          }
-        }.mkString("&")}"
+          .flatMap { case (name, values) =>
+            values.map { value =>
+              s"${encodeURIComponent(name)}=${encodeURIComponent(value)}"
+            }
+          }.mkString("&")}"
     }
 
 }

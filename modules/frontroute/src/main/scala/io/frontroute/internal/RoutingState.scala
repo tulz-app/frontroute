@@ -117,13 +117,13 @@ final private[frontroute] class RoutingState private (
 
   override def toString: String = {
     s"""matched: $path\n${data
-      .map {
-        case (key, value: Var[_]) =>
-          s"  $key -> $value (${value.signal.now()})"
-        case (key, value)         =>
-          s"  $key -> $value"
-      }
-      .mkString("\n")}"""
+        .map {
+          case (key, value: Var[_]) =>
+            s"  $key -> $value (${value.signal.now()})"
+          case (key, value)         =>
+            s"  $key -> $value"
+        }
+        .mkString("\n")}"""
   }
 
   override def equals(other: Any): Boolean = other match {
