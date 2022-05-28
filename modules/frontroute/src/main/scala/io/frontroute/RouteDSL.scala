@@ -180,7 +180,7 @@ trait RouteDSL[A] extends PathMatchers with RunRoute[A] with ApplyConverters[Typ
 
   def location: Directive[LocationProvider] =
     extract(_.unmatchedPath).signal.map { $unmatched =>
-      LocationProvider.custom($unmatched.map(path => Some(path.mkString("/", "/", ""))))
+      LocationProvider.custom($unmatched.map(path => path.mkString("/", "/", "")))
     }
 
   def memoize[T](retrieve: () => EventStream[T]): Directive[T] = {

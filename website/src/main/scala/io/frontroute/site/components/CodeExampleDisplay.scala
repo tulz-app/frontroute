@@ -48,9 +48,9 @@ object CodeExampleDisplay {
     val sourceCollapsed  = storedBoolean(example.id, initial = true)
     val dimContext       = storedBoolean("dim-context", initial = true)
     val hasContext       = example.code.source.contains("/* <focus> */")
-    val locations        = new EventBus[String]
-    val currentLocation  = locations.events.toSignal("")
-    val locationProvider = LocationProvider.custom(locations.events)
+    val locations        = Var("")
+    val currentLocation  = locations.signal
+    val locationProvider = LocationProvider.custom(currentLocation)
 
     val urlInput = input(
       value <-- locations,
@@ -215,7 +215,7 @@ object CodeExampleDisplay {
           )
         ),
         onMountCallback { _ =>
-          locations.emit("https://site.nowhere/")
+          locations.set("https://site.nowhere/")
         }
       )
     )

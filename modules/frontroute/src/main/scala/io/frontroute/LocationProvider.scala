@@ -26,6 +26,6 @@ object LocationProvider {
     ignoreEmptyTitle = ignoreEmptyTitle
   )
 
-  @inline def custom(locations: Signal[Option[String]]) = new CustomLocationProvider(locations)
+  @inline def custom(locations: Signal[String]) = new CustomLocationProvider(locations)
 
 }
