@@ -6,7 +6,7 @@ import org.scalajs.dom
 
 trait LocationProvider {
 
-  def stream: EventStream[RouteLocation]
+  def currentLocation: Signal[Option[RouteLocation]]
 
 }
 
@@ -26,6 +26,6 @@ object LocationProvider {
     ignoreEmptyTitle = ignoreEmptyTitle
   )
 
-  @inline def custom(locations: EventStream[String]) = new CustomLocationProvider(locations)
+  @inline def custom(locations: Signal[Option[String]]) = new CustomLocationProvider(locations)
 
 }

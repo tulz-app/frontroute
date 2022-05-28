@@ -86,8 +86,8 @@ trait RouteDSL[A] extends PathMatchers with RunRoute[A] with ApplyConverters[Typ
         }
       }
 
-    def signal: Directive[Signal[L]] =
-      new Directive[Signal[L]]({ inner => (location, previous, state) =>
+    def signal: Directive[StrictSignal[L]] =
+      new Directive[StrictSignal[L]]({ inner => (location, previous, state) =>
         this.tapply {
           value => // TODO figure this out, when this is run, enter is not yet called
             (location, previous, state) =>
@@ -177,6 +177,11 @@ trait RouteDSL[A] extends PathMatchers with RunRoute[A] with ApplyConverters[Typ
       }
     )
   }
+
+  def location: Directive[LocationProvider] =
+    extract(_.unmatchedPath).signal.map { $unmatched =>
+      LocationProvider.custom($unmatched.map(path => Some(path.mkString("/", "/", ""))))
+    }
 
   def memoize[T](retrieve: () => EventStream[T]): Directive[T] = {
     Directive[T](inner =>

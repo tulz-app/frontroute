@@ -14,23 +14,25 @@ trait RunRoute[A] {
     var currentSubscription: Subscription = null
     val currentResult                     = Var(Option.empty[A])
 
-    locationProvider.stream
-      .flatMap { location =>
-        route(
-          location,
-          currentState.resetPath,
-          RoutingState.withPersistentData(currentState.persistent, currentState.async)
-        ).map {
-          case RouteResult.Complete(nextState, createResult) =>
-            if (nextState != currentState) {
-              currentState = nextState
-              Some(createResult)
-            } else {
+    locationProvider.currentLocation
+      .flatMap {
+        case Some(location) =>
+          route(
+            location,
+            currentState.resetPath,
+            RoutingState.withPersistentData(currentState.persistent, currentState.async)
+          ).map {
+            case RouteResult.Complete(nextState, createResult) =>
+              if (nextState != currentState) {
+                currentState = nextState
+                Some(createResult)
+              } else {
+                Option.empty
+              }
+            case RouteResult.Rejected                          =>
               Option.empty
-            }
-          case RouteResult.Rejected                          =>
-            Option.empty
-        }
+          }
+        case None           => EventStream.empty
       }
       .collect { case Some(createView) => createView() }
       .foreach { createResult =>

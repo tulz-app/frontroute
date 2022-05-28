@@ -1,13 +1,15 @@
 package io.frontroute
 
-import com.raquo.airstream.core.EventStream
+import com.raquo.airstream.core.Signal
 import io.frontroute.internal.UrlString
+
 import scala.scalajs.js
 
-class CustomLocationProvider(locations: EventStream[String]) extends LocationProvider {
+class CustomLocationProvider(locations: Signal[Option[String]]) extends LocationProvider {
 
-  val stream: EventStream[RouteLocation] = locations.collect { case UrlString(location) =>
-    RouteLocation(location, js.undefined)
+  val currentLocation: Signal[Option[RouteLocation]] = locations.map {
+    case Some(UrlString(location)) => Some(RouteLocation(location, js.undefined))
+    case None                      => None
   }
 
 }

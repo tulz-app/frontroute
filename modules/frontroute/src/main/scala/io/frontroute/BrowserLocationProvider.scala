@@ -1,6 +1,7 @@
 package io.frontroute
 
 import com.raquo.airstream.core.EventStream
+import com.raquo.airstream.core.Signal
 import io.frontroute.internal.DocumentTitle
 import org.scalajs.dom
 
@@ -11,7 +12,7 @@ class BrowserLocationProvider(
   ignoreEmptyTitle: Boolean = false
 ) extends LocationProvider {
 
-  val stream: EventStream[RouteLocation] = popStateEvents.map { event =>
+  val currentLocation: Signal[Option[RouteLocation]] = popStateEvents.map { event =>
     val routeLocation = RouteLocation(dom.window.location, event.state)
     if (setTitleOnPopStateEvents) {
       routeLocation.parsedState.foreach { state =>
@@ -21,6 +22,6 @@ class BrowserLocationProvider(
       }
     }
     routeLocation
-  }
+  }.toWeakSignal
 
 }
