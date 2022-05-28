@@ -9,7 +9,7 @@ inThisBuild(
     licenses                            := List("MIT" -> url("https://github.com/tulz-app/frontroute/blob/main/LICENSE.md")),
     scmInfo                             := Some(ScmInfo(url("https://github.com/tulz-app/frontroute"), "scm:git@github.com/tulz-app/frontroute.git")),
     developers                          := List(Developer("yurique", "Iurii Malchenko", "i@yurique.com", url("https://github.com/yurique"))),
-    description                         := "Router library based for Laminar with DSL inspired by Akka HTTP.",
+    description                         := "Router library for Laminar with DSL inspired by Akka HTTP.",
     Test / publishArtifact              := false,
     scalafmtOnCompile                   := true,
     versionScheme                       := Some("early-semver"),
@@ -19,7 +19,7 @@ inThisBuild(
       ScalaVersions.v213
     ),
     versionPolicyIntention              := Compatibility.BinaryCompatible,
-    githubWorkflowJavaVersions          := Seq("openjdk@1.11.0"),
+    githubWorkflowJavaVersions          := Seq(JavaSpec.temurin("17")),
 //    githubWorkflowBuild += WorkflowStep.Sbt(List("versionPolicyCheck")),
     githubWorkflowTargetTags ++= Seq("v*"),
     githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v"))),
