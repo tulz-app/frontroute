@@ -17,8 +17,10 @@ object BasicRoutingExample
     )((locationProvider: LocationProvider) =>
       (a: AmendedHtmlTag[dom.html.Anchor, AmAny]) =>
         useLocationProvider(locationProvider) { implicit locationProvider =>
-          import io.frontroute.renderDSL._
           import com.raquo.laminar.api.L.{a => _, _}
+          /* <focus> */
+          import io.frontroute.renderDSL._
+          /* </focus> */
 
           /* <focus> */
           val route =
