@@ -5,9 +5,8 @@ import io.frontroute.internal.RoutingState
 
 object Types {
 
-  type Directive0   = Directive[Unit]
   type PathMatcher0 = PathMatcher[Unit]
 
-  type Route = (RouteLocation, RoutingState, RoutingState) => EventStream[RouteResult]
+  type TypedRoute[A] = (RouteLocation, RoutingState, RoutingState) => EventStream[RouteResult[A]]
 
 }

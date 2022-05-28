@@ -83,7 +83,16 @@ object CodeExampleDisplay {
     val codeNode = (dim: Boolean) => {
       val theCode = pre(
         cls := "w-full text-sm",
-        fixIndentation(example.code.source.replace("import com.raquo.laminar.api.L.{a => _, _}", "import com.raquo.laminar.api.L._"))
+        fixIndentation {
+          example.code.source
+            .replace("import com.raquo.laminar.api.L.{a => _, _}", "import com.raquo.laminar.api.L._")
+            .replace(
+              """(locationProvider: LocationProvider) =>
+                |      (a: AmendedHtmlTag[dom.html.Anchor, AmAny]) =>
+                |        useLocationProvider(locationProvider) { implicit locationProvider =>""".stripMargin,
+              ""
+            )
+        }
       )
       div(
         theCode,
@@ -201,7 +210,7 @@ object CodeExampleDisplay {
             )
           ),
           onMountUnmountCallbackWithState(
-            mount = ctx => render(ctx.thisNode.ref, example.code.value(locationProvider, amendedA)),
+            mount = ctx => render(ctx.thisNode.ref, example.code.value(locationProvider)(amendedA)),
             unmount = (_, root: Option[RootNode]) => root.foreach(_.unmount())
           )
         ),

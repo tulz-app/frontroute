@@ -60,7 +60,7 @@ lazy val frontroute =
       name := "frontroute",
       libraryDependencies ++=
         Seq.concat(
-          Dependencies.airstream.value,
+          Dependencies.laminar.value,
           Dependencies.`tuplez-apply`.value,
           Dependencies.utest.value
         ),

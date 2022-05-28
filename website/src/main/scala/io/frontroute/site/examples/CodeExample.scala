@@ -7,9 +7,9 @@ import io.laminext.AmendedHtmlTag
 import org.scalajs.dom
 
 abstract class CodeExample(val id: String, val title: String, val description: String)(
-  _code: sourcecode.Text[(LocationProvider, AmendedHtmlTag[dom.html.Anchor, AmAny]) => Element]
+  _code: sourcecode.Text[LocationProvider => AmendedHtmlTag[dom.html.Anchor, AmAny] => Element]
 ) {
 
-  val code: sourcecode.Text[(LocationProvider, AmendedHtmlTag[dom.html.Anchor, AmAny]) => Element] = _code
+  val code: sourcecode.Text[LocationProvider => AmendedHtmlTag[dom.html.Anchor, AmAny] => Element] = _code
 
 }

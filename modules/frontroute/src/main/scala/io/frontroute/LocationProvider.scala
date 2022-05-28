@@ -1,5 +1,6 @@
 package io.frontroute
 
+import com.raquo.laminar.api.L._
 import com.raquo.airstream.core.EventStream
 import org.scalajs.dom
 
@@ -10,6 +11,8 @@ trait LocationProvider {
 }
 
 object LocationProvider {
+
+  val defaultProvider: LocationProvider = LocationProvider.browser(windowEvents.onPopState)
 
   @inline def browser(
     popStateEvents: EventStream[dom.PopStateEvent],

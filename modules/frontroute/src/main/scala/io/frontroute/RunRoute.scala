@@ -1,36 +1,48 @@
 package io.frontroute
 
-import com.raquo.airstream.ownership.Owner
-import com.raquo.airstream.ownership.Subscription
+import com.raquo.laminar.api.L._
 import io.frontroute.internal.RoutingState
 
-trait RunRoute {
+trait RunRoute[A] {
+  self: RouteDSL[A] =>
 
-  def runRoute(route: Route, locationProvider: LocationProvider)(implicit owner: Owner): Subscription = {
-    var current = RoutingState.empty
+  def runRoute(
+    route: Route
+  )(implicit owner: Owner, locationProvider: LocationProvider = LocationProvider.defaultProvider): Signal[Option[A]] = {
+
+    var currentState                      = RoutingState.empty
+    var currentSubscription: Subscription = null
+    val currentResult                     = Var(Option.empty[A])
+
     locationProvider.stream
       .flatMap { location =>
         route(
           location,
-          current.resetPath,
-          RoutingState.withPersistentData(current.persistent, current.async)
+          currentState.resetPath,
+          RoutingState.withPersistentData(currentState.persistent, currentState.async)
         ).map {
-          case RouteResult.Complete(next, action) =>
-            if (next != current) {
-              current = next
-              Some(action)
+          case RouteResult.Complete(nextState, createResult) =>
+            if (nextState != currentState) {
+              currentState = nextState
+              Some(createResult)
             } else {
               Option.empty
             }
-          case RouteResult.Rejected               =>
+          case RouteResult.Rejected                          =>
             Option.empty
         }
       }
-      .collect { case Some(events) =>
-        events
+      .collect { case Some(createView) => createView() }
+      .foreach { createResult =>
+        if (currentSubscription != null) {
+          currentSubscription.kill()
+          currentSubscription = null
+        }
+        currentSubscription = createResult.foreach { result =>
+          currentResult.set(Option(result))
+        }
       }
-      .flatten
-      .foreach(_())
+    currentResult.signal
   }
 
 }

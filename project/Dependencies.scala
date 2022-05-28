@@ -10,6 +10,12 @@ object Dependencies {
     )
   }
 
+  val laminar: Def.Initialize[Seq[ModuleID]] = Def.setting {
+    Seq(
+      "com.raquo" %%% "laminar" % DependencyVersions.laminar
+    )
+  }
+
   val `tuplez-apply`: Def.Initialize[Seq[ModuleID]] = Def.setting {
     Seq(
       "app.tulz" %%% "tuplez-apply" % DependencyVersions.`tuplez-apply`
