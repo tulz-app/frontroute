@@ -12,7 +12,13 @@ trait LocationProvider {
 
 object LocationProvider {
 
-  val defaultProvider: LocationProvider = LocationProvider.browser(windowEvents.onPopState)
+  lazy val windowLocationProvider: LocationProvider = LocationProvider.browser(windowEvents.onPopState)
+
+  object Implicits {
+
+    implicit val windowLocationProvider: LocationProvider = LocationProvider.windowLocationProvider
+
+  }
 
   @inline def browser(
     popStateEvents: EventStream[dom.PopStateEvent],

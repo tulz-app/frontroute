@@ -55,4 +55,10 @@ object Dependencies {
     )
   }
 
+  val `scala-js-macrotask-executor`: Def.Initialize[Seq[ModuleID]] = Def.setting {
+    Seq(
+      "org.scala-js" %%% "scala-js-macrotask-executor" % DependencyVersions.`scala-js-macrotask-executor`
+    )
+  }
+
 }

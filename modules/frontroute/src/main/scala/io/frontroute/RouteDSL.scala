@@ -53,8 +53,8 @@ trait RouteDSL[A] extends PathMatchers with RunRoute[A] with ApplyConverters[Typ
             inner(value)(location, previous, state.leaveDisjunction)
           }(location, previous, state.enterDisjunction)
           .flatMap {
-            case complete: RouteResult.Complete[A] => EventStream.fromValue(complete)
-            case RouteResult.Rejected              =>
+            case RouteResult.Complete(state, result) => EventStream.fromValue(RouteResult.Complete(state, result))
+            case RouteResult.Rejected                =>
               other.tapply { value => (location, previous, state) =>
                 inner(value)(location, previous, state.leaveDisjunction)
               }(location, previous, state.enterDisjunction)
@@ -326,8 +326,8 @@ trait RouteDSL[A] extends PathMatchers with RunRoute[A] with ApplyConverters[Typ
         case Nil                    => Util.rejected
         case (route, index) :: tail =>
           route(location, previous, state.enterConcat(index)).flatMap {
-            case complete: RouteResult.Complete[A] => EventStream.fromValue(complete)
-            case RouteResult.Rejected              => findFirst(tail)
+            case RouteResult.Complete(state, result) => EventStream.fromValue(RouteResult.Complete(state, result))
+            case RouteResult.Rejected                => findFirst(tail)
           }
       }
 
@@ -360,12 +360,12 @@ trait RouteDSL[A] extends PathMatchers with RunRoute[A] with ApplyConverters[Typ
 
   implicit def runRouteImplicitly(
     route: Route
-  )(implicit locationProvider: LocationProvider = LocationProvider.defaultProvider, ev: A <:< Element): Mod[Element] =
+  )(implicit locationProvider: LocationProvider, ev: A <:< Element): Mod[Element] =
     renderRoute(route)
 
   def renderRoute(
     route: Route
-  )(implicit locationProvider: LocationProvider = LocationProvider.defaultProvider, ev: A <:< Element): Mod[Element] =
+  )(implicit locationProvider: LocationProvider, ev: A <:< Element): Mod[Element] =
     onMountInsert { ctx =>
       import ctx.owner
       child.maybe <-- runRoute(route).asInstanceOf[Signal[Option[Element]]]

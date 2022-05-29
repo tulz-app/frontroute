@@ -8,7 +8,7 @@ trait RunRoute[A] {
 
   def runRoute(
     route: Route
-  )(implicit owner: Owner, locationProvider: LocationProvider = LocationProvider.defaultProvider): Signal[Option[A]] = {
+  )(implicit owner: Owner, locationProvider: LocationProvider): Signal[Option[A]] = {
 
     var currentState                      = RoutingState.empty
     var currentSubscription: Subscription = null

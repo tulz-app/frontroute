@@ -4,18 +4,18 @@ import com.raquo.airstream.core.Observer
 import com.raquo.airstream.core.Signal
 import com.raquo.airstream.ownership.Owner
 import com.raquo.airstream.state.Var
-import io.frontroute.Route
-import io.frontroute.runRoute
+import io.frontroute.RouteDSL
 import utest.TestSuite
+
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import scala.concurrent.Promise
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration._
 import scala.scalajs.js.timers.setTimeout
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits.global
 
-abstract class TestBase extends TestSuite {
+abstract class TestBase extends TestSuite with RouteDSL[Unit] {
 
   implicit protected val testOwner: Owner = new Owner {}
 
@@ -38,15 +38,15 @@ abstract class TestBase extends TestSuite {
     wait: FiniteDuration = 10.millis,
     init: TestLocationProvider => Unit
   )(checks: Probe[String] => Future[T]): Future[T] = {
-    val locationProvider = new TestLocationProvider()
-    val probe            = new Probe[String]
+    implicit val locationProvider: TestLocationProvider = new TestLocationProvider()
+    val probe                                           = new Probe[String]
 
-    val sub    = runRoute(route(probe), locationProvider)(testOwner)
+    val sub    = runRoute(route(probe))(testOwner, implicitly)
     val future = delayedFuture(wait).flatMap { _ =>
       try {
         checks(probe)
       } finally {
-        sub.kill()
+//        sub.kill()
       }
     }
     init(locationProvider)

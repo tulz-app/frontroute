@@ -62,7 +62,8 @@ lazy val frontroute =
         Seq.concat(
           Dependencies.laminar.value,
           Dependencies.`tuplez-apply`.value,
-          Dependencies.utest.value
+          Dependencies.utest.value,
+          Dependencies.`scala-js-macrotask-executor`.value.map(_ % Test)
         ),
       testFrameworks += new TestFramework("utest.runner.Framework"),
       ScalaOptions.fixOptions,

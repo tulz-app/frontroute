@@ -1,10 +1,11 @@
 package io.frontroute.testing
 
-import com.raquo.airstream.core.EventStream
+import com.raquo.airstream.core.Signal
 import com.raquo.airstream.eventbus.EventBus
 import io.frontroute.LocationProvider
 import io.frontroute.RouteLocation
 import io.frontroute.internal.HistoryState
+
 import scala.scalajs.js
 
 class TestLocationProvider extends LocationProvider {
@@ -18,7 +19,7 @@ class TestLocationProvider extends LocationProvider {
 
   private val bus = new EventBus[RouteLocation]
 
-  val currentLocation: EventStream[RouteLocation] = bus.events
+  val currentLocation: Signal[Option[RouteLocation]] = bus.events.toWeakSignal
 
   def protocol(protocol: String): Unit = {
     currentProtocol = protocol
