@@ -14,12 +14,6 @@ object LocationProvider {
 
   lazy val windowLocationProvider: LocationProvider = LocationProvider.browser(windowEvents.onPopState)
 
-  object Implicits {
-
-    implicit val windowLocationProvider: LocationProvider = LocationProvider.windowLocationProvider
-
-  }
-
   @inline def browser(
     popStateEvents: EventStream[dom.PopStateEvent],
     setTitleOnPopStateEvents: Boolean = true,

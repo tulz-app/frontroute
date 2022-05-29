@@ -10,4 +10,10 @@ package object frontroute {
 
   object renderDSL extends RouteDSL[Element]
 
+  object Implicits {
+
+    implicit val locationProvider: LocationProvider = LocationProvider.windowLocationProvider
+
+  }
+
 }
