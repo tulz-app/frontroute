@@ -1,13 +1,13 @@
 package io.frontroute.internal
 
 import com.raquo.laminar.api.L._
-import io.frontroute.PageMeta
+import io.frontroute.DocumentMeta
 import io.frontroute.PageStatusCode
 
-object DocumentMeta {
+object Document {
 
   def update(
-    pageMeta: PageMeta
+    pageMeta: DocumentMeta
   ): Unit = {
     org.scalajs.dom.document.title = pageMeta.title
     val titleElement = org.scalajs.dom.document.head.querySelector("title")
