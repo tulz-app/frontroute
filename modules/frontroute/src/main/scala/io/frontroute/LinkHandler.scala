@@ -3,23 +3,18 @@ package io.frontroute
 import io.frontroute.internal.UrlString
 import org.scalajs.dom
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSGlobal
 
 object LinkHandler {
 
-  @js.native
-  @JSGlobal("window")
-  private object WindowWithRouteTo extends js.Object {
-    var routeTo: js.UndefOr[js.Function1[String, Unit]] = js.native
-  }
-
   private def clickListener(defaultTitle: String): js.Function1[dom.Event, Unit] = event => {
     findParent("A", event.target.asInstanceOf[dom.Node]).foreach { aParent =>
-      val anchor     = aParent.asInstanceOf[dom.HTMLAnchorElement]
-      val rel        = anchor.rel
-      val href       = anchor.href
-      val title      = anchor.dataset.get("title")
-      val sameOrigin =
+      val anchor      = aParent.asInstanceOf[dom.HTMLAnchorElement]
+      val rel         = anchor.rel
+      val href        = anchor.href
+      val title       = anchor.dataset.get("title")
+      val description = anchor.dataset.get("description")
+      val keywords    = anchor.dataset.get("keywords")
+      val sameOrigin  =
         href.startsWith("/") ||
           !href.startsWith("http://") && !href.startsWith("https://") ||
           dom.window.location.origin.exists(origin => href.startsWith(origin))
@@ -32,7 +27,12 @@ object LinkHandler {
           location.hash != dom.window.location.hash
         }
         if (shouldPush) {
-          BrowserNavigation.pushState(url = anchor.href, title = title.getOrElse(defaultTitle))
+          val pageMeta = PageMeta(
+            title = title.getOrElse(defaultTitle),
+            description = description,
+            keywords = keywords
+          )
+          BrowserNavigation.pushState(url = anchor.href, meta = pageMeta)
         }
       } else if (rel == "external") {
         event.preventDefault()
@@ -41,12 +41,9 @@ object LinkHandler {
     }
   }
 
-  private val routeTo: js.Function1[String, Unit] = (path: String) => BrowserNavigation.pushState(url = path)
-
   def install(
     defaultTitle: String = ""
   ): js.Function1[dom.Event, Unit] = {
-    WindowWithRouteTo.routeTo = routeTo
     val listener = clickListener(defaultTitle)
     dom.document.addEventListener("click", listener)
     listener
@@ -55,7 +52,6 @@ object LinkHandler {
   def uninstall(
     listener: js.Function1[dom.Event, Unit]
   ): Unit = {
-    WindowWithRouteTo.routeTo = js.undefined
     dom.document.removeEventListener("click", listener)
   }
 

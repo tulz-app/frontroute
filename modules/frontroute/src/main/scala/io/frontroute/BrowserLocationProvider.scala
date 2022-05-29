@@ -2,22 +2,20 @@ package io.frontroute
 
 import com.raquo.airstream.core.EventStream
 import com.raquo.airstream.core.Signal
-import io.frontroute.internal.DocumentTitle
+import io.frontroute.internal.DocumentMeta
 import org.scalajs.dom
 
 class BrowserLocationProvider(
   popStateEvents: EventStream[dom.PopStateEvent],
-  setTitleOnPopStateEvents: Boolean = true,
-  updateTitleElement: Boolean = true,
-  ignoreEmptyTitle: Boolean = false
+  updatePageMetaOnPopStateEvents: Boolean = true
 ) extends LocationProvider {
 
   val currentLocation: Signal[Option[RouteLocation]] = popStateEvents.map { event =>
     val routeLocation = RouteLocation(dom.window.location, event.state)
-    if (setTitleOnPopStateEvents) {
+    if (updatePageMetaOnPopStateEvents) {
       routeLocation.parsedState.foreach { state =>
         state.internal.foreach { internal =>
-          DocumentTitle.updateTitle(title = internal.title, updateTitleElement = updateTitleElement, ignoreEmptyTitle = ignoreEmptyTitle)
+          DocumentMeta.update(internal.meta)
         }
       }
     }

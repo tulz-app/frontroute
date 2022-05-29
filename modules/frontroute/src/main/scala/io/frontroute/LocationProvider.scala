@@ -16,14 +16,10 @@ object LocationProvider {
 
   @inline def browser(
     popStateEvents: EventStream[dom.PopStateEvent],
-    setTitleOnPopStateEvents: Boolean = true,
-    updateTitleElement: Boolean = true,
-    ignoreEmptyTitle: Boolean = false
+    updatePageMetaOnPopStateEvents: Boolean = true
   ): LocationProvider = new BrowserLocationProvider(
     popStateEvents = popStateEvents,
-    setTitleOnPopStateEvents = setTitleOnPopStateEvents,
-    updateTitleElement = updateTitleElement,
-    ignoreEmptyTitle = ignoreEmptyTitle
+    updatePageMetaOnPopStateEvents = updatePageMetaOnPopStateEvents
   )
 
   @inline def custom(locations: Signal[String]) = new CustomLocationProvider(locations)
