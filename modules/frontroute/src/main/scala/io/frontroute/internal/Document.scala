@@ -21,6 +21,7 @@ object Document {
         setMetaTag(name, Option.when(value.nonEmpty)(value))
       }
     }
+    setMetaTag("http-status", Option.when(pageMeta.status == PageStatusCode.NotFound)("404"))
   }
 
   private def setMetaTag(metaName: String, value: Option[String]): Unit = {
