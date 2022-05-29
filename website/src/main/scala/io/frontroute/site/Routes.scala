@@ -11,10 +11,7 @@ import io.laminext.tailwind.theme.Theme
 import org.scalajs.dom
 import io.frontroute.Implicits.locationProvider
 
-class Routes {
-
-  private val dsl = io.frontroute.dsl[(SiteModule, Page)]
-  import dsl._
+class Routes extends io.frontroute.RouteDSL[(SiteModule, Page)] {
 
   private val mobileMenuContent = Var[Option[ModalContent]](None)
 
