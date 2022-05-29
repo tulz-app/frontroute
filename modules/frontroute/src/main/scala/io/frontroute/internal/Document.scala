@@ -6,7 +6,7 @@ import io.frontroute.PageStatusCode
 
 object Document {
 
-  def update(
+  def updateMeta(
     pageMeta: DocumentMeta
   ): Unit = {
     org.scalajs.dom.document.title = pageMeta.title
