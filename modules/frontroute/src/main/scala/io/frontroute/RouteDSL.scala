@@ -2,7 +2,6 @@ package io.frontroute
 
 import com.raquo.laminar.api.L._
 import io.frontroute.internal.PathMatchResult
-import io.frontroute.internal.Util
 import com.raquo.airstream.core.EventStream
 import com.raquo.airstream.core.Signal
 import com.raquo.airstream.state.Var
@@ -70,7 +69,7 @@ trait RouteDSL[A] extends PathMatchers with RunRoute[A] with ApplyConverters[Typ
             val mapped = f(value)
             inner(mapped)(location, previous, state.enterAndSet(mapped))
           } else {
-            Util.rejected
+            rejected
           }
         }
       }
@@ -81,7 +80,7 @@ trait RouteDSL[A] extends PathMatchers with RunRoute[A] with ApplyConverters[Typ
           if (predicate(value)) {
             inner(value)(location, previous, state.enter)
           } else {
-            Util.rejected
+            rejected
           }
         }
       }
@@ -144,7 +143,7 @@ trait RouteDSL[A] extends PathMatchers with RunRoute[A] with ApplyConverters[Typ
 
   }
 
-  def reject: Route = (_, _, _) => Util.rejected
+  def reject: Route = (_, _, _) => rejected
 
   private[frontroute] def extractContext: Directive[RouteLocation] =
     Directive[RouteLocation](inner => (location, previous, state) => inner(location)(location, previous, state))
@@ -212,7 +211,7 @@ trait RouteDSL[A] extends PathMatchers with RunRoute[A] with ApplyConverters[Typ
       (location, previous, state) => {
         location.params.get(name).flatMap(_.headOption) match {
           case Some(paramValue) => inner(paramValue)(location, previous, state.enterAndSet(paramValue))
-          case None             => Util.rejected
+          case None             => rejected
         }
       }
     )
@@ -259,7 +258,7 @@ trait RouteDSL[A] extends PathMatchers with RunRoute[A] with ApplyConverters[Typ
       (location, previous, state) => {
         m(location.unmatchedPath) match {
           case PathMatchResult.Match(t, rest) => inner(t)(location.withUnmatchedPath(rest), previous, state.enterAndSet(t))
-          case _                              => Util.rejected
+          case _                              => rejected
         }
       }
     )
@@ -270,7 +269,7 @@ trait RouteDSL[A] extends PathMatchers with RunRoute[A] with ApplyConverters[Typ
       (location, previous, state) => {
         m(location.unmatchedPath) match {
           case PathMatchResult.Match(t, _) => inner(t)(location, previous, state.enterAndSet(t))
-          case _                           => Util.rejected
+          case _                           => rejected
         }
       }
     )
@@ -282,7 +281,7 @@ trait RouteDSL[A] extends PathMatchers with RunRoute[A] with ApplyConverters[Typ
         if (location.unmatchedPath.isEmpty) {
           inner(())(location, previous, state.enter)
         } else {
-          Util.rejected
+          rejected
         }
       }
     )
@@ -292,7 +291,7 @@ trait RouteDSL[A] extends PathMatchers with RunRoute[A] with ApplyConverters[Typ
       (location, previous, state) => {
         m(location.unmatchedPath) match {
           case PathMatchResult.Match(t, Nil) => inner(t)(location.withUnmatchedPath(List.empty), previous, state.enterAndSet(t))
-          case _                             => Util.rejected
+          case _                             => rejected
         }
       }
     )
@@ -303,7 +302,19 @@ trait RouteDSL[A] extends PathMatchers with RunRoute[A] with ApplyConverters[Typ
       (location, previous, state) => {
         m(location.unmatchedPath) match {
           case PathMatchResult.Match(t, Nil) => inner(t)(location, previous, state.enterAndSet(t))
-          case _                             => Util.rejected
+          case _                             => rejected
+        }
+      }
+    )
+  }
+
+  def when(condition: => Boolean): Directive0 = {
+    Directive[Unit](inner =>
+      (location, previous, state) => {
+        if (condition) {
+          inner(())(location, previous, state)
+        } else {
+          rejected
         }
       }
     )
@@ -323,7 +334,7 @@ trait RouteDSL[A] extends PathMatchers with RunRoute[A] with ApplyConverters[Typ
   def concat(routes: Route*): Route = (location, previous, state) => {
     def findFirst(rs: List[(Route, Int)]): EventStream[RouteResult[A]] =
       rs match {
-        case Nil                    => Util.rejected
+        case Nil                    => rejected
         case (route, index) :: tail =>
           route(location, previous, state.enterConcat(index)).flatMap {
             case RouteResult.Complete(state, result) => EventStream.fromValue(RouteResult.Complete(state, result))
@@ -370,5 +381,7 @@ trait RouteDSL[A] extends PathMatchers with RunRoute[A] with ApplyConverters[Typ
       import ctx.owner
       child.maybe <-- runRoute(route).asInstanceOf[Signal[Option[Element]]]
     }
+
+  private[frontroute] def rejected: EventStream[RouteResult[Nothing]] = EventStream.fromValue(RouteResult.Rejected)
 
 }
