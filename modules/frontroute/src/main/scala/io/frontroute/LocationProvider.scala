@@ -15,12 +15,9 @@ object LocationProvider {
   lazy val windowLocationProvider: LocationProvider = LocationProvider.browser(windowEvents.onPopState)
 
   @inline def browser(
-    popStateEvents: EventStream[dom.PopStateEvent],
-    updatePageMetaOnPopStateEvents: Boolean = true
-  ): LocationProvider = new BrowserLocationProvider(
-    popStateEvents = popStateEvents,
-    updatePageMetaOnPopStateEvents = updatePageMetaOnPopStateEvents
-  )
+    popStateEvents: EventStream[dom.PopStateEvent]
+  ): LocationProvider =
+    new BrowserLocationProvider(popStateEvents = popStateEvents)
 
   @inline def custom(locations: Signal[String]) = new CustomLocationProvider(locations)
 

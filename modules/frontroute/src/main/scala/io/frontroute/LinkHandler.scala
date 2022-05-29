@@ -6,15 +6,12 @@ import scala.scalajs.js
 
 object LinkHandler {
 
-  private def clickListener(defaultTitle: String): js.Function1[dom.Event, Unit] = event => {
+  private val clickListener: js.Function1[dom.Event, Unit] = event => {
     findParent("A", event.target.asInstanceOf[dom.Node]).foreach { aParent =>
-      val anchor      = aParent.asInstanceOf[dom.HTMLAnchorElement]
-      val rel         = anchor.rel
-      val href        = anchor.href
-      val title       = anchor.dataset.get("title")
-      val description = anchor.dataset.get("description")
-      val keywords    = anchor.dataset.get("keywords")
-      val sameOrigin  =
+      val anchor     = aParent.asInstanceOf[dom.HTMLAnchorElement]
+      val rel        = anchor.rel
+      val href       = anchor.href
+      val sameOrigin =
         href.startsWith("/") ||
           !href.startsWith("http://") && !href.startsWith("https://") ||
           dom.window.location.origin.exists(origin => href.startsWith(origin))
@@ -27,12 +24,7 @@ object LinkHandler {
           location.hash != dom.window.location.hash
         }
         if (shouldPush) {
-          val pageMeta = PageMeta(
-            title = title.getOrElse(defaultTitle),
-            description = description,
-            keywords = keywords
-          )
-          BrowserNavigation.pushState(url = anchor.href, meta = pageMeta)
+          BrowserNavigation.pushState(url = anchor.href)
         }
       } else if (rel == "external") {
         event.preventDefault()
@@ -41,18 +33,12 @@ object LinkHandler {
     }
   }
 
-  def install(
-    defaultTitle: String = ""
-  ): js.Function1[dom.Event, Unit] = {
-    val listener = clickListener(defaultTitle)
-    dom.document.addEventListener("click", listener)
-    listener
+  def install(): Unit = {
+    dom.document.addEventListener("click", clickListener)
   }
 
-  def uninstall(
-    listener: js.Function1[dom.Event, Unit]
-  ): Unit = {
-    dom.document.removeEventListener("click", listener)
+  def uninstall(): Unit = {
+    dom.document.removeEventListener("click", clickListener)
   }
 
   @scala.annotation.tailrec
