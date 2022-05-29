@@ -7,9 +7,8 @@ import scala.scalajs.js
 
 class CustomLocationProvider(locations: Signal[String]) extends LocationProvider {
 
-  val currentLocation: Signal[Option[RouteLocation]] = locations.map {
-    case UrlString(location) => Some(RouteLocation(location, js.undefined))
-    case _                   => None
+  val currentLocation: Signal[Option[RouteLocation]] = locations.map { case UrlString(location) =>
+    Some(RouteLocation(location, js.undefined))
   }
 
 }
