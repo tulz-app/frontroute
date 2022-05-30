@@ -19,7 +19,7 @@ object SignalTests extends TestBase {
           pathPrefix("prefix1") {
             pathPrefix("prefix2") {
               path(segment).signal { s =>
-                complete {
+                testComplete {
                   pathSignal = s
                   signals = nSignals(1, pathSignal)
                   probe.append("prefix1/prefix2")
@@ -53,7 +53,7 @@ object SignalTests extends TestBase {
           pathPrefix("prefix1") {
             pathPrefix("prefix2") {
               path(segment).signal { s =>
-                complete {
+                testComplete {
                   pathSignal = s
                   signals = nSignals(3, pathSignal)
                   probe.append("prefix1/prefix2")
@@ -91,7 +91,7 @@ object SignalTests extends TestBase {
           pathPrefix("prefix1") {
             pathPrefix("prefix2") {
               param("test-param").signal { s =>
-                complete {
+                testComplete {
                   paramSignal = s
                   signals = nSignals(3, paramSignal)
                   probe.append("prefix1/prefix2")
@@ -132,7 +132,7 @@ object SignalTests extends TestBase {
           pathPrefix("prefix1") {
             pathPrefix("prefix2") {
               (maybeParam("test-param-1").signal & maybeParam("test-param-2").signal) { (p1, p2) =>
-                complete {
+                testComplete {
                   paramSignal1 = p1
                   paramSignal2 = p2
                   signals1 = nSignals(4, paramSignal1)
@@ -182,7 +182,7 @@ object SignalTests extends TestBase {
           pathPrefix("prefix1") {
             pathPrefix("prefix2") {
               (path(segment) | pathEnd.map(_ => "default")).signal { s =>
-                complete {
+                testComplete {
                   pathSignal = s
                   signals = nSignals(4, pathSignal)
                   probe.append("prefix1/prefix2")
@@ -228,7 +228,7 @@ object SignalTests extends TestBase {
                   path("suffix-3").mapTo("suffix-3") |
                   pathEnd.mapTo("default")
               ).signal { s =>
-                complete {
+                testComplete {
                   pathSignal = s
                   signals = nSignals(4, pathSignal)
                   probe.append("prefix1/prefix2")

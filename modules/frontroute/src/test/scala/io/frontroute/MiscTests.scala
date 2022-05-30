@@ -13,7 +13,7 @@ object MiscTests extends TestBase {
       routeTest(
         route = probe =>
           extractHostname { hostname =>
-            complete {
+            testComplete {
               probe.append(hostname)
             }
           },
@@ -29,7 +29,7 @@ object MiscTests extends TestBase {
       routeTest(
         route = probe =>
           extractPort { port =>
-            complete {
+            testComplete {
               probe.append(port)
             }
           },
@@ -45,7 +45,7 @@ object MiscTests extends TestBase {
       routeTest(
         route = probe =>
           extractHost { host =>
-            complete {
+            testComplete {
               probe.append(host)
             }
           },
@@ -61,7 +61,7 @@ object MiscTests extends TestBase {
       routeTest(
         route = probe =>
           extractProtocol { protocol =>
-            complete {
+            testComplete {
               probe.append(protocol)
             }
           },
@@ -77,7 +77,7 @@ object MiscTests extends TestBase {
       routeTest(
         route = probe =>
           extractOrigin { origin =>
-            complete {
+            testComplete {
               probe.append(origin.getOrElse("---"))
             }
           },
@@ -93,7 +93,7 @@ object MiscTests extends TestBase {
       routeTest(
         route = probe =>
           historyState { state =>
-            complete {
+            testComplete {
               probe.append(JSON.stringify(state.getOrElse("NO-STATE")))
             }
           },
@@ -116,7 +116,7 @@ object MiscTests extends TestBase {
             counter
           } { state =>
             extractUnmatchedPath { _ =>
-              complete {
+              testComplete {
                 probe.append(state.toString)
               }
             }

@@ -14,17 +14,17 @@ object ConcatTests extends TestBase {
         route = probe =>
           concat(
             path("a") {
-              complete {
+              testComplete {
                 probe.append("a")
               }
             },
             path("b") {
-              complete {
+              testComplete {
                 probe.append("b")
               }
             },
             path("c") {
-              complete {
+              testComplete {
                 probe.append("c")
               }
             }
@@ -47,12 +47,12 @@ object ConcatTests extends TestBase {
               pathPrefix("prefix2") {
                 concat(
                   pathEnd {
-                    complete {
+                    testComplete {
                       probe.append("prefix1/prefix2")
                     }
                   },
                   path("suffix1") {
-                    complete {
+                    testComplete {
                       probe.append("prefix1/prefix2/suffix1")
                     }
                   }
@@ -63,18 +63,18 @@ object ConcatTests extends TestBase {
               pathPrefix("prefix3") {
                 concat(
                   pathEnd {
-                    complete {
+                    testComplete {
                       probe.append("prefix2/prefix3")
                     }
                   },
                   path("suffix2") {
-                    complete {
+                    testComplete {
                       probe.append("prefix2/prefix3/suffix2")
                     }
                   },
                   path("suffix3") {
                     param("param1") { paramValue =>
-                      complete {
+                      testComplete {
                         probe.append(s"prefix2/prefix3/suffix3?param1=$paramValue")
                       }
                     }

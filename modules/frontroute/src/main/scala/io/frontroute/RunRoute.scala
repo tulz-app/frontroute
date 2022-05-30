@@ -3,16 +3,15 @@ package io.frontroute
 import com.raquo.laminar.api.L._
 import io.frontroute.internal.RoutingState
 
-trait RunRoute[A] {
-  self: RouteDSL[A] =>
+trait RunRoute {
 
   def runRoute(
     route: Route
-  )(implicit owner: Owner, locationProvider: LocationProvider): Signal[Option[A]] = {
+  )(implicit owner: Owner, locationProvider: LocationProvider): Signal[Option[Element]] = {
 
     var currentState                      = RoutingState.empty
     var currentSubscription: Subscription = null
-    val currentResult                     = Var(Option.empty[A])
+    val currentResult                     = Var(Option.empty[Element])
 
     locationProvider.currentLocation
       .flatMap {

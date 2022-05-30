@@ -1,10 +1,10 @@
 package io.frontroute.testing
 
+import com.raquo.laminar.api.L._
 import com.raquo.airstream.core.Observer
 import com.raquo.airstream.core.Signal
 import com.raquo.airstream.ownership.Owner
 import com.raquo.airstream.state.Var
-import io.frontroute.RouteDSL
 import utest.TestSuite
 
 import scala.collection.mutable.ListBuffer
@@ -14,8 +14,9 @@ import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration._
 import scala.scalajs.js.timers.setTimeout
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits.global
+import io.frontroute._
 
-abstract class TestBase extends TestSuite with RouteDSL[Unit] {
+abstract class TestBase extends TestSuite {
 
   implicit protected val testOwner: Owner = new Owner {}
 
@@ -33,6 +34,11 @@ abstract class TestBase extends TestSuite with RouteDSL[Unit] {
     def toList: Seq[A] = buffer.toList
   }
 
+  protected def testComplete(body: => Unit): Element = {
+    val _ = body
+    null
+  }
+
   protected def routeTestF[T](
     route: Probe[String] => Route,
     wait: FiniteDuration = 10.millis,
@@ -41,7 +47,8 @@ abstract class TestBase extends TestSuite with RouteDSL[Unit] {
     implicit val locationProvider: TestLocationProvider = new TestLocationProvider()
     val probe                                           = new Probe[String]
 
-    val sub    = runRoute(route(probe))(testOwner, implicitly)
+    val _ = runRoute(route(probe))(testOwner, implicitly)
+
     val future = delayedFuture(wait).flatMap { _ =>
       try {
         checks(probe)

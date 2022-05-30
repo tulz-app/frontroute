@@ -19,3 +19,5 @@ addSbtPlugin("com.github.sbt" % "sbt-ci-release" % "1.5.10")
 addSbtPlugin("ch.epfl.scala" % "sbt-version-policy" % "2.0.1")
 
 addSbtPlugin("com.yurique" % "sbt-embedded-files" % "0.2.2")
+
+addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % "0.20.0")

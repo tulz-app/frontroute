@@ -17,7 +17,7 @@ object DisjunctionTests extends TestBase {
       routeTest(
         route = probe =>
           (pathEnd.map(_ => true) | path("page-1").map(_ => false)) { isIndex =>
-            complete {
+            testComplete {
               probe.append(Page(isIndex).toString)
             }
           },
@@ -48,7 +48,7 @@ object DisjunctionTests extends TestBase {
               path("page-1").map(_ => 1) |
               path("page-2").map(_ => 2)
           ) { index =>
-            complete {
+            testComplete {
               probe.append(Page(index).toString)
             }
           },
@@ -81,7 +81,7 @@ object DisjunctionTests extends TestBase {
       routeTest(
         route = probe =>
           (pathEnd.mapTo(true) | path("page-1").mapTo(false)) { isIndex =>
-            complete {
+            testComplete {
               probe.append(Page(isIndex).toString)
             }
           },
@@ -112,7 +112,7 @@ object DisjunctionTests extends TestBase {
               path("page-1").mapTo(1) |
               path("page-2").mapTo(2)
           ) { index =>
-            complete {
+            testComplete {
               probe.append(Page(index).toString)
             }
           },
@@ -145,7 +145,7 @@ object DisjunctionTests extends TestBase {
       routeTest(
         route = probe =>
           (pathEnd.collect { case _ => true } | path("page-1").collect { case _ => false }) { isIndex =>
-            complete {
+            testComplete {
               probe.append(Page(isIndex).toString)
             }
           },
@@ -176,7 +176,7 @@ object DisjunctionTests extends TestBase {
               path("page-1").collect { case _ => 1 } |
               path("page-2").collect { case _ => 2 }
           ) { index =>
-            complete {
+            testComplete {
               probe.append(Page(index).toString)
             }
           },

@@ -1,10 +1,10 @@
-package io.frontroute
-package site
+package io.frontroute.site
 package examples
 package ex_basic
 
 import io.frontroute.site.examples.CodeExample
 import com.yurique.embedded.FileAsString
+import io.frontroute.LocationProvider
 import io.laminext.AmAny
 import io.laminext.AmendedHtmlTag
 import org.scalajs.dom
@@ -19,7 +19,7 @@ object BasicRoutingExample
         useLocationProvider(locationProvider) { implicit locationProvider =>
           import com.raquo.laminar.api.L.{a => _, _}
           /* <focus> */
-          import io.frontroute.renderDSL._
+          import io.frontroute._
           /* </focus> */
 
           /* <focus> */

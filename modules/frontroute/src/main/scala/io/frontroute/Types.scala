@@ -1,12 +1,10 @@
 package io.frontroute
 
-import com.raquo.airstream.core.EventStream
+import com.raquo.laminar.api.L._
 import io.frontroute.internal.RoutingState
 
 object Types {
 
-  type PathMatcher0 = PathMatcher[Unit]
-
-  type TypedRoute[A] = (RouteLocation, RoutingState, RoutingState) => EventStream[RouteResult[A]]
+  type Route = (RouteLocation, RoutingState, RoutingState) => EventStream[RouteResult]
 
 }

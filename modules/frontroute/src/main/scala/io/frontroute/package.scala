@@ -1,19 +1,91 @@
 package io
 
 import com.raquo.laminar.api.L._
+import app.tulz.tuplez.ApplyConverter
+import app.tulz.tuplez.ApplyConverters
+import com.raquo.airstream.core.EventStream
+import com.raquo.airstream.core.Signal
+import io.frontroute.ops.DirectiveOfOptionOps
+import org.scalajs.dom
 
-package object frontroute {
+package object frontroute extends PathMatchers with RunRoute with Directives with ApplyConverters[Types.Route] {
 
-  type PathMatcher0 = Types.PathMatcher0
+  type PathMatcher0 = PathMatcher[Unit]
 
-  def dsl[A]: RouteDSL[A] = new RouteDSL[A] {}
+  type Route = Types.Route
 
-  object renderDSL extends RouteDSL[Element]
+  type Directive0 = Directive[Unit]
 
   object Implicits {
 
     implicit val locationProvider: LocationProvider = LocationProvider.windowLocationProvider
 
   }
+
+  implicit def directiveOfOptionSyntax(underlying: Directive[Option[Element]]): DirectiveOfOptionOps = new DirectiveOfOptionOps(underlying)
+
+  def reject: Route = (_, _, _) => rejected
+
+  def complete(result: => ToComplete[Element]): Route = (_, _, state) =>
+    EventStream.fromValue(
+      RouteResult.Complete(state, () => result.get)
+    )
+
+  def debug(message: Any, optionalParams: Any*)(subRoute: Route): Route =
+    (location, previous, state) => {
+      dom.console.debug(message, optionalParams: _*)
+      subRoute(location, previous, state)
+    }
+
+  def concat(routes: Route*): Route = (location, previous, state) => {
+    def findFirst(rs: List[(Route, Int)]): EventStream[RouteResult] =
+      rs match {
+        case Nil                    => rejected
+        case (route, index) :: tail =>
+          route(location, previous, state.enterConcat(index)).flatMap {
+            case RouteResult.Complete(state, result) => EventStream.fromValue(RouteResult.Complete(state, result))
+            case RouteResult.Rejected                => findFirst(tail)
+          }
+      }
+
+    findFirst(routes.zipWithIndex.toList)
+  }
+
+  implicit def toDirective[L](route: Route): Directive[L] = Directive[L](_ => route)
+
+  implicit def addDirectiveApply[L](directive: Directive[L])(implicit hac: ApplyConverter[L, Route]): hac.In => Route =
+    subRoute =>
+      (ctx, previous, state) => {
+        val result = directive.tapply(hac(subRoute))(ctx, previous, state)
+        result
+      }
+
+  implicit def addNullaryDirectiveApply(directive: Directive0): Route => Route =
+    subRoute =>
+      (ctx, previous, state) => {
+        val result = directive.tapply(_ => subRoute)(ctx, previous, state)
+        result
+      }
+
+  implicit def liftElementIntoVal(element: Element): Signal[Element] = Val(element)
+
+  implicit def runRouteImplicitly(
+    route: Route
+  )(implicit locationProvider: LocationProvider): Mod[Element] =
+    renderRoute(route)
+
+  def renderRoute(
+    route: Route
+  )(implicit locationProvider: LocationProvider): Mod[Element] =
+    onMountInsert { ctx =>
+      import ctx.owner
+      child.maybe <-- runRoute(route)
+    }
+
+  implicit def elementToRoute(e: => Element): Route = complete(e)
+
+  implicit def signlOfElementToRoute(e: => Signal[Element]): Route = complete(e)
+
+  private[frontroute] def rejected: EventStream[RouteResult] = EventStream.fromValue(RouteResult.Rejected)
 
 }

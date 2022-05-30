@@ -17,7 +17,7 @@ object MemoizeTests extends TestBase {
               asyncInvocations = asyncInvocations :+ value
               EventStream.fromValue(s"retrieved: $value")
             }) { retrieved =>
-              complete {
+              testComplete {
                 probe.append(retrieved)
               }
             }

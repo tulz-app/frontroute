@@ -13,7 +13,7 @@ object ConjunctionTests extends TestBase {
           pathPrefix("prefix1") {
             pathPrefix("prefix2") {
               (path(segment) & param("param1")) { (seg, paramValue) =>
-                complete {
+                testComplete {
                   probe.append(s"prefix1/prefix2/$seg?param1=$paramValue")
                 }
               }

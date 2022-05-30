@@ -13,7 +13,7 @@ object PathTests extends TestBase {
       routeTest(
         route = probe =>
           pathEnd {
-            complete {
+            testComplete {
               probe.append("end")
             }
           },
@@ -29,7 +29,7 @@ object PathTests extends TestBase {
       routeTest(
         route = probe =>
           path(segment(Set("a", "b"))) { str =>
-            complete {
+            testComplete {
               probe.append(str)
             }
           },
@@ -46,7 +46,7 @@ object PathTests extends TestBase {
       routeTest(
         route = probe =>
           path(segment(Set("a", "b")).recover("default")) { str =>
-            complete {
+            testComplete {
               probe.append(str)
             }
           },
@@ -65,12 +65,12 @@ object PathTests extends TestBase {
         route = probe =>
           concat(
             pathEnd {
-              complete {
+              testComplete {
                 probe.append("end")
               }
             },
             path("path1") {
-              complete {
+              testComplete {
                 probe.append("path1")
               }
             }
@@ -90,7 +90,7 @@ object PathTests extends TestBase {
         route = probe =>
           testPathPrefix("a" / "b") {
             extractUnmatchedPath { unmatched =>
-              complete {
+              testComplete {
                 probe.append(unmatched.mkString("/"))
               }
             }
@@ -108,7 +108,7 @@ object PathTests extends TestBase {
         route = probe =>
           testPath("a" / "b" / "c" / "d") {
             extractUnmatchedPath { unmatched =>
-              complete {
+              testComplete {
                 probe.append(unmatched.mkString("/"))
               }
             }

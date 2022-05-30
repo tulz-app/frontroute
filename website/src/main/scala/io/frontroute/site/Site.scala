@@ -1,7 +1,5 @@
 package io.frontroute.site
 
-//import io.frontroute.site.examples.CodeExample
-//import io.frontroute.site.pages.CodeExamplePage
 import io.frontroute.site.pages.CodeExamplePage
 import io.frontroute.site.pages.DocumentationPage
 import com.yurique.embedded.FileAsString
