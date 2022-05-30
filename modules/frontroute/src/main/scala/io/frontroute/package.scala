@@ -88,4 +88,12 @@ package object frontroute extends PathMatchers with RunRoute with Directives wit
 
   private[frontroute] def rejected: EventStream[RouteResult] = EventStream.fromValue(RouteResult.Rejected)
 
+  def routeLink(href: String, mods: (Signal[Boolean] => Mod[HtmlElement])*)(implicit locationProvider: LocationProvider): Element = {
+    val active = locationProvider.isActive(href)
+    a(
+      com.raquo.laminar.api.L.href := href,
+      mods.map(_(active))
+    )
+  }
+
 }

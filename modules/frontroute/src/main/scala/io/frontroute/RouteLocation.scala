@@ -11,6 +11,7 @@ final case class RouteLocation(
   host: String,
   origin: Option[String],
   unmatchedPath: List[String],
+  fullPath: List[String],
   params: Map[String, Seq[String]],
   state: js.UndefOr[js.Any]
 ) {
@@ -30,17 +31,20 @@ final case class RouteLocation(
 
 object RouteLocation {
 
-  def apply(location: dom.Location, state: js.UndefOr[js.Any]): RouteLocation =
+  def apply(location: dom.Location, state: js.UndefOr[js.Any]): RouteLocation = {
+    val path = extractPath(location)
     new RouteLocation(
       hostname = location.hostname,
       port = location.port,
       protocol = location.protocol,
       host = location.host,
       origin = location.origin.toOption,
-      unmatchedPath = extractPath(location),
+      unmatchedPath = path,
+      fullPath = path,
       params = LocationUtils.parseLocationParams(location),
       state = state
     )
+  }
 
   private def extractPath(location: dom.Location): List[String] = {
     location.pathname.dropWhile(_ == '/').split('/').toList.dropWhile(_.isEmpty)

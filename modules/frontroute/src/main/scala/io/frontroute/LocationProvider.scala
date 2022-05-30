@@ -7,6 +7,12 @@ import org.scalajs.dom
 trait LocationProvider {
 
   def currentLocation: Signal[Option[RouteLocation]]
+  def isActive(href: String): Signal[Boolean] = currentLocation.map {
+    case None    => false
+    case Some(l) =>
+      l.fullPath.mkString("/", "/", "").startsWith(href)
+
+  }
 
 }
 
