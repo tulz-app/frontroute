@@ -25,7 +25,7 @@ object Document {
   }
 
   private def setMetaTag(metaName: String, value: Option[String]): Unit = {
-    var metaElement = org.scalajs.dom.document.head.querySelector(s"meta[name=${metaName}]'")
+    var metaElement = org.scalajs.dom.document.head.querySelector(s"meta[name=${metaName}]")
     value match {
       case Some(value) =>
         if (metaElement == null) {
