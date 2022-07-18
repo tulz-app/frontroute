@@ -58,7 +58,7 @@ object TabsExample
                   )
                 }
               },
-              addDirectiveApply(extractUnmatchedPath).apply { unmatched =>
+              extractUnmatchedPath { unmatched =>
                 complete {
                   div(
                     div(cls := "text-2xl", "Not Found"),

@@ -1,5 +1,6 @@
 package io.frontroute.testing
 
+import com.raquo.airstream.core.EventStream
 import com.raquo.airstream.core.Signal
 import com.raquo.airstream.eventbus.EventBus
 import io.frontroute.LocationProvider
@@ -19,7 +20,7 @@ class TestLocationProvider extends LocationProvider {
 
   private val bus = new EventBus[RouteLocation]
 
-  val currentLocation: Signal[Option[RouteLocation]] = bus.events.toWeakSignal
+  val locations: EventStream[RouteLocation] = bus.events
 
   def protocol(protocol: String): Unit = {
     currentProtocol = protocol
@@ -66,6 +67,7 @@ class TestLocationProvider extends LocationProvider {
         host = s"${currentHostname}:${currentPort}",
         origin = Some(s"${currentProtocol}://${currentHostname}:${currentPort}"),
         unmatchedPath = currentPath,
+        fullPath = currentPath,
         params = currentParams,
         state = currentState
       )

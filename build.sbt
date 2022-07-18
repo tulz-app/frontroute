@@ -57,7 +57,7 @@ lazy val frontroute =
     .in(file("modules/frontroute"))
     .enablePlugins(ScalaJSPlugin, ScalaJSJUnitPlugin)
     .settings(
-      name := "frontroute",
+      name                     := "frontroute",
       libraryDependencies ++=
         Seq.concat(
           Dependencies.laminar.value,
@@ -66,6 +66,7 @@ lazy val frontroute =
           Dependencies.`scala-js-macrotask-executor`.value.map(_ % Test)
         ),
       testFrameworks += new TestFramework("utest.runner.Framework"),
+      Test / parallelExecution := false,
       ScalaOptions.fixOptions,
       scalacOptions ++= {
         val sourcesGithubUrl  = s"https://raw.githubusercontent.com/tulz-app/frontroute/${git.gitHeadCommit.value.get}/"

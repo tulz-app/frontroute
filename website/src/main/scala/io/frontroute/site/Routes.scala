@@ -9,7 +9,6 @@ import io.laminext.tailwind.theme.Modal
 import io.laminext.tailwind.theme.Theme
 import org.scalajs.dom
 import io.frontroute._
-import io.frontroute.Implicits.locationProvider
 
 class Routes {
 

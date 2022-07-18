@@ -18,6 +18,13 @@ import io.frontroute._
 
 abstract class TestBase extends TestSuite {
 
+  override def utestBeforeEach(path: Seq[String]): Unit = {
+    println(s"----- utestBeforeEach: $path")
+  }
+  override def utestAfterEach(path: Seq[String]): Unit  = {
+    println(s"----- utestAfterEach: $path")
+  }
+
   implicit protected val testOwner: Owner = new Owner {}
 
   case class Page(p: String)
@@ -44,21 +51,17 @@ abstract class TestBase extends TestSuite {
     wait: FiniteDuration = 10.millis,
     init: TestLocationProvider => Unit
   )(checks: Probe[String] => Future[T]): Future[T] = {
-    implicit val locationProvider: TestLocationProvider = new TestLocationProvider()
-    val probe                                           = new Probe[String]
-
-    val _ = runRoute(route(probe))(testOwner, implicitly)
+    val locationProvider: TestLocationProvider = new TestLocationProvider()
+    val probe                                  = new Probe[String]
+    Config.setLocationProvider(locationProvider)
+    val _                                      = runRoute(route(probe))(testOwner)
 
     val future = delayedFuture(wait).flatMap { _ =>
-      try {
-        checks(probe)
-      } finally {
-//        sub.kill()
-      }
+      GlobalState.kill()
+      checks(probe)
     }
     init(locationProvider)
     future
-
   }
 
   protected def routeTest[T](

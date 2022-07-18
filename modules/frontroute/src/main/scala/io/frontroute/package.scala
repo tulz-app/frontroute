@@ -16,6 +16,14 @@ package object frontroute extends PathMatchers with RunRoute with Directives wit
 
   type Directive0 = Directive[Unit]
 
+  object Config {
+
+    def setLocationProvider(locationProvider: LocationProvider): Unit = {
+      GlobalState.setLocationProvider(locationProvider)
+    }
+
+  }
+
   object Implicits {
 
     implicit val locationProvider: LocationProvider = LocationProvider.windowLocationProvider
@@ -26,9 +34,9 @@ package object frontroute extends PathMatchers with RunRoute with Directives wit
 
   def reject: Route = (_, _, _) => rejected
 
-  def complete(result: => ToComplete[Element]): Route = (_, _, state) =>
+  def complete(result: => ToComplete[Element]): Route = (location, _, state) =>
     EventStream.fromValue(
-      RouteResult.Complete(state, () => result.get)
+      RouteResult.Complete(state, location, () => result.get)
     )
 
   def debug(message: Any, optionalParams: Any*)(subRoute: Route): Route =
@@ -43,8 +51,8 @@ package object frontroute extends PathMatchers with RunRoute with Directives wit
         case Nil                    => rejected
         case (route, index) :: tail =>
           route(location, previous, state.enterConcat(index)).flatMap {
-            case RouteResult.Complete(state, result) => EventStream.fromValue(RouteResult.Complete(state, result))
-            case RouteResult.Rejected                => findFirst(tail)
+            case RouteResult.Complete(state, location, result) => EventStream.fromValue(RouteResult.Complete(state, location, result))
+            case RouteResult.Rejected                          => findFirst(tail)
           }
       }
 
@@ -71,12 +79,12 @@ package object frontroute extends PathMatchers with RunRoute with Directives wit
 
   implicit def runRouteImplicitly(
     route: Route
-  )(implicit locationProvider: LocationProvider): Mod[Element] =
+  ): Mod[Element] =
     renderRoute(route)
 
   def renderRoute(
     route: Route
-  )(implicit locationProvider: LocationProvider): Mod[Element] =
+  ): Mod[Element] =
     onMountInsert { ctx =>
       import ctx.owner
       child.maybe <-- runRoute(route)
@@ -84,12 +92,12 @@ package object frontroute extends PathMatchers with RunRoute with Directives wit
 
   implicit def elementToRoute(e: => Element): Route = complete(e)
 
-  implicit def signlOfElementToRoute(e: => Signal[Element]): Route = complete(e)
+  implicit def signalOfElementToRoute(e: => Signal[Element]): Route = complete(e)
 
   private[frontroute] def rejected: EventStream[RouteResult] = EventStream.fromValue(RouteResult.Rejected)
 
-  def routeLink(href: String, mods: (Signal[Boolean] => Mod[HtmlElement])*)(implicit locationProvider: LocationProvider): Element = {
-    val active = locationProvider.isActive(href)
+  def routeLink(href: String, mods: (Signal[Boolean] => Mod[HtmlElement])*): Element = {
+    val active = GlobalState.isActive(href)
     a(
       com.raquo.laminar.api.L.href := href,
       mods.map(_(active))

@@ -26,28 +26,26 @@ object BasicRoutingExample
           val route =
             concat(
               pathEnd {
-                complete { div(cls := "text-2xl", "Index page.") }
+                div(cls := "text-2xl", "Index page.")
               },
               (path("new-path") | path("legacy-path")) {
-                complete { div(cls := "text-2xl", "new-path OR legacy-path") }
+                div(cls := "text-2xl", "new-path OR legacy-path")
               },
               pathPrefix("some-section") {
                 concat(
                   path("some-page") {
-                    complete { div(cls := "text-2xl", "Some page.") }
+                    div(cls := "text-2xl", "Some page.")
                   },
                   path("another-page") {
-                    complete { div(cls := "text-2xl", "Another page.") }
+                    div(cls := "text-2xl", "Another page.")
                   }
                 )
               },
               extractUnmatchedPath { unmatched =>
-                complete {
-                  div(
-                    div(cls := "text-2xl", "Not Found"),
-                    div(unmatched.mkString("/", "/", ""))
-                  )
-                }
+                div(
+                  div(cls := "text-2xl", "Not Found"),
+                  div(unmatched.mkString("/", "/", ""))
+                )
               }
             )
           /* </focus> */

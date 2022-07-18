@@ -7,13 +7,16 @@ trait RunRoute {
 
   def runRoute(
     route: Route
-  )(implicit owner: Owner, locationProvider: LocationProvider): Signal[Option[Element]] = {
+  )(implicit owner: Owner): Signal[Option[Element]] = {
 
     var currentState                      = RoutingState.empty
     var currentSubscription: Subscription = null
     val currentResult                     = Var(Option.empty[Element])
 
-    locationProvider.currentLocation
+    GlobalState.locationChanges
+      .mapTo {
+        GlobalState.currentUnmatched
+      }
       .flatMap {
         case Some(location) =>
           route(
@@ -21,14 +24,15 @@ trait RunRoute {
             currentState.resetPath,
             RoutingState.withPersistentData(currentState.persistent, currentState.async)
           ).map {
-            case RouteResult.Complete(nextState, createResult) =>
+            case RouteResult.Complete(nextState, nextLocation, createResult) =>
               if (nextState != currentState) {
                 currentState = nextState
+                GlobalState.setCurrentUnmatched(nextLocation)
                 Some(createResult)
               } else {
                 Option.empty
               }
-            case RouteResult.Rejected                          =>
+            case RouteResult.Rejected                                        =>
               Option.empty
           }
         case None           => EventStream.empty
@@ -43,6 +47,7 @@ trait RunRoute {
           currentResult.set(Option(result))
         }
       }
+
     currentResult.signal
   }
 

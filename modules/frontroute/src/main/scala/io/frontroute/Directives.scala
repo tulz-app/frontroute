@@ -39,11 +39,6 @@ trait Directives {
     )
   }
 
-  def location: Directive[LocationProvider] =
-    extract(_.unmatchedPath).signal.map { $unmatched =>
-      LocationProvider.custom($unmatched.map(path => path.mkString("/", "/", "")))
-    }
-
   def memoize[T](retrieve: () => EventStream[T]): Directive[T] = {
     Directive[T](inner =>
       (location, previous, state) => {

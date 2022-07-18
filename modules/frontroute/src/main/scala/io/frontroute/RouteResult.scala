@@ -6,6 +6,6 @@ import io.frontroute.internal.RoutingState
 sealed trait RouteResult extends Product with Serializable
 
 object RouteResult {
-  final case class Complete(state: RoutingState, result: () => Signal[Element]) extends RouteResult
-  case object Rejected                                                          extends RouteResult
+  final case class Complete(state: RoutingState, location: RouteLocation, result: () => Signal[Element]) extends RouteResult
+  case object Rejected                                                                                   extends RouteResult
 }

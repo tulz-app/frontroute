@@ -6,13 +6,7 @@ import org.scalajs.dom
 
 trait LocationProvider {
 
-  def currentLocation: Signal[Option[RouteLocation]]
-  def isActive(href: String): Signal[Boolean] = currentLocation.map {
-    case None    => false
-    case Some(l) =>
-      l.fullPath.mkString("/", "/", "").startsWith(href)
-
-  }
+  val locations: EventStream[RouteLocation]
 
 }
 
@@ -25,6 +19,6 @@ object LocationProvider {
   ): LocationProvider =
     new BrowserLocationProvider(popStateEvents = popStateEvents)
 
-  @inline def custom(locations: Signal[String]) = new CustomLocationProvider(locations)
+  @inline def custom(locations: EventStream[String]) = new CustomLocationProvider(locations)
 
 }
