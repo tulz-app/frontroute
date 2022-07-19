@@ -59,7 +59,7 @@ object CodeExampleDisplay {
           example.code.source
             .replace("import com.raquo.laminar.api.L.{a => _, _}", "import com.raquo.laminar.api.L._")
             .replace(
-              """          |      (a: AmendedHtmlTag[dom.html.Anchor, AmAny]) =>
+              """      (a: AmendedHtmlTag[dom.html.Anchor, AmAny]) =>
                 |        {""".stripMargin,
               ""
             )
@@ -120,7 +120,7 @@ object CodeExampleDisplay {
                 }
               ),
               span(
-                "dim context"
+                "highlight relevant code"
               )
             )
           },
@@ -215,7 +215,7 @@ object CodeExampleDisplay {
     )
 
     div(
-      cls := "w-full border-4 border-dashed border-blue-400 bg-blue-300 text-blue-900 rounded-lg -m-2 p-4",
+      cls := "w-full border-4 border-dashed border-blue-400 bg-blue-300 text-blue-900 rounded-lg p-6",
       div(
         cls := "-mx-4 -mt-4 p-4 bg-blue-500 flex space-x-1",
         urlInput.amend(

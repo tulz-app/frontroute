@@ -19,38 +19,35 @@ object BasicRoutingExample
       import io.frontroute._
       /* </focus> */
 
-      /* <focus> */
-      val route =
-        concat(
-          pathEnd {
-            div(cls := "text-2xl", "Index page.")
-          },
-          (path("new-path") | path("legacy-path")) {
-            div(cls := "text-2xl", "new-path OR legacy-path")
-          },
-          pathPrefix("some-section") {
-            concat(
-              path("some-page") {
-                div(cls := "text-2xl", "Some page.")
-              },
-              path("another-page") {
-                div(cls := "text-2xl", "Another page.")
-              }
-            )
-          },
-          extractUnmatchedPath { unmatched =>
-            div(
-              div(cls := "text-2xl", "Not Found"),
-              div(unmatched.mkString("/", "/", ""))
-            )
-          }
-        )
-      /* </focus> */
-
       div(
         div(
           cls := "p-4 min-h-[300px]",
-          route
+          /* <focus> */
+          concat(
+            pathEnd {
+              div(cls := "text-2xl", "Index page.")
+            },
+            (path("new-path") | path("legacy-path")) {
+              div(cls := "text-2xl", "new-path OR legacy-path")
+            },
+            pathPrefix("some-section") {
+              concat(
+                path("some-page") {
+                  div(cls := "text-2xl", "Some page.")
+                },
+                path("another-page") {
+                  div(cls := "text-2xl", "Another page.")
+                }
+              )
+            },
+            extractUnmatchedPath { unmatched =>
+              div(
+                div(cls := "text-2xl", "Not Found"),
+                div(unmatched.mkString("/", "/", ""))
+              )
+            }
+          )
+          /* </focus> */
         ),
         div(
           cls := "bg-blue-900 -mx-4 -mb-4 p-2",

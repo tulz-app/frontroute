@@ -24,25 +24,27 @@ object RecursivePathMatchingExample
             head :: rest
           }
         }
+      /* </focus> */
 
       val route =
         concat(
           pathEnd {
-            complete { div(cls := "text-2xl", "Index page.") }
+            div(cls := "text-2xl", "Index page.")
           },
-          (pathPrefix("recursive") & recursivePathMatch) { segments =>
-            complete { div(div(cls := "text-2xl", "Recursive page."), div(s"Segments: ${segments.mkString(", ")}")) }
+          (pathPrefix("recursive") &
+            /* <focus> */
+            recursivePathMatch
+          /* </focus> */
+          ) { segments =>
+            div(div(cls := "text-2xl", "Recursive page."), div(s"Segments: ${segments.mkString(", ")}"))
           },
           extractUnmatchedPath { unmatched =>
-            complete {
-              div(
-                div(cls := "text-2xl", "Not Found"),
-                div(unmatched.mkString("/", "/", ""))
-              )
-            }
+            div(
+              div(cls := "text-2xl", "Not Found"),
+              div(unmatched.mkString("/", "/", ""))
+            )
           }
         )
-      /* </focus> */
 
       div(
         div(
@@ -76,11 +78,6 @@ object RecursivePathMatchingExample
               cls  := "text-blue-300 hover:text-blue-100",
               href := "/recursive/1/2",
               "➜ /recursive/1/2"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/recursive/1/2/3",
-              "➜ /recursive/1/2/3"
             ),
             a(
               cls  := "text-blue-300 hover:text-blue-100",

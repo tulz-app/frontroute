@@ -25,28 +25,22 @@ object SignalExample
           /* </focus> */
           concat(
             pathEnd {
-              complete {
-                div(
-                  div(cls := "text-2xl", "Index page."),
-                  div(s"Signal value: $signalValue")
-                )
-              }
+              div(
+                div(cls := "text-2xl", "Index page."),
+                div(s"Signal value: $signalValue")
+              )
             },
             path("some-page") {
-              complete {
-                div(
-                  div(cls := "text-2xl", "Some page."),
-                  div(s"Signal value: $signalValue")
-                )
-              }
+              div(
+                div(cls := "text-2xl", "Some page."),
+                div(s"Signal value: $signalValue")
+              )
             },
             extractUnmatchedPath { unmatched =>
-              complete {
-                div(
-                  div(cls := "text-2xl", "Not Found"),
-                  div(unmatched.mkString("/", "/", ""))
-                )
-              }
+              div(
+                div(cls := "text-2xl", "Not Found"),
+                div(unmatched.mkString("/", "/", ""))
+              )
             }
           )
         }

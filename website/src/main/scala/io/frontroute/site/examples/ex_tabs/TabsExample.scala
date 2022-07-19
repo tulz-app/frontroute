@@ -24,44 +24,40 @@ object TabsExample
           /* <focus> */
           (pathEnd.mapTo("tab-1") | path(Set("tab-1", "tab-2"))).signal { tab =>
             /* </focus> */
-            complete {
+            div(
+              cls := "space-y-2",
               div(
-                cls := "space-y-2",
+                cls := "flex space-x-2",
+                a(
+                  href := "/tab-1",
+                  "Tab 1",
+                  cls  := "text-xl p-1 rounded",
+                  cls.toggle("bg-blue-400 text-blue-100") <-- tab.valueIs("tab-1")
+                ),
+                a(
+                  href := "/tab-2",
+                  "Tab 2",
+                  cls  := "text-xl p-1 rounded",
+                  cls.toggle("bg-blue-400 text-blue-100") <-- tab.valueIs("tab-2")
+                )
+              ),
+              div(
                 div(
-                  cls := "flex space-x-2",
-                  a(
-                    href := "/tab-1",
-                    "Tab 1",
-                    cls  := "text-xl p-1 rounded",
-                    cls.toggle("bg-blue-400 text-blue-100") <-- tab.valueIs("tab-1")
-                  ),
-                  a(
-                    href := "/tab-2",
-                    "Tab 2",
-                    cls  := "text-xl p-1 rounded",
-                    cls.toggle("bg-blue-400 text-blue-100") <-- tab.valueIs("tab-2")
-                  )
+                  cls.toggle("hidden") <-- !tab.valueIs("tab-1"),
+                  textArea("tab-1 text area", cls := "bg-blue-100 text-blue-500")
                 ),
                 div(
-                  div(
-                    cls.toggle("hidden") <-- !tab.valueIs("tab-1"),
-                    textArea("tab-1 text area", cls := "bg-blue-100 text-blue-500")
-                  ),
-                  div(
-                    cls.toggle("hidden") <-- !tab.valueIs("tab-2"),
-                    textArea("tab-2 text area", cls := "bg-blue-100 text-blue-500")
-                  )
+                  cls.toggle("hidden") <-- !tab.valueIs("tab-2"),
+                  textArea("tab-2 text area", cls := "bg-blue-100 text-blue-500")
                 )
               )
-            }
+            )
           },
           extractUnmatchedPath { unmatched =>
-            complete {
-              div(
-                div(cls := "text-2xl", "Not Found"),
-                div(unmatched.mkString("/", "/", ""))
-              )
-            }
+            div(
+              div(cls := "text-2xl", "Not Found"),
+              div(unmatched.mkString("/", "/", ""))
+            )
           }
         )
 

@@ -31,34 +31,29 @@ object MemoizeExample
             } else {
               s"non-okay response: ${response.status}"
             }
-
           }
       /* </focus> */
 
       val route =
         concat(
           pathEnd {
-            complete { div(cls := "text-2xl", "Index page.") }
+            div(cls := "text-2xl", "Index page.")
           },
           path("memoize" / segment) { value =>
             /* <focus> */
             memoize(() => fetchData(value)) { fetched =>
               /* </focus> */
-              complete {
-                div(
-                  div(cls := "text-2xl", "Index page."),
-                  div(s"Fetched value: $fetched")
-                )
-              }
+              div(
+                div(cls := "text-2xl", "Index page."),
+                div(s"Fetched value: $fetched")
+              )
             }
           },
           extractUnmatchedPath { unmatched =>
-            complete {
-              div(
-                div(cls := "text-2xl", "Not Found"),
-                div(unmatched.mkString("/", "/", ""))
-              )
-            }
+            div(
+              div(cls := "text-2xl", "Not Found"),
+              div(unmatched.mkString("/", "/", ""))
+            )
           }
         )
 

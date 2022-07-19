@@ -45,34 +45,28 @@ object AuthExample
           /* </focus> */
           concat(
             pathEnd {
-              complete {
-                div(
-                  div(cls := "text-2xl", "Index page."),
-                  div(s"Maybe user: $maybeUser")
-                )
-              }
+              div(
+                div(cls := "text-2xl", "Index page."),
+                div(s"Maybe user: $maybeUser")
+              )
             },
             pathPrefix("private") {
               /* <focus> */
               requireAuthentication { user =>
                 /* </focus> */
                 path("profile") {
-                  complete {
-                    div(
-                      div(cls := "text-2xl", "Profile page."),
-                      div(s"User: $user")
-                    )
-                  }
+                  div(
+                    div(cls := "text-2xl", "Profile page."),
+                    div(s"User: $user")
+                  )
                 }
               }
             },
             extractUnmatchedPath { unmatched =>
-              complete {
-                div(
-                  div(cls := "text-2xl", "Not Found"),
-                  div(unmatched.mkString("/", "/", ""))
-                )
-              }
+              div(
+                div(cls := "text-2xl", "Not Found"),
+                div(unmatched.mkString("/", "/", ""))
+              )
             }
           )
         }

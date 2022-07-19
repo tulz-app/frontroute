@@ -20,25 +20,23 @@ object ParamsExample
       val route =
         concat(
           pathEnd {
-            complete { div(cls := "text-2xl", "Index page.") }
+            div(cls := "text-2xl", "Index page.")
           },
           /* <focus> */
           (path("movie") & param("id")) { movieId =>
             /* </focus> */
-            complete { div(div(cls := "text-2xl", "Movie page."), div(s"Movie ID: $movieId")) }
+            div(div(cls := "text-2xl", "Movie page."), div(s"Movie ID: $movieId"))
           },
           /* <focus> */
           (path("movies" / "search") & maybeParam("director") & maybeParam("year")) { (maybeDirector, maybeYear) =>
             /* </focus> */
-            complete { div(div(cls := "text-2xl", "Movie search page."), div(s"Director: $maybeDirector"), div(s"Year: $maybeYear")) }
+            div(div(cls := "text-2xl", "Movie search page."), div(s"Director: $maybeDirector"), div(s"Year: $maybeYear"))
           },
           extractUnmatchedPath { unmatched =>
-            complete {
-              div(
-                div(cls := "text-2xl", "Not Found"),
-                div(unmatched.mkString("/", "/", ""))
-              )
-            }
+            div(
+              div(cls := "text-2xl", "Not Found"),
+              div(unmatched.mkString("/", "/", ""))
+            )
           }
         )
 
@@ -72,7 +70,7 @@ object ParamsExample
             ),
             a(
               cls  := "text-blue-300 hover:text-blue-100",
-              href := "/movies/search?director=nolan&year=interstellar",
+              href := "/movies/search?director=nolan&year=2014",
               "➜ /movies/search?director=nolan&year=2014"
             ),
             a(
