@@ -8,7 +8,7 @@ trait RunRoute {
   def runRoute(
     route: Route
   )(implicit owner: Owner): Signal[Option[Element]] = {
-    println(s"run route")
+//    println(s"run route")
     var currentState                      = RoutingState.empty
     var currentSubscription: Subscription = null
     val currentResult                     = Var(Option.empty[Element])
@@ -20,12 +20,12 @@ trait RunRoute {
         EventStream.fromValue(()),
         GlobalState.locationChanges
       )
-      .map { _ =>
-        println(s"!!!! deepness:         ${GlobalState.deepness}")
-        println(s"!!   my deepness:      ${myDeepness}")
-        println(s"     currentUnmatched: ${GlobalState.currentUnmatched}")
-        println(s"     previous:         ${previous}")
-      }
+//      .map { _ =>
+//        println(s"!!!! deepness:         ${GlobalState.deepness}")
+//        println(s"!!   my deepness:      ${myDeepness}")
+//        println(s"     currentUnmatched: ${GlobalState.currentUnmatched}")
+//        println(s"     previous:         ${previous}")
+//      }
       .collect {
         case _ if GlobalState.deepness == myDeepness && !previous.contains(GlobalState.currentLocation) =>
           previous = Some(GlobalState.currentLocation)
@@ -38,12 +38,12 @@ trait RunRoute {
           RoutingState.withPersistentData(currentState.persistent, currentState.async)
         ).map {
           case RouteResult.Complete(nextState, location, createResult) =>
-            println(s"nextState: $nextState")
-            println(s"currentState: $currentState")
-            println(s"next location: $location")
+//            println(s"nextState: $nextState")
+//            println(s"currentState: $currentState")
+//            println(s"next location: $location")
             GlobalState.setCurrentUnmatched(location)
             if (nextState != currentState) {
-              println(s"!! state changed")
+//              println(s"!! state changed")
               currentState = nextState
               Some(createResult)
             } else {
@@ -59,7 +59,7 @@ trait RunRoute {
         r
       }
       .collect { case Some(createView) =>
-        println(s"matched: $myDeepness")
+//        println(s"matched: $myDeepness")
         createView()
       }
       .foreach { createResult =>

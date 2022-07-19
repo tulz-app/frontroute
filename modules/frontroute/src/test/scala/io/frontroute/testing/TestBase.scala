@@ -18,11 +18,8 @@ import io.frontroute._
 
 abstract class TestBase extends TestSuite {
 
-  override def utestBeforeEach(path: Seq[String]): Unit = {
-    println(s"----- utestBeforeEach: $path")
-  }
-  override def utestAfterEach(path: Seq[String]): Unit  = {
-    println(s"----- utestAfterEach: $path")
+  override def utestAfterEach(path: Seq[String]): Unit = {
+    GlobalState.kill()
   }
 
   implicit protected val testOwner: Owner = new Owner {}
@@ -57,7 +54,6 @@ abstract class TestBase extends TestSuite {
     val _                                      = runRoute(route(probe))(testOwner)
 
     val future = delayedFuture(wait).flatMap { _ =>
-      GlobalState.kill()
       checks(probe)
     }
     init(locationProvider)

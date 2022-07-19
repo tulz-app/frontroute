@@ -19,12 +19,12 @@ private[frontroute] object GlobalState {
   def currentLocation: RouteLocation     = _currentLocation
 
   def setCurrentUnmatched(location: RouteLocation): Unit = {
-    println(s"got new unmatched: $location")
+//    println(s"got new unmatched: $location")
     _currentUnmatched = location
   }
 
   def emit(): Unit = {
-    println("emitting")
+//    println("emitting")
     locationChangesBus.emit(())
   }
 
@@ -36,7 +36,7 @@ private[frontroute] object GlobalState {
     }
     subscription = locationProvider.changes.foreach { _ =>
       val location = locationProvider.current
-      println(s"got new location: ${locationProvider.current}")
+//      println(s"got new location: ${locationProvider.current}")
       setDeepness(0)
       if (_currentLocation != location) {
         _currentLocation = location
@@ -48,16 +48,18 @@ private[frontroute] object GlobalState {
   }
 
   def setDeepness(d: Int): Unit = {
-    println(s"deepness <-- $d")
+//    println(s"deepness <-- $d")
     _deepness = d
   }
 
   def kill(): Unit = {
     if (subscription != null) {
-      println("!! KILL")
+//      println("!! KILL")
       subscription.kill()
+      subscription = null
       _currentLocation = RouteLocation.emoty
       _currentUnmatched = RouteLocation.emoty
+      _deepness = 0
     }
   }
 

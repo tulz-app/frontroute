@@ -1,7 +1,6 @@
 package io.frontroute.testing
 
 import com.raquo.airstream.core.EventStream
-import com.raquo.airstream.core.Signal
 import com.raquo.airstream.eventbus.EventBus
 import io.frontroute.LocationProvider
 import io.frontroute.RouteLocation
@@ -18,9 +17,12 @@ class TestLocationProvider extends LocationProvider {
   private var currentParams: Map[String, List[String]] = Map.empty
   private var currentState: js.UndefOr[HistoryState]   = js.undefined
 
-  private val bus = new EventBus[RouteLocation]
+  private var _current: RouteLocation = RouteLocation.emoty
+  def current: RouteLocation          = _current
 
-  val changes: EventStream[RouteLocation] = bus.events
+  private val bus = new EventBus[Unit]
+
+  val changes: EventStream[Unit] = bus.events
 
   def protocol(protocol: String): Unit = {
     currentProtocol = protocol
@@ -59,19 +61,18 @@ class TestLocationProvider extends LocationProvider {
   }
 
   def emit(): Unit = {
-    bus.writer.onNext(
-      RouteLocation(
-        hostname = currentHostname,
-        port = currentPort,
-        protocol = currentProtocol,
-        host = s"${currentHostname}:${currentPort}",
-        origin = Some(s"${currentProtocol}://${currentHostname}:${currentPort}"),
-        unmatchedPath = currentPath,
-        fullPath = currentPath,
-        params = currentParams,
-        state = currentState
-      )
+    _current = RouteLocation(
+      hostname = currentHostname,
+      port = currentPort,
+      protocol = currentProtocol,
+      host = s"${currentHostname}:${currentPort}",
+      origin = Some(s"${currentProtocol}://${currentHostname}:${currentPort}"),
+      unmatchedPath = currentPath,
+      fullPath = currentPath,
+      params = currentParams,
+      state = currentState
     )
+    bus.emit(())
   }
 
 }
