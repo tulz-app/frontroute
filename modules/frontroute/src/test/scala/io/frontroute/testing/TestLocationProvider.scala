@@ -17,8 +17,8 @@ class TestLocationProvider extends LocationProvider {
   private var currentParams: Map[String, List[String]] = Map.empty
   private var currentState: js.UndefOr[HistoryState]   = js.undefined
 
-  private var _current: RouteLocation = RouteLocation.emoty
-  def current: RouteLocation          = _current
+  private var _current               = Option.empty[RouteLocation]
+  def current: Option[RouteLocation] = _current
 
   private val bus = new EventBus[Unit]
 
@@ -61,16 +61,18 @@ class TestLocationProvider extends LocationProvider {
   }
 
   def emit(): Unit = {
-    _current = RouteLocation(
-      hostname = currentHostname,
-      port = currentPort,
-      protocol = currentProtocol,
-      host = s"${currentHostname}:${currentPort}",
-      origin = Some(s"${currentProtocol}://${currentHostname}:${currentPort}"),
-      unmatchedPath = currentPath,
-      fullPath = currentPath,
-      params = currentParams,
-      state = currentState
+    _current = Some(
+      RouteLocation(
+        hostname = currentHostname,
+        port = currentPort,
+        protocol = currentProtocol,
+        host = s"${currentHostname}:${currentPort}",
+        origin = Some(s"${currentProtocol}://${currentHostname}:${currentPort}"),
+        unmatchedPath = currentPath,
+        fullPath = currentPath,
+        params = currentParams,
+        state = currentState
+      )
     )
     bus.emit(())
   }

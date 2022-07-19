@@ -9,7 +9,6 @@ object PathWithOneOfAndRecoverTest extends TestBase {
   val tests: Tests = Tests {
 
     test("path with oneOf path matcher and recover") {
-      println("path with oneOf path matcher and recover")
       routeTest(
         route = probe =>
           path(segment(Set("a", "b")).recover("default")) { str =>

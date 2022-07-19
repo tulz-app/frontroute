@@ -31,18 +31,6 @@ final case class RouteLocation(
 
 object RouteLocation {
 
-  val emoty: RouteLocation = RouteLocation(
-    hostname = "",
-    port = "",
-    protocol = "https",
-    host = "",
-    origin = None,
-    unmatchedPath = List.empty,
-    fullPath = List.empty,
-    params = Map.empty,
-    state = js.undefined
-  )
-
   def apply(location: dom.Location, state: js.UndefOr[js.Any]): RouteLocation = {
     val path = extractPath(location)
     new RouteLocation(

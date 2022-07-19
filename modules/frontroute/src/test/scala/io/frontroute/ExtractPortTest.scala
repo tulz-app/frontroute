@@ -22,7 +22,7 @@ object ExtractPortTest extends TestBase {
           locationProvider.path()
         }
       ) { probe =>
-        probe.toList ==> List("", "443")
+        probe.toList ==> List("443")
       }
     }
 

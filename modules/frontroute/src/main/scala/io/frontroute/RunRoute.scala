@@ -27,13 +27,16 @@ trait RunRoute {
 //        println(s"     previous:         ${previous}")
 //      }
       .collect {
-        case _ if GlobalState.deepness == myDeepness && !previous.contains(GlobalState.currentLocation) =>
-          previous = Some(GlobalState.currentLocation)
-          ()
+        case _ if GlobalState.deepness == myDeepness && previous != GlobalState.currentLocation =>
+          previous = GlobalState.currentLocation
+          GlobalState.currentUnmatched
       }
-      .flatMap { _ =>
+      .collect { case Some(currentUnmatched) =>
+        currentUnmatched
+      }
+      .flatMap { currentUnmatched =>
         route(
-          GlobalState.currentUnmatched,
+          currentUnmatched,
           currentState.resetPath,
           RoutingState.withPersistentData(currentState.persistent, currentState.async)
         ).map {
@@ -41,7 +44,7 @@ trait RunRoute {
 //            println(s"nextState: $nextState")
 //            println(s"currentState: $currentState")
 //            println(s"next location: $location")
-            GlobalState.setCurrentUnmatched(location)
+            GlobalState.setCurrentUnmatched(Some(location))
             if (nextState != currentState) {
 //              println(s"!! state changed")
               currentState = nextState

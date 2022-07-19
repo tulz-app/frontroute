@@ -22,7 +22,7 @@ object ExtractProtocolTest extends TestBase {
           locationProvider.path()
         }
       ) { probe =>
-        probe.toList ==> List("", "https")
+        probe.toList ==> List("https")
       }
     }
   }

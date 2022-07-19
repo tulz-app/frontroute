@@ -22,7 +22,7 @@ object ExtractHostNameTest extends TestBase {
           locationProvider.path()
         }
       ) { probe =>
-        probe.toList ==> List("", "test.nowhere")
+        probe.toList ==> List("test.nowhere")
       }
     }
 

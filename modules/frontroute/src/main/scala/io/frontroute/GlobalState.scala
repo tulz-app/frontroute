@@ -9,16 +9,16 @@ private[frontroute] object GlobalState {
   private var _deepness = 0
   def deepness: Int     = _deepness
 
-  private val locationChangesBus               = new EventBus[Unit]
-  private val currentLocationVar               = Var(Option.empty[RouteLocation])
-  private var _currentLocation: RouteLocation  = RouteLocation.emoty
-  private var _currentUnmatched: RouteLocation = RouteLocation.emoty
+  private val locationChangesBus                       = new EventBus[Unit]
+  private val currentLocationVar                       = Var(Option.empty[RouteLocation])
+  private var _currentLocation: Option[RouteLocation]  = None
+  private var _currentUnmatched: Option[RouteLocation] = None
 
-  val locationChanges: EventStream[Unit] = locationChangesBus.events
-  def currentUnmatched: RouteLocation    = _currentUnmatched
-  def currentLocation: RouteLocation     = _currentLocation
+  val locationChanges: EventStream[Unit]      = locationChangesBus.events
+  def currentUnmatched: Option[RouteLocation] = _currentUnmatched
+  def currentLocation: Option[RouteLocation]  = _currentLocation
 
-  def setCurrentUnmatched(location: RouteLocation): Unit = {
+  def setCurrentUnmatched(location: Option[RouteLocation]): Unit = {
 //    println(s"got new unmatched: $location")
     _currentUnmatched = location
   }
@@ -41,7 +41,7 @@ private[frontroute] object GlobalState {
       if (_currentLocation != location) {
         _currentLocation = location
         setCurrentUnmatched(location)
-        currentLocationVar.set(Some(location))
+        currentLocationVar.set(location)
         emit()
       }
     }(unsafeWindowOwner)
@@ -57,8 +57,8 @@ private[frontroute] object GlobalState {
 //      println("!! KILL")
       subscription.kill()
       subscription = null
-      _currentLocation = RouteLocation.emoty
-      _currentUnmatched = RouteLocation.emoty
+      _currentLocation = None
+      _currentUnmatched = None
       _deepness = 0
     }
   }

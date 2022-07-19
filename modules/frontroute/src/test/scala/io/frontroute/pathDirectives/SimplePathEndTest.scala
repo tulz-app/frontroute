@@ -9,7 +9,6 @@ object SimplePathEndTest extends TestBase {
   val tests: Tests = Tests {
 
     test("simple pathEnd") {
-      println("simple pathEnd")
       routeTest(
         route = probe =>
           pathEnd {

@@ -22,7 +22,7 @@ object ExtractHostTest extends TestBase {
           locationProvider.path()
         }
       ) { probe =>
-        probe.toList ==> List("", "test.nowhere:443")
+        probe.toList ==> List("test.nowhere:443")
       }
     }
 

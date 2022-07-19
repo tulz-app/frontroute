@@ -5,20 +5,14 @@ import io.frontroute.internal.UrlString
 
 import scala.scalajs.js
 
-class CustomLocationProvider(initial: String, locationStrings: EventStream[String]) extends LocationProvider {
+class CustomLocationProvider(locationStrings: EventStream[String]) extends LocationProvider {
 
-  private var _current = RouteLocation(
-    initial match {
-      case UrlString(location) => location
-      case other               => throw new RuntimeException(s"invalid initial location: $other")
-    },
-    js.undefined
-  )
+  private var _current = Option.empty[RouteLocation]
 
-  def current: RouteLocation = _current
+  def current: Option[RouteLocation] = _current
 
   val changes: EventStream[Unit] = locationStrings.collect { case UrlString(location) =>
-    _current = RouteLocation(location, js.undefined)
+    _current = Some(RouteLocation(location, js.undefined))
   }
 
 }

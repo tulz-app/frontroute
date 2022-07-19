@@ -6,7 +6,7 @@ import org.scalajs.dom
 
 trait LocationProvider {
 
-  def current: RouteLocation
+  def current: Option[RouteLocation]
   val changes: EventStream[Unit]
 
 }
@@ -20,6 +20,6 @@ object LocationProvider {
   ): LocationProvider =
     new BrowserLocationProvider(popStateEvents = popStateEvents)
 
-  @inline def custom(initial: String, locations: EventStream[String]) = new CustomLocationProvider(initial, locations)
+  @inline def custom(locations: EventStream[String]) = new CustomLocationProvider(locations)
 
 }
