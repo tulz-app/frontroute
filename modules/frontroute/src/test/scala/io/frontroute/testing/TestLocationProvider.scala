@@ -20,7 +20,7 @@ class TestLocationProvider extends LocationProvider {
 
   private val bus = new EventBus[RouteLocation]
 
-  val locations: EventStream[RouteLocation] = bus.events
+  val changes: EventStream[RouteLocation] = bus.events
 
   def protocol(protocol: String): Unit = {
     currentProtocol = protocol

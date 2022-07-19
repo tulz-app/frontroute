@@ -6,43 +6,58 @@ private[frontroute] object GlobalState {
 
   private var subscription: Subscription = null
 
-  private val locationChangesBus                       = new EventBus[Unit]
-  private val currentLocationVar                       = Var(Option.empty[RouteLocation])
-  private var _currentLocation: Option[RouteLocation]  = None
-  private var _currentUnmatched: Option[RouteLocation] = None
+  private var _deepness = 0
+  def deepness: Int     = _deepness
 
-  val locationChanges: EventStream[Unit]      = locationChangesBus.events
-  def currentUnmatched: Option[RouteLocation] = _currentUnmatched
+  private val locationChangesBus               = new EventBus[Unit]
+  private val currentLocationVar               = Var(Option.empty[RouteLocation])
+  private var _currentLocation: RouteLocation  = RouteLocation.emoty
+  private var _currentUnmatched: RouteLocation = RouteLocation.emoty
+
+  val locationChanges: EventStream[Unit] = locationChangesBus.events
+  def currentUnmatched: RouteLocation    = _currentUnmatched
+  def currentLocation: RouteLocation     = _currentLocation
 
   def setCurrentUnmatched(location: RouteLocation): Unit = {
     println(s"got new unmatched: $location")
-    _currentUnmatched = Some(location)
+    _currentUnmatched = location
+  }
+
+  def emit(): Unit = {
+    println("emitting")
+    locationChangesBus.emit(())
   }
 
   def setLocationProvider(locationProvider: LocationProvider): Unit = {
     if (subscription != null) {
       subscription.kill()
-      _currentLocation = None
-      _currentUnmatched = None
+      _currentLocation = locationProvider.current
+      _currentUnmatched = locationProvider.current
     }
-    subscription = locationProvider.locations.foreach { location =>
-      println(s"got new location: $location")
-      if (!_currentLocation.contains(location)) {
-        val some = Some(location)
-        _currentLocation = some
+    subscription = locationProvider.changes.foreach { _ =>
+      val location = locationProvider.current
+      println(s"got new location: ${locationProvider.current}")
+      setDeepness(0)
+      if (_currentLocation != location) {
+        _currentLocation = location
         setCurrentUnmatched(location)
-        currentLocationVar.set(some)
-        locationChangesBus.emit(())
+        currentLocationVar.set(Some(location))
+        emit()
       }
     }(unsafeWindowOwner)
+  }
+
+  def setDeepness(d: Int): Unit = {
+    println(s"deepness <-- $d")
+    _deepness = d
   }
 
   def kill(): Unit = {
     if (subscription != null) {
       println("!! KILL")
       subscription.kill()
-      _currentLocation = None
-      _currentUnmatched = None
+      _currentLocation = RouteLocation.emoty
+      _currentUnmatched = RouteLocation.emoty
     }
   }
 
