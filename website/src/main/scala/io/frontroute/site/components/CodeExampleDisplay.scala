@@ -1,6 +1,7 @@
 package io.frontroute.site.components
 
 import com.raquo.laminar.api.L._
+import io.frontroute.Config
 import io.frontroute.LocationProvider
 import io.laminext.syntax.core._
 import io.laminext.syntax.tailwind._
@@ -12,7 +13,9 @@ import io.frontroute.site.Styles
 import io.frontroute.site.TemplateVars
 import io.laminext.util.UrlString
 import org.scalajs.dom
+import org.scalajs.dom.HTMLIFrameElement
 import org.scalajs.dom.html
+
 import scala.scalajs.js
 
 object CodeExampleDisplay {
@@ -45,40 +48,9 @@ object CodeExampleDisplay {
   )
 
   def apply(example: CodeExample): Element = {
-    val sourceCollapsed  = storedBoolean(example.id, initial = true)
-    val dimContext       = storedBoolean("dim-context", initial = true)
-    val hasContext       = example.code.source.contains("/* <focus> */")
-    val locations        = Var("")
-    val currentLocation  = locations.signal
-    val locationProvider = LocationProvider.custom(currentLocation)
-
-    val urlInput = input(
-      value <-- locations,
-      tpe         := "url",
-      placeholder := "https://site.nowhere/path"
-    )
-
-    val amendedA = a.amend[AmAny](
-      thisEvents(onClick.preventDefault.stopPropagation)
-        .withCurrentValueOf(currentLocation)
-        .map { case (e, current) =>
-          val href            = e.target.getAttribute("href")
-          val anchorLocation  = UrlString.parse(href)
-          val currentLocation = UrlString.parse(current)
-          if (!href.contains("://")) {
-            currentLocation.search = anchorLocation.search
-            if (href.startsWith("/")) {
-              currentLocation.pathname = anchorLocation.pathname
-            } else {
-              currentLocation.pathname = currentLocation.pathname.reverse.dropWhile(_ != '/').reverse + href
-            }
-            val search = currentLocation.search
-            s"${currentLocation.protocol}//${currentLocation.hostname}${currentLocation.pathname}${search}"
-          } else {
-            anchorLocation.href
-          }
-        } --> locations
-    )
+    val sourceCollapsed = storedBoolean(example.id, initial = true)
+    val dimContext      = storedBoolean("dim-context", initial = true)
+    val hasContext      = example.code.source.contains("/* <focus> */")
 
     val codeNode = (dim: Boolean) => {
       val theCode = pre(
@@ -87,9 +59,8 @@ object CodeExampleDisplay {
           example.code.source
             .replace("import com.raquo.laminar.api.L.{a => _, _}", "import com.raquo.laminar.api.L._")
             .replace(
-              """(locationProvider: LocationProvider) =>
-                |      (a: AmendedHtmlTag[dom.html.Anchor, AmAny]) =>
-                |        useLocationProvider(locationProvider) { implicit locationProvider =>""".stripMargin,
+              """          |      (a: AmendedHtmlTag[dom.html.Anchor, AmAny]) =>
+                |        {""".stripMargin,
               ""
             )
         }
@@ -196,28 +167,74 @@ object CodeExampleDisplay {
           "Live demo:"
         ),
         div(
-          cls := "border-4 border-dashed border-blue-400 bg-blue-300 text-blue-900 rounded-lg -m-2 p-4",
-          div(
-            cls := "-mx-4 -mt-4 p-4 bg-blue-500 flex space-x-1",
-            urlInput.amend(
-              cls := "flex-1",
-              thisEvents(onKeyDown.filter(_.key == "Enter").preventDefault.stopPropagation).sample(urlInput.value) --> locations
-            ),
-            button(
-              cls := "btn-md-outline-white",
-              "Go",
-              thisEvents(onClick).sample(urlInput.value) --> locations
-            )
-          ),
-          onMountUnmountCallbackWithState(
-            mount = ctx => render(ctx.thisNode.ref, example.code.value(locationProvider)(amendedA)),
-            unmount = (_, root: Option[RootNode]) => root.foreach(_.unmount())
+          iframe(
+            styleAttr := "width:100%; min-height: 32rem",
+            onLoad --> { e =>
+              val f = e.target.asInstanceOf[HTMLIFrameElement]
+              f.style.height = (f.contentWindow.document.body.scrollHeight + 20).toString + "px"
+            },
+            src       := s"/example-frame/${example.id}"
           )
-        ),
-        onMountCallback { _ =>
-          locations.set("https://site.nowhere/")
-        }
+        )
       )
+    )
+  }
+
+  def frame(example: CodeExample): Element = {
+    val locations        = new EventBus[String]
+    val currentLocation  = locations.events.toSignal("")
+    val locationProvider = LocationProvider.custom(locations.events)
+    Config.setLocationProvider(locationProvider)
+
+    val urlInput = input(
+      value <-- locations,
+      tpe         := "url",
+      placeholder := "https://site.nowhere/path"
+    )
+
+    val amendedA = a.amend[AmAny](
+      thisEvents(onClick.preventDefault.stopPropagation)
+        .withCurrentValueOf(currentLocation)
+        .map { case (e, current) =>
+          val href            = e.target.getAttribute("href")
+          val anchorLocation  = UrlString.parse(href)
+          val currentLocation = UrlString.parse(current)
+          if (!href.contains("://")) {
+            currentLocation.search = anchorLocation.search
+            if (href.startsWith("/")) {
+              currentLocation.pathname = anchorLocation.pathname
+            } else {
+              currentLocation.pathname = currentLocation.pathname.reverse.dropWhile(_ != '/').reverse + href
+            }
+            val search = currentLocation.search
+            s"${currentLocation.protocol}//${currentLocation.hostname}${currentLocation.pathname}${search}"
+          } else {
+            anchorLocation.href
+          }
+        } --> locations
+    )
+
+    div(
+      cls := "w-full border-4 border-dashed border-blue-400 bg-blue-300 text-blue-900 rounded-lg -m-2 p-4",
+      div(
+        cls := "-mx-4 -mt-4 p-4 bg-blue-500 flex space-x-1",
+        urlInput.amend(
+          cls := "flex-1",
+          thisEvents(onKeyDown.filter(_.key == "Enter").preventDefault.stopPropagation).sample(urlInput.value) --> locations
+        ),
+        button(
+          cls := "btn-md-outline-white",
+          "Go",
+          thisEvents(onClick).sample(urlInput.value) --> locations
+        )
+      ),
+      onMountUnmountCallbackWithState(
+        mount = ctx => render(ctx.thisNode.ref, example.code.value(amendedA)),
+        unmount = (_, root: Option[RootNode]) => root.foreach(_.unmount())
+      ),
+      onMountCallback { _ =>
+        locations.emit("https://site.nowhere/")
+      }
     )
   }
 

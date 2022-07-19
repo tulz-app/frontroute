@@ -61,6 +61,7 @@ class Routes {
     )
     com.raquo.laminar.api.L.render(menuContainer, TW.modal(mobileMenuContent.signal, mobileMenuModal))
 
+    Config.setLocationProvider(LocationProvider.windowLocationProvider)
     BrowserNavigation.emitPopStateEvent()
   }
 

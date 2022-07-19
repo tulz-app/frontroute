@@ -23,6 +23,19 @@ object Site {
       index = docPage("", "frontroute", FileAsString("/doc/index.md"))
     )
 
+  val examples: Seq[CodeExample] =
+    Seq(
+      io.frontroute.site.examples.ex_basic.BasicRoutingExample,
+      io.frontroute.site.examples.ex_path_matching.PathMatchingExample,
+      io.frontroute.site.examples.ex_recursive_path_matching.RecursivePathMatchingExample,
+      io.frontroute.site.examples.ex_params.ParamsExample,
+      io.frontroute.site.examples.ex_custom_directives.CustomDirectivesExample,
+      io.frontroute.site.examples.ex_signal.SignalExample,
+      io.frontroute.site.examples.ex_memoize.MemoizeExample,
+      io.frontroute.site.examples.ex_auth.AuthExample,
+      io.frontroute.site.examples.ex_tabs.TabsExample
+    )
+
   val modules: Seq[SiteModule] = Seq(
     indexModule,
     SiteModule(
@@ -70,17 +83,7 @@ object Site {
     SiteModule(
       path = "examples",
       index = docPage("", "Examples", FileAsString("/doc/examples/index.md")),
-      ""                   -> Seq(
-        examplePage(io.frontroute.site.examples.ex_basic.BasicRoutingExample),
-        examplePage(io.frontroute.site.examples.ex_path_matching.PathMatchingExample),
-        examplePage(io.frontroute.site.examples.ex_recursive_path_matching.RecursivePathMatchingExample),
-        examplePage(io.frontroute.site.examples.ex_params.ParamsExample),
-        examplePage(io.frontroute.site.examples.ex_custom_directives.CustomDirectivesExample),
-        examplePage(io.frontroute.site.examples.ex_signal.SignalExample),
-        examplePage(io.frontroute.site.examples.ex_memoize.MemoizeExample),
-        examplePage(io.frontroute.site.examples.ex_auth.AuthExample),
-        examplePage(io.frontroute.site.examples.ex_tabs.TabsExample)
-      )
+      ""                   -> examples.map(ex => examplePage(ex))
     )
   )
 

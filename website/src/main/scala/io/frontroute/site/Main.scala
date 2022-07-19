@@ -2,6 +2,7 @@ package io.frontroute.site
 
 import com.raquo.laminar.api.L._
 import io.frontroute.LinkHandler
+import io.frontroute.site.components.CodeExampleDisplay
 import io.laminext.highlight.Highlight
 import io.laminext.highlight.HighlightJavaScript
 import io.laminext.highlight.HighlightJson
@@ -26,8 +27,19 @@ object Main {
       Highlight.registerLanguage("scala", HighlightScala)
       Highlight.registerLanguage("javascript", HighlightJavaScript)
       Highlight.registerLanguage("json", HighlightJson)
-      wiring.routes.start()
+      if (dom.window.location.pathname.startsWith("/example-frame/")) {
+        renderExample()
+      } else {
+        wiring.routes.start()
+      }
     }(unsafeWindowOwner)
+  }
+
+  private def renderExample(): Unit = {
+    val id           = dom.window.location.pathname.drop("/example-frame/".length).takeWhile(_ != '/')
+    val appContainer = dom.document.querySelector("#app")
+    val content      = Site.examples.find(_.id == id).map(ex => CodeExampleDisplay.frame(ex)).getOrElse(div(s"EXAMPLE NOT FOUND: ${id}"))
+    val _            = com.raquo.laminar.api.L.render(appContainer, content)
   }
 
   private def insertJsClass(ssrContext: SsrContext): Unit = {
