@@ -7,7 +7,7 @@ import io.frontroute.site.examples.CodeExample
 
 object Site {
 
-  val frontrouteVersion: String = "0.15.x"
+  val frontrouteVersion: String = "0.16.x"
 
   def thisVersionHref(href: String): String =
     s"/v/$frontrouteVersion/${href.dropWhile(_ == '/')}"

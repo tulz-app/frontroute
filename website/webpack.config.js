@@ -14,7 +14,7 @@ const scalaOutputPath = path.resolve(__dirname, `./target/scala-${scalaVersion}`
 const devServerHost = '127.0.0.1';
 const devServerPort = 30098;
 
-const publicPath = 'v/0.15.x'
+const publicPath = 'v/0.16.x'
 
 const devServer = _.mergeWith(
   {
