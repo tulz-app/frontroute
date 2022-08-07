@@ -21,7 +21,7 @@ object PageWrap {
     div(
       linkTag(
         rel := "stylesheet",
-        href <-- Styles.highlightStyle.signal.map(s => s"/stylesheets/highlightjs/${s}.css")
+        href <-- Styles.highlightStyle.signal.map(s => Site.thisVersionHref(s"/stylesheets/highlightjs/${s}.css"))
       ),
       div(
         cls := "h-screen flex flex-col",
@@ -51,8 +51,8 @@ object PageWrap {
       ),
       $pageAndResult.bind {
         case Some((_, Right((_, theTitle)))) =>
-          titleElement.textContent = s"$theTitle - laminext"
-          org.scalajs.dom.document.title = s"$theTitle - laminext"
+          titleElement.textContent = s"$theTitle - frontroute"
+          org.scalajs.dom.document.title = s"$theTitle - frontroute"
           if (theTitle.nonEmpty) {
             if (theTitle == "Not Found") {
               titleElement.setAttribute("data-status", "404")
