@@ -29,13 +29,19 @@ object PageHeader {
       div(
         cls := "flex-shrink-0 -my-4 -mx-4",
         img(
-          src := "/images/logo.svg",
+          src := Site.thisVersionHref("/images/logo.svg"),
           cls := "w-10 h-10"
         )
       ),
       nav(
         cls := "flex flex-1 md:flex-none space-x-4 items-center justify-start",
-        Site.modules.take(1).map(moduleLink($page))
+        span(
+          Site.modules.take(1).map(moduleLink($page))
+        ),
+        span(
+          cls := "text-gray-500 text-xs font-black",
+          Site.frontrouteVersion
+        )
       ),
       nav(
         cls := "hidden md:flex flex-1 space-x-4",
@@ -157,7 +163,7 @@ object PageHeader {
           "border-gray-300 text-white",
           "text-gray-300 hover:border-gray-300 hover:text-white "
         ),
-      href := s"/${module.path}",
+      href := Site.thisVersionHref(s"/${module.path}"),
       module.index.title
     )
 

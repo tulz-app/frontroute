@@ -36,6 +36,16 @@ class Routes {
     )
   )
 
+  private val versionSegment = {
+    regex("\\d+\\.\\d+\\.\\S+".r).map(_.source)
+  }
+
+  private val versionPrefix =
+    pathPrefix("v" / versionSegment)
+
+  private val thisVersionPrefix =
+    versionPrefix.filter(_.toString.startsWith(Site.frontrouteVersion)).mapTo(())
+
   def start(): Unit = {
     val appContainer  = dom.document.querySelector("#app")
     val menuContainer = dom.document.querySelector("#menu-modal")
@@ -45,14 +55,17 @@ class Routes {
       appContainer,
       div(
         cls := "contents",
-        concat(
-          (pathEnd.mapTo(Some((Site.indexModule, Site.indexModule.index))) |
-            (modulePrefix & pathEnd).map(m => Some((m, m.index))) |
-            moduleAndPagePrefix.map(moduleAndPage => Some(moduleAndPage))).signal { moduleAndPage =>
-            PageWrap(moduleAndPage, mobileMenuContent.writer)
-          },
-          div("Not Found")
-        )
+        thisVersionPrefix(
+          concat(
+            (pathEnd.mapTo(Some((Site.indexModule, Site.indexModule.index))) |
+              (modulePrefix & pathEnd).map(m => Some((m, m.index))) |
+              moduleAndPagePrefix.map(moduleAndPage => Some(moduleAndPage))).signal { moduleAndPage =>
+              PageWrap(moduleAndPage, mobileMenuContent.writer)
+            },
+            div("Not Found")
+          )
+        ),
+        div("TODO: reload")
       )
     )
     com.raquo.laminar.api.L.render(menuContainer, TW.modal(mobileMenuContent.signal, mobileMenuModal))
