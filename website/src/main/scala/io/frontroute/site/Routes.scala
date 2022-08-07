@@ -46,14 +46,10 @@ class Routes {
       div(
         cls := "contents",
         concat(
-          pathEnd {
-            PageWrap(Val(Some((Site.indexModule, Site.indexModule.index))), mobileMenuContent.writer)
-          },
-          (modulePrefix & pathEnd).signal { module =>
-            PageWrap(module.map(m => Some((m, m.index))), mobileMenuContent.writer)
-          },
-          moduleAndPagePrefix.signal { moduleAndPage =>
-            PageWrap(moduleAndPage.map(t => Some(t)), mobileMenuContent.writer)
+          (pathEnd.mapTo(Some((Site.indexModule, Site.indexModule.index))) |
+            (modulePrefix & pathEnd).map(m => Some((m, m.index))) |
+            moduleAndPagePrefix.map(moduleAndPage => Some(moduleAndPage))).signal { moduleAndPage =>
+            PageWrap(moduleAndPage, mobileMenuContent.writer)
           },
           div("Not Found")
         )
