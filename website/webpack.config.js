@@ -24,7 +24,7 @@ const devServer = _.mergeWith(
     historyApiFallback: {
       verbose: true,
       rewrites: [
-        { from: /\/v\/0.15.x\//, to: `/${publicPath}/index.html`}
+        { from: /\/v\/0.16.x\//, to: `/${publicPath}/index.html`}
       ],
       index: true
     }

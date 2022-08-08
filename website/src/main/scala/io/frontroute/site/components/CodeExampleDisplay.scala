@@ -9,6 +9,7 @@ import io.laminext.syntax.markdown._
 import io.laminext.highlight.Highlight
 import io.frontroute.site.examples.CodeExample
 import io.laminext.tailwind.theme
+import io.frontroute.site.Site
 import io.frontroute.site.Styles
 import io.frontroute.site.TemplateVars
 import io.laminext.util.UrlString
@@ -173,7 +174,7 @@ object CodeExampleDisplay {
               val f = e.target.asInstanceOf[HTMLIFrameElement]
               f.style.height = (f.contentWindow.document.body.scrollHeight + 20).toString + "px"
             },
-            src       := s"/example-frame/${example.id}"
+            src       := Site.thisVersionHref(s"/example-frame/${example.id}")
           )
         )
       )

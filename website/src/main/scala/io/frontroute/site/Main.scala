@@ -27,7 +27,7 @@ object Main {
       Highlight.registerLanguage("scala", HighlightScala)
       Highlight.registerLanguage("javascript", HighlightJavaScript)
       Highlight.registerLanguage("json", HighlightJson)
-      if (dom.window.location.pathname.startsWith("/example-frame/")) {
+      if (dom.window.location.pathname.startsWith(Site.thisVersionHref("/example-frame/"))) {
         renderExample()
       } else {
         wiring.routes.start()
@@ -36,7 +36,7 @@ object Main {
   }
 
   private def renderExample(): Unit = {
-    val id           = dom.window.location.pathname.drop("/example-frame/".length).takeWhile(_ != '/')
+    val id           = dom.window.location.pathname.drop(Site.thisVersionHref("/example-frame/").length).takeWhile(_ != '/')
     val appContainer = dom.document.querySelector("#app")
     val content      = Site.examples.find(_.id == id).map(ex => CodeExampleDisplay.frame(ex)).getOrElse(div(s"EXAMPLE NOT FOUND: ${id}"))
     val _            = com.raquo.laminar.api.L.render(appContainer, content)
