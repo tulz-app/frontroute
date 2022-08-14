@@ -23,7 +23,7 @@ object BasicRoutingExample
         div(
           cls := "p-4 min-h-[300px]",
           /* <focus> */
-          concat(
+          routes(
             pathEnd {
               div(cls := "text-2xl", "Index page.")
             },
