@@ -13,7 +13,8 @@ final case class RouteLocation(
   unmatchedPath: List[String],
   fullPath: List[String],
   params: Map[String, Seq[String]],
-  state: js.UndefOr[js.Any]
+  state: js.UndefOr[js.Any],
+  otherMatched: Boolean
 ) {
 
   @inline def withUnmatchedPath(path: List[String]): RouteLocation = this.copy(unmatchedPath = path)
@@ -42,7 +43,8 @@ object RouteLocation {
       unmatchedPath = path,
       fullPath = path,
       params = LocationUtils.parseLocationParams(location),
-      state = state
+      state = state,
+      otherMatched = false
     )
   }
 

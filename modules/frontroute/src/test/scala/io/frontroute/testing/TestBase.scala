@@ -50,7 +50,7 @@ abstract class TestBase extends TestSuite {
   )(checks: Probe[String] => Future[T]): Future[T] = {
     val locationProvider: TestLocationProvider = new TestLocationProvider()
     val probe                                  = new Probe[String]
-    Config.setLocationProvider(locationProvider)
+    FrontrouteConfig.setLocationProvider(locationProvider)
     val _                                      = runRoute(route(probe))(testOwner)
 
     val future = delayedFuture(wait).flatMap { _ =>

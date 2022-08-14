@@ -14,8 +14,6 @@ import org.scalajs.dom
 
 object Main {
 
-//  val mainCss: MainCss.type = MainCss
-
   def main(args: Array[String]): Unit = {
     val _ = documentEvents.onDomContentLoaded.foreach { _ =>
       Theme.setTheme(DefaultTheme.theme)

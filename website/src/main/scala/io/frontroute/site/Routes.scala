@@ -1,7 +1,6 @@
 package io.frontroute.site
 
 import com.raquo.laminar.api.L._
-import io.frontroute.BrowserNavigation
 import io.frontroute.site.layout.PageWrap
 import io.laminext.syntax.tailwind._
 import io.laminext.tailwind.modal.ModalContent
@@ -69,8 +68,6 @@ class Routes {
       )
     )
     com.raquo.laminar.api.L.render(menuContainer, TW.modal(mobileMenuContent.signal, mobileMenuModal))
-
-    Config.setLocationProvider(LocationProvider.windowLocationProvider)
     BrowserNavigation.emitPopStateEvent()
   }
 

@@ -1,7 +1,7 @@
 package io.frontroute.site.components
 
 import com.raquo.laminar.api.L._
-import io.frontroute.Config
+import io.frontroute.DefaultLocationProvider
 import io.frontroute.LocationProvider
 import io.laminext.syntax.core._
 import io.laminext.syntax.tailwind._
@@ -185,7 +185,7 @@ object CodeExampleDisplay {
     val locations        = new EventBus[String]
     val currentLocation  = locations.events.toSignal("")
     val locationProvider = LocationProvider.custom(locations.events)
-    Config.setLocationProvider(locationProvider)
+    DefaultLocationProvider.set(locationProvider)
 
     val urlInput = input(
       value <-- locations,

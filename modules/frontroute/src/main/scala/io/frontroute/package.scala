@@ -8,27 +8,11 @@ import com.raquo.airstream.core.Signal
 import io.frontroute.ops.DirectiveOfOptionOps
 import org.scalajs.dom
 
-package object frontroute extends PathMatchers with RunRoute with Directives with ApplyConverters[Types.Route] {
+package object frontroute extends PathMatchers with Directives with ApplyConverters[Route] {
 
   type PathMatcher0 = PathMatcher[Unit]
 
-  type Route = Types.Route
-
   type Directive0 = Directive[Unit]
-
-  object Config {
-
-    def setLocationProvider(locationProvider: LocationProvider): Unit = {
-      GlobalState.setLocationProvider(locationProvider)
-    }
-
-  }
-
-  object Implicits {
-
-    implicit val locationProvider: LocationProvider = LocationProvider.windowLocationProvider
-
-  }
 
   implicit def directiveOfOptionSyntax(underlying: Directive[Option[Element]]): DirectiveOfOptionOps = new DirectiveOfOptionOps(underlying)
 
@@ -79,19 +63,6 @@ package object frontroute extends PathMatchers with RunRoute with Directives wit
 
   implicit def liftElementIntoVal(element: Element): Signal[Element] = Val(element)
 
-  implicit def runRouteImplicitly(
-    route: Route
-  ): Mod[Element] =
-    renderRoute(route)
-
-  def renderRoute(
-    route: Route
-  ): Mod[Element] =
-    onMountInsert { ctx =>
-      import ctx.owner
-      child.maybe <-- runRoute(route)
-    }
-
   implicit def elementToRoute(e: => Element): Route = complete(e)
 
   implicit def signalOfElementToRoute(e: => Signal[Element]): Route = complete(e)
@@ -99,7 +70,7 @@ package object frontroute extends PathMatchers with RunRoute with Directives wit
   private[frontroute] def rejected: EventStream[RouteResult] = EventStream.fromValue(RouteResult.Rejected)
 
   def routeLink(href: String, mods: (Signal[Boolean] => Mod[HtmlElement])*): Element = {
-    val active = GlobalState.isActive(href)
+    val active = DefaultLocationProvider.isActive(href)
     a(
       com.raquo.laminar.api.L.href := href,
       mods.map(_(active))
