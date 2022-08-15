@@ -11,8 +11,43 @@ object NestedExample
     )(() => {
       import io.frontroute._
 
-//      import io.laminext.syntax.core._
       import com.raquo.laminar.api.L._
+
+      def MyComponent(): Element =
+        div(
+          cls := "space-y-2",
+          div(
+            cls := "flex space-x-2",
+            a(
+              href := "tab-1",
+              cls  := "text-xl p-1 rounded",
+              navMod { active =>
+                cls.toggle("bg-blue-400 text-blue-100") <-- active
+              },
+              "Tab 1"
+            ),
+            a(
+              href := "tab-2",
+              cls  := "text-xl p-1 rounded",
+              navMod { active =>
+                cls.toggle("bg-blue-400 text-blue-100") <-- active
+              },
+              "Tab 2"
+            )
+          ),
+          div(
+            /* <focus> */
+            path("tab-1") {
+              /* </focus> */
+              div("Content one.", cls := "bg-blue-100 text-blue-500 p-4")
+            },
+            /* <focus> */
+            path("tab-2") {
+              /* </focus> */
+              div("Content two", cls := "bg-blue-100 text-blue-500 p-4")
+            }
+          )
+        )
 
       div(
         div(
@@ -22,38 +57,9 @@ object NestedExample
           },
           /* <focus> */
           pathPrefix("tabs") {
-            /* </focus> */
-            div(
-              cls := "space-y-2",
-              div(
-                cls := "flex space-x-2",
-                routeLink(
-                  "tab-1",
-                  _ => "Tab 1",
-                  _ => cls := "text-xl p-1 rounded",
-                  active => cls.toggle("bg-blue-400 text-blue-100") <-- active
-                ),
-                routeLink(
-                  "tab-2",
-                  _ => "Tab 2",
-                  _ => cls := "text-xl p-1 rounded",
-                  active => cls.toggle("bg-blue-400 text-blue-100") <-- active
-                )
-              ),
-              div(
-                /* <focus> */
-                path("tab-1") {
-                  /* </focus> */
-                  div("Content one.", cls := "bg-blue-100 text-blue-500 p-4")
-                },
-                /* <focus> */
-                path("tab-2") {
-                  /* </focus> */
-                  div("Content two", cls := "bg-blue-100 text-blue-500 p-4")
-                }
-              )
-            )
+            MyComponent()
           },
+          /* </focus> */
           (noneMatched & extractUnmatchedPath) { unmatched =>
             div(
               div(cls := "text-2xl", "Not Found"),

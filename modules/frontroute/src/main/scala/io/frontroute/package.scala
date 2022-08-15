@@ -4,8 +4,11 @@ import com.raquo.laminar.api.L._
 import app.tulz.tuplez.ApplyConverter
 import app.tulz.tuplez.ApplyConverters
 import com.raquo.airstream.core.Signal
+import com.raquo.laminar.nodes.ReactiveHtmlElement
+import io.frontroute.internal.UrlString
 import io.frontroute.ops.DirectiveOfOptionOps
 import org.scalajs.dom
+import org.scalajs.dom.HTMLAnchorElement
 
 package object frontroute extends PathMatchers with Directives with ApplyConverters[Route] {
 
@@ -15,7 +18,9 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
 
   implicit def directiveOfOptionSyntax(underlying: Directive[Option[Element]]): DirectiveOfOptionOps = new DirectiveOfOptionOps(underlying)
 
-  def reject: Route = (_, _, _) => rejected
+  private[frontroute] val rejected: Signal[RouteResult] = Val(RouteResult.Rejected)
+
+  val reject: Route = (_, _, _) => rejected
 
   def complete(result: => ToComplete[Element]): Route = (location, _, state) => Val(RouteResult.Complete(state, location, () => result.get))
 
@@ -39,8 +44,6 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
     findFirst(routes.zipWithIndex.toList)
   }
 
-  implicit def toDirective[L](route: Route): Directive[L] = Directive[L](_ => route)
-
   implicit def addDirectiveApply[L](directive: Directive[L])(implicit hac: ApplyConverter[L, Route]): hac.In => Route =
     subRoute =>
       (ctx, previous, state) => {
@@ -61,14 +64,15 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
 
   implicit def signalOfElementToRoute(e: => Signal[Element]): Route = complete(e)
 
-  private[frontroute] def rejected: Signal[RouteResult] = Val(RouteResult.Rejected)
-
-  def routeLink(href: String, mods: (Signal[Boolean] => Mod[HtmlElement])*): Element = {
-    val active = DefaultLocationProvider.isActive(href)
-    a(
-      com.raquo.laminar.api.L.href := href,
-      mods.map(_(active))
-    )
-  }
+  def navMod(mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
+    inContext { el =>
+      val UrlString(url) = el.ref.href
+      val active         =
+        DefaultLocationProvider.location.map {
+          case None    => false
+          case Some(l) => l.fullPath.mkString("/", "/", "").startsWith(url.pathname)
+        }
+      mod(active)
+    }
 
 }

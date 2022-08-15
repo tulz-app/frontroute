@@ -7,9 +7,6 @@ import io.frontroute.internal.LocationState
 import io.frontroute.internal.RoutingState
 import io.frontroute.internal.RoutingStateRef
 import io.frontroute.internal.SignalToStream
-import org.scalajs.dom.html
-
-import scala.annotation.tailrec
 
 trait Route extends ((RouteLocation, RoutingState, RoutingState) => Signal[RouteResult]) with Mod[HtmlElement] {
 
@@ -40,7 +37,22 @@ trait Route extends ((RouteLocation, RoutingState, RoutingState) => Signal[Route
   )(implicit owner: Owner): Signal[Option[Element]] = {
     var latestRender  = Option.empty[Element]
     val currentRender = Var(Option.empty[Element])
-    val locationState = getClosestLocationState(ctx.thisNode.ref)
+    val locationState = ElementWithLocationState.getClosestOrInit(
+      ctx.thisNode.ref,
+      init = {
+        val siblingMatched   = Var(false)
+        val onSiblingMatched = siblingMatched.writer.contramap { (_: Unit) => true }
+        DefaultLocationProvider.location.foreach { _ => siblingMatched.set(false) }
+        () =>
+          LocationState(
+            DefaultLocationProvider.location,
+            siblingMatched.signal,
+            onSiblingMatched,
+            new RoutingStateRef,
+            owner
+          )
+      }
+    )
     val childStateRef = new RoutingStateRef
 
     def killPrevious(): Unit = {
@@ -88,17 +100,17 @@ trait Route extends ((RouteLocation, RoutingState, RoutingState) => Signal[Route
         .foreach {
           case RouteEvent.NextRender(nextState, remaining, render) =>
             killPrevious()
-            val resultWithState = render.ref.asInstanceOf[ElementWithLocationState]
-            if (resultWithState.____locationState.isEmpty) {
-              resultWithState.____locationState = new LocationState(
-                locationState.remaining,
-                locationState.$childMatched,
-                locationState.onChildMatched,
-                childStateRef,
-                owner
-              )
-            }
-            resultWithState.____locationState.get.start()
+            val _ = ElementWithLocationState.getOrInit(
+              render.ref,
+              () =>
+                LocationState(
+                  locationState.remaining,
+                  locationState.$childMatched,
+                  locationState.onChildMatched,
+                  childStateRef,
+                  owner
+                )
+            )
 
             locationState.currentState.set(this, nextState)
 
@@ -125,37 +137,11 @@ trait Route extends ((RouteLocation, RoutingState, RoutingState) => Signal[Route
     currentRender.signal
   }
 
-  @tailrec
-  private def getClosestLocationState(
-    node: html.Element
-  )(implicit owner: Owner): LocationState = {
-    val withState = node.asInstanceOf[ElementWithLocationState]
-    if (withState.____locationState.isEmpty) {
-      if (node.parentElement != null) {
-        getClosestLocationState(node.parentElement)
-      } else {
-        val siblingMatched   = Var(false)
-        val onSiblingMatched = siblingMatched.writer.contramap { (_: Unit) => true }
-        DefaultLocationProvider.location.foreach { _ => siblingMatched.set(false) }
-        val locationState    = new LocationState(
-          DefaultLocationProvider.location,
-          siblingMatched.signal,
-          onSiblingMatched,
-          new RoutingStateRef,
-          owner
-        )
-        withState.____locationState = locationState
-        locationState.start()
-        locationState
-      }
-    } else {
-      withState.____locationState.get
-    }
-  }
-
 }
 
 object Route {
+
+  implicit def toDirective[L](route: Route): Directive[L] = Directive[L](_ => route)
 
   sealed private[frontroute] trait RouteEvent extends Product with Serializable
 
