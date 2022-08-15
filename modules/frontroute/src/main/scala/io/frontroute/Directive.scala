@@ -38,7 +38,7 @@ class Directive[L](
           inner(value)(location, previous, state.leaveDisjunction)
         }(location, previous, state.enterDisjunction)
         .flatMap {
-          case RouteResult.Complete(state, location, result) => EventStream.fromValue(RouteResult.Complete(state, location, result))
+          case RouteResult.Complete(state, location, result) => Val(RouteResult.Complete(state, location, result))
           case RouteResult.Rejected                          =>
             other.tapply { value => (location, previous, state) =>
               inner(value)(location, previous, state.leaveDisjunction)

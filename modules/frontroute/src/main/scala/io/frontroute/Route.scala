@@ -11,7 +11,7 @@ import org.scalajs.dom.html
 
 import scala.annotation.tailrec
 
-trait Route extends ((RouteLocation, RoutingState, RoutingState) => EventStream[RouteResult]) with Mod[HtmlElement] {
+trait Route extends ((RouteLocation, RoutingState, RoutingState) => Signal[RouteResult]) with Mod[HtmlElement] {
 
   import Route._
 
@@ -57,10 +57,12 @@ trait Route extends ((RouteLocation, RoutingState, RoutingState) => EventStream[
         }
         .flatMap { currentUnmatched =>
           val routingState = locationState.currentState.get(this).getOrElse(RoutingState.empty)
-          route(
-            currentUnmatched.copy(otherMatched = locationState.siblingMatched),
-            routingState.resetPath,
-            RoutingState.withPersistentData(routingState.persistent, routingState.async)
+          SignalToStream(
+            route(
+              currentUnmatched.copy(otherMatched = locationState.siblingMatched),
+              routingState.resetPath,
+              RoutingState.withPersistentData(routingState.persistent, routingState.async)
+            )
           )
         }
         .flatMap {

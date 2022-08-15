@@ -3,7 +3,6 @@ package io
 import com.raquo.laminar.api.L._
 import app.tulz.tuplez.ApplyConverter
 import app.tulz.tuplez.ApplyConverters
-import com.raquo.airstream.core.EventStream
 import com.raquo.airstream.core.Signal
 import io.frontroute.ops.DirectiveOfOptionOps
 import org.scalajs.dom
@@ -18,10 +17,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
 
   def reject: Route = (_, _, _) => rejected
 
-  def complete(result: => ToComplete[Element]): Route = (location, _, state) =>
-    EventStream.fromValue(
-      RouteResult.Complete(state, location, () => result.get)
-    )
+  def complete(result: => ToComplete[Element]): Route = (location, _, state) => Val(RouteResult.Complete(state, location, () => result.get))
 
   def debug(message: Any, optionalParams: Any*)(subRoute: Route): Route =
     (location, previous, state) => {
@@ -30,12 +26,12 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
     }
 
   def concat(routes: Route*): Route = (location, previous, state) => {
-    def findFirst(rs: List[(Route, Int)]): EventStream[RouteResult] =
+    def findFirst(rs: List[(Route, Int)]): Signal[RouteResult] =
       rs match {
         case Nil                    => rejected
         case (route, index) :: tail =>
           route(location, previous, state.enterConcat(index)).flatMap {
-            case RouteResult.Complete(state, location, result) => EventStream.fromValue(RouteResult.Complete(state, location, result))
+            case RouteResult.Complete(state, location, result) => Val(RouteResult.Complete(state, location, result))
             case RouteResult.Rejected                          => findFirst(tail)
           }
       }
@@ -65,7 +61,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
 
   implicit def signalOfElementToRoute(e: => Signal[Element]): Route = complete(e)
 
-  private[frontroute] def rejected: EventStream[RouteResult] = EventStream.fromValue(RouteResult.Rejected)
+  private[frontroute] def rejected: Signal[RouteResult] = Val(RouteResult.Rejected)
 
   def routeLink(href: String, mods: (Signal[Boolean] => Mod[HtmlElement])*): Element = {
     val active = DefaultLocationProvider.isActive(href)
