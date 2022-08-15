@@ -1,5 +1,9 @@
 # Changelog
 
+### 0,.16.x
+
+* memoize is gone (event streams in routes interfere with `noneMatched`)
+
 ### 0.15.2
 
 Airstream `v0.14.2`.

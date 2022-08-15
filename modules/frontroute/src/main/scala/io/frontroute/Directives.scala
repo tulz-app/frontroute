@@ -39,30 +39,6 @@ trait Directives {
     )
   }
 
-  def memoize[T](retrieve: () => EventStream[T]): Directive[T] = {
-    Directive[T](inner =>
-      (location, previous, state) => {
-        state.async.get((state.path.key, state.data)) match {
-          case Some(value) =>
-            inner(value.asInstanceOf[T])(location, previous, state.enterAndSet(value.asInstanceOf[T]))
-          case _           =>
-            var retrieved = 0
-            retrieve()
-              .filter { _ =>
-                retrieved = retrieved + 1
-                retrieved == 1
-              }
-              .flatMap { retrieved =>
-                val newState = state.copy(
-                  async = state.async.updated((state.path.key, state.data), retrieved)
-                )
-                inner(retrieved)(location, previous, newState.enterAndSet(retrieved))
-              }
-        }
-      }
-    )
-  }
-
   def param(name: String): Directive[String] = {
     Directive[String](inner =>
       (location, previous, state) => {

@@ -5,11 +5,15 @@ import com.raquo.laminar.lifecycle.InsertContext
 import io.frontroute.internal.ElementWithLocationState
 import io.frontroute.internal.LocationState
 import io.frontroute.internal.RoutingState
+import io.frontroute.internal.RoutingStateRef
+import io.frontroute.internal.SignalToStream
 import org.scalajs.dom.html
 
 import scala.annotation.tailrec
 
 trait Route extends ((RouteLocation, RoutingState, RoutingState) => EventStream[RouteResult]) with Mod[HtmlElement] {
+
+  import Route._
 
   override def apply(element: HtmlElement): Unit = {
     var maybeSubscription: Option[DynamicSubscription] = None
@@ -34,78 +38,89 @@ trait Route extends ((RouteLocation, RoutingState, RoutingState) => EventStream[
     route: Route,
     ctx: MountContext[HtmlElement]
   )(implicit owner: Owner): Signal[Option[Element]] = {
-    var currentSubscription: Subscription = null
-    val currentResult                     = Var(Option.empty[Element])
-    val locationState                     = getClosestLocationState(ctx.thisNode.ref)
+    var latestRender  = Option.empty[Element]
+    val currentRender = Var(Option.empty[Element])
+    val locationState = getClosestLocationState(ctx.thisNode.ref)
+    val childStateRef = new RoutingStateRef
 
     def killPrevious(): Unit = {
-      if (currentSubscription != null) {
-        currentSubscription.kill()
-        currentSubscription = null
-      }
-      currentResult.now().foreach { previous =>
+      currentRender.now().foreach { previous =>
         previous.ref.asInstanceOf[ElementWithLocationState].____locationState.foreach(_.kill())
       }
     }
 
     val _ =
-      EventStream
-        .merge(
-          EventStream.fromValue(locationState.location.now()).delay(0),
-          locationState.location.changes.delay(0)
-        )
+      SignalToStream(locationState.location)
+        .delay(0)
         .collect { case Some(currentUnmatched) =>
           currentUnmatched
         }
         .flatMap { currentUnmatched =>
+          val routingState = locationState.currentState.get(this).getOrElse(RoutingState.empty)
           route(
             currentUnmatched.copy(otherMatched = locationState.siblingMatched),
-            locationState.currentState.resetPath,
-            RoutingState.withPersistentData(locationState.currentState.persistent, locationState.currentState.async)
+            routingState.resetPath,
+            RoutingState.withPersistentData(routingState.persistent, routingState.async)
           )
         }
         .flatMap {
           case RouteResult.Complete(nextState, location, createResult) =>
-            if (nextState != locationState.currentState) {
-              createResult().map { result =>
-                Some((nextState, location, Some(result)))
-              }
+            val routingState = locationState.currentState.get(this)
+            if (!routingState.contains(nextState)) {
+              SignalToStream(
+                createResult().map { result =>
+                  RouteEvent.NextRender(nextState, location, result)
+                }
+              )
             } else {
-              EventStream.fromValue(Some((nextState, location, None)))
+              EventStream.fromValue(
+                RouteEvent.SameRender(nextState, location)
+              )
             }
 
           case RouteResult.Rejected =>
-            EventStream.fromValue(None)
-
+            EventStream.fromValue(
+              RouteEvent.NoRender
+            )
         }
         .foreach {
-          case RouteResult.Complete(nextState, location, createResult) =>
-            if (nextState != locationState.currentState) {
-              locationState.currentState = nextState
-
-              val created = createResult()
-
-              killPrevious()
-              currentSubscription = created.foreach { result =>
-                val resultWithState = result.ref.asInstanceOf[ElementWithLocationState]
-                if (resultWithState.____locationState.isEmpty) {
-                  resultWithState.____locationState = new LocationState(locationState.remaining, locationState.$childMatched, locationState.onChildMatched, owner)
-                }
-                resultWithState.____locationState.get.start()
-
-                currentResult.set(Option(result))
-              }
+          case RouteEvent.NextRender(nextState, remaining, render) =>
+            killPrevious()
+            val resultWithState = render.ref.asInstanceOf[ElementWithLocationState]
+            if (resultWithState.____locationState.isEmpty) {
+              resultWithState.____locationState = new LocationState(
+                locationState.remaining,
+                locationState.$childMatched,
+                locationState.onChildMatched,
+                childStateRef,
+                owner
+              )
             }
-            locationState.emitRemaining(Some(location))
+            resultWithState.____locationState.get.start()
+
+            locationState.currentState.set(this, nextState)
+
+            locationState.emitRemaining(Some(remaining))
             locationState.notifyMatched()
 
-          case RouteResult.Rejected =>
+            latestRender = Some(render)
+            currentRender.set(Some(render))
+
+          case RouteEvent.SameRender(nextState, remaining) =>
+            locationState.currentState.set(this, nextState)
+
+            locationState.emitRemaining(Some(remaining))
+            locationState.notifyMatched()
+            currentRender.set(latestRender)
+
+          case RouteEvent.NoRender =>
             killPrevious()
-            locationState.currentState = RoutingState.empty
-            currentResult.set(None)
+            locationState.currentState.unset(this)
+            latestRender = None
+            currentRender.set(None)
         }
 
-    currentResult.signal
+    currentRender.signal
   }
 
   @tailrec
@@ -120,7 +135,13 @@ trait Route extends ((RouteLocation, RoutingState, RoutingState) => EventStream[
         val siblingMatched   = Var(false)
         val onSiblingMatched = siblingMatched.writer.contramap { (_: Unit) => true }
         DefaultLocationProvider.location.foreach { _ => siblingMatched.set(false) }
-        val locationState    = new LocationState(DefaultLocationProvider.location, siblingMatched.signal, onSiblingMatched, owner)
+        val locationState    = new LocationState(
+          DefaultLocationProvider.location,
+          siblingMatched.signal,
+          onSiblingMatched,
+          new RoutingStateRef,
+          owner
+        )
         withState.____locationState = locationState
         locationState.start()
         locationState
@@ -128,6 +149,29 @@ trait Route extends ((RouteLocation, RoutingState, RoutingState) => EventStream[
     } else {
       withState.____locationState.get
     }
+  }
+
+}
+
+object Route {
+
+  sealed private[frontroute] trait RouteEvent extends Product with Serializable
+
+  private[frontroute] object RouteEvent {
+
+    case class NextRender(
+      nextState: RoutingState,
+      remaining: RouteLocation,
+      render: Element
+    ) extends RouteEvent
+
+    case class SameRender(
+      nextState: RoutingState,
+      remaining: RouteLocation
+    ) extends RouteEvent
+
+    case object NoRender extends RouteEvent
+
   }
 
 }

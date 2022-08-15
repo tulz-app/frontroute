@@ -1,6 +1,7 @@
 package io.frontroute.internal
 
 import com.raquo.laminar.api.L._
+import io.frontroute.Route
 import io.frontroute.RouteLocation
 
 import scala.scalajs.js
@@ -12,10 +13,27 @@ private[frontroute] trait ElementWithLocationState extends js.Any {
 
 }
 
+private[frontroute] class RoutingStateRef {
+
+  private var states: Map[Route, RoutingState] = Map.empty
+
+  def get(r: Route): Option[RoutingState] = states.get(r)
+
+  def set(r: Route, next: RoutingState): Unit = {
+    states = states.updated(r, next)
+  }
+
+  def unset(r: Route): Unit = {
+    states = states.removed(r)
+  }
+
+}
+
 private[frontroute] class LocationState(
   $providedLocation: StrictSignal[Option[RouteLocation]],
   $siblingMatched: StrictSignal[Boolean],
   matchedObserver: Observer[Unit],
+  val currentState: RoutingStateRef,
   owner: Owner
 ) {
 
@@ -30,8 +48,6 @@ private[frontroute] class LocationState(
   val $childMatched: StrictSignal[Boolean] = childMatchedVar.signal
 
   private var locationSubscription: Subscription = _
-
-  var currentState: RoutingState = RoutingState.empty
 
   def siblingMatched: Boolean = $siblingMatched.now()
 
@@ -52,8 +68,10 @@ private[frontroute] class LocationState(
   }
 
   def kill(): Unit = {
-    locationSubscription.kill()
-    locationSubscription = null
+    if (locationSubscription != null) {
+      locationSubscription.kill()
+      locationSubscription = null
+    }
   }
 
 }

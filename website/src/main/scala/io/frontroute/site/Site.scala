@@ -36,7 +36,6 @@ object Site {
       io.frontroute.site.examples.ex_params.ParamsExample,
       io.frontroute.site.examples.ex_custom_directives.CustomDirectivesExample,
       io.frontroute.site.examples.ex_signal.SignalExample,
-      io.frontroute.site.examples.ex_memoize.MemoizeExample,
       io.frontroute.site.examples.ex_auth.AuthExample,
       io.frontroute.site.examples.ex_tabs.TabsExample,
       io.frontroute.site.examples.ex_nested.NestedExample

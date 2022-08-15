@@ -111,10 +111,6 @@ final private[frontroute] class RoutingState private (
     this.copy(persistent = updateData(persistent, path.key, nv))
   }
 
-  def unsetPersistentValue[T](): RoutingState = {
-    this.copy(persistent = persistent.removed(path.key))
-  }
-
   override def toString: String = {
     s"""matched: $path\n${data
         .map {
