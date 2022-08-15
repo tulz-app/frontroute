@@ -29,9 +29,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
       subRoute(location, previous, state)
     }
 
-  @inline def concat(_routes: Route*): Route = routes(_routes: _*)
-
-  def routes(routes: Route*): Route = (location, previous, state) => {
+  def concat(routes: Route*): Route = (location, previous, state) => {
     def findFirst(rs: List[(Route, Int)]): EventStream[RouteResult] =
       rs match {
         case Nil                    => rejected
