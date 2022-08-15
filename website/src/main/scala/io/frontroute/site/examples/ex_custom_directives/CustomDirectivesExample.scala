@@ -4,17 +4,14 @@ package ex_custom_directives
 
 import com.yurique.embedded.FileAsString
 import io.frontroute.site.examples.CodeExample
-import io.laminext.AmAny
-import io.laminext.AmendedHtmlTag
-import org.scalajs.dom
 
 object CustomDirectivesExample
     extends CodeExample(
       id = "custom-directives",
       title = "Custom directives",
       description = FileAsString("description.md")
-    )((a: AmendedHtmlTag[dom.html.Anchor, AmAny]) => {
-      import com.raquo.laminar.api.L.{a => _, _}
+    )(() => {
+      import com.raquo.laminar.api.L._
       import io.frontroute._
       import scala.util._
 

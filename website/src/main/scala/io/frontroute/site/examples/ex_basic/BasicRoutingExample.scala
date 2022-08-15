@@ -4,17 +4,14 @@ package ex_basic
 
 import io.frontroute.site.examples.CodeExample
 import com.yurique.embedded.FileAsString
-import io.laminext.AmAny
-import io.laminext.AmendedHtmlTag
-import org.scalajs.dom
 
 object BasicRoutingExample
     extends CodeExample(
       id = "basic-routing",
       title = "Basic routing",
       description = FileAsString("description.md")
-    )((a: AmendedHtmlTag[dom.html.Anchor, AmAny]) => {
-      import com.raquo.laminar.api.L.{a => _, _}
+    )(() => {
+      import com.raquo.laminar.api.L._
       /* <focus> */
       import io.frontroute._
       /* </focus> */
@@ -23,30 +20,32 @@ object BasicRoutingExample
         div(
           cls := "p-4 min-h-[300px]",
           /* <focus> */
-          routes(
-            pathEnd {
-              div(cls := "text-2xl", "Index page.")
-            },
-            (path("new-path") | path("legacy-path")) {
-              div(cls := "text-2xl", "new-path OR legacy-path")
-            },
-            pathPrefix("some-section") {
-              concat(
-                path("some-page") {
-                  div(cls := "text-2xl", "Some page.")
-                },
-                path("another-page") {
-                  div(cls := "text-2xl", "Another page.")
-                }
-              )
-            },
-            extractUnmatchedPath { unmatched =>
+          pathEnd {
+            div(cls := "text-2xl", "Index page.")
+          },
+          (path("new-path") | path("legacy-path")) {
+            div(cls := "text-2xl", "new-path OR legacy-path")
+          },
+          pathPrefix("some-section") {
+            concat(
+              path("some-page") {
+                div(cls := "text-2xl", "Some page.")
+              },
+              path("another-page") {
+                div(cls := "text-2xl", "Another page.")
+              }
+            )
+          },
+          (noneMatched & extractUnmatchedPath) { unmatched =>
+            div(
+              div(cls := "text-2xl", "Not Found"),
               div(
-                div(cls := "text-2xl", "Not Found"),
-                div(unmatched.mkString("/", "/", ""))
+                cls   := "flex items-center space-x-2",
+                span("Not found path:"),
+                span(unmatched.mkString("/", "/", ""))
               )
-            }
-          )
+            )
+          }
           /* </focus> */
         ),
         div(

@@ -4,9 +4,6 @@ package ex_memoize
 
 import io.frontroute.site.examples.CodeExample
 import com.yurique.embedded.FileAsString
-import io.laminext.AmAny
-import io.laminext.AmendedHtmlTag
-import org.scalajs.dom
 
 import scala.scalajs.js
 
@@ -15,10 +12,10 @@ object MemoizeExample
       id = "memoize",
       title = "Memoize",
       description = FileAsString("description.md")
-    )((a: AmendedHtmlTag[dom.html.Anchor, AmAny]) => {
+    )(() => {
       import io.frontroute._
       import io.laminext.fetch._
-      import com.raquo.laminar.api.L.{a => _, _}
+      import com.raquo.laminar.api.L._
 
       /* <focus> */
       def fetchData(something: String): EventStream[String] =

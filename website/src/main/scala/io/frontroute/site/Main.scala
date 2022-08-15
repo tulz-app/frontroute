@@ -1,6 +1,7 @@
 package io.frontroute.site
 
 import com.raquo.laminar.api.L._
+import io.frontroute.BrowserNavigation
 import io.frontroute.LinkHandler
 import io.frontroute.site.components.CodeExampleDisplay
 import io.laminext.highlight.Highlight
@@ -38,6 +39,7 @@ object Main {
     val appContainer = dom.document.querySelector("#app")
     val content      = Site.examples.find(_.id == id).map(ex => CodeExampleDisplay.frame(ex)).getOrElse(div(s"EXAMPLE NOT FOUND: ${id}"))
     val _            = com.raquo.laminar.api.L.render(appContainer, content)
+    BrowserNavigation.pushState(url = "/")
   }
 
   private def insertJsClass(ssrContext: SsrContext): Unit = {

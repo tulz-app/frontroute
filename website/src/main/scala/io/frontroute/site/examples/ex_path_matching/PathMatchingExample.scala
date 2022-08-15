@@ -4,17 +4,14 @@ package ex_path_matching
 
 import com.yurique.embedded.FileAsString
 import io.frontroute.site.examples.CodeExample
-import io.laminext.AmAny
-import io.laminext.AmendedHtmlTag
-import org.scalajs.dom
 
 object PathMatchingExample
     extends CodeExample(
       id = "path-matching",
       title = "Path matching",
       description = FileAsString("description.md")
-    )((a: AmendedHtmlTag[dom.html.Anchor, AmAny]) => {
-      import com.raquo.laminar.api.L.{a => _, _}
+    )(() => {
+      import com.raquo.laminar.api.L._
       import io.frontroute._
 
       div(

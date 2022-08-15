@@ -4,20 +4,17 @@ package ex_tabs
 
 import io.frontroute.site.examples.CodeExample
 import com.yurique.embedded.FileAsString
-import io.laminext.AmAny
-import io.laminext.AmendedHtmlTag
-import org.scalajs.dom
 
 object TabsExample
     extends CodeExample(
       id = "tabs",
       title = "Tabs",
       description = FileAsString("description.md")
-    )((a: AmendedHtmlTag[dom.html.Anchor, AmAny]) => {
+    )(() => {
       import io.frontroute._
 
       import io.laminext.syntax.core._
-      import com.raquo.laminar.api.L.{a => _, _}
+      import com.raquo.laminar.api.L._
 
       val route =
         concat(

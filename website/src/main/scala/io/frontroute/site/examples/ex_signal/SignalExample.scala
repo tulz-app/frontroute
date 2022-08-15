@@ -4,18 +4,15 @@ package ex_signal
 
 import io.frontroute.site.examples.CodeExample
 import com.yurique.embedded.FileAsString
-import io.laminext.AmAny
-import io.laminext.AmendedHtmlTag
-import org.scalajs.dom
 
 object SignalExample
     extends CodeExample(
       id = "signal",
       title = "Signal",
       description = FileAsString("description.md")
-    )((a: AmendedHtmlTag[dom.html.Anchor, AmAny]) => {
+    )(() => {
       import io.frontroute._
-      import com.raquo.laminar.api.L.{a => _, _}
+      import com.raquo.laminar.api.L._
 
       val mySignal = Var("Test")
 

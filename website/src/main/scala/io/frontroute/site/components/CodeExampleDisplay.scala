@@ -1,8 +1,7 @@
 package io.frontroute.site.components
 
 import com.raquo.laminar.api.L._
-import io.frontroute.DefaultLocationProvider
-import io.frontroute.LocationProvider
+import io.frontroute.BrowserNavigation
 import io.laminext.syntax.core._
 import io.laminext.syntax.tailwind._
 import io.laminext.syntax.markdown._
@@ -12,10 +11,10 @@ import io.laminext.tailwind.theme
 import io.frontroute.site.Site
 import io.frontroute.site.Styles
 import io.frontroute.site.TemplateVars
-import io.laminext.util.UrlString
 import org.scalajs.dom
 import org.scalajs.dom.HTMLIFrameElement
 import org.scalajs.dom.html
+import org.scalajs.dom.window
 
 import scala.scalajs.js
 
@@ -58,11 +57,12 @@ object CodeExampleDisplay {
         cls := "w-full text-sm",
         fixIndentation {
           example.code.source
-            .replace("import com.raquo.laminar.api.L.{a => _, _}", "import com.raquo.laminar.api.L._")
-            .replace(
-              """      (a: AmendedHtmlTag[dom.html.Anchor, AmAny]) =>
-                |        {""".stripMargin,
-              ""
+            .replaceAll(
+              "/\\* <focus> \\*/\\n\\s*",
+              "/\\* <focus> \\*/"
+            ).replaceAll(
+              "\\n/\\* </focus> \\*/",
+              "/* <focus> */"
             )
         }
       )
@@ -182,37 +182,15 @@ object CodeExampleDisplay {
   }
 
   def frame(example: CodeExample): Element = {
-    val locations        = new EventBus[String]
-    val currentLocation  = locations.events.toSignal("")
-    val locationProvider = LocationProvider.custom(locations.events)
-    DefaultLocationProvider.set(locationProvider)
+    val currentUrl = windowEvents.onPopState
+      .mapTo(window.location.toString).map { url =>
+        url.dropWhile(_ != '/').drop(2).dropWhile(_ != '/')
+      }.startWith("/")
 
     val urlInput = input(
-      value <-- locations,
+      value <-- currentUrl,
       tpe         := "url",
       placeholder := "https://site.nowhere/path"
-    )
-
-    val amendedA = a.amend[AmAny](
-      thisEvents(onClick.preventDefault.stopPropagation)
-        .withCurrentValueOf(currentLocation)
-        .map { case (e, current) =>
-          val href            = e.target.getAttribute("href")
-          val anchorLocation  = UrlString.parse(href)
-          val currentLocation = UrlString.parse(current)
-          if (!href.contains("://")) {
-            currentLocation.search = anchorLocation.search
-            if (href.startsWith("/")) {
-              currentLocation.pathname = anchorLocation.pathname
-            } else {
-              currentLocation.pathname = currentLocation.pathname.reverse.dropWhile(_ != '/').reverse + href
-            }
-            val search = currentLocation.search
-            s"${currentLocation.protocol}//${currentLocation.hostname}${currentLocation.pathname}${search}"
-          } else {
-            anchorLocation.href
-          }
-        } --> locations
     )
 
     div(
@@ -221,21 +199,22 @@ object CodeExampleDisplay {
         cls := "-mx-4 -mt-4 p-4 bg-blue-500 flex space-x-1",
         urlInput.amend(
           cls := "flex-1",
-          thisEvents(onKeyDown.filter(_.key == "Enter").preventDefault.stopPropagation).sample(urlInput.value) --> locations
+          thisEvents(onKeyDown.filter(_.key == "Enter").preventDefault.stopPropagation).sample(urlInput.value) --> { url =>
+            BrowserNavigation.pushState(url = url)
+          }
         ),
         button(
           cls := "btn-md-outline-white",
           "Go",
-          thisEvents(onClick).sample(urlInput.value) --> locations
+          thisEvents(onClick).sample(urlInput.value) --> { url =>
+            BrowserNavigation.pushState(url = url)
+          }
         )
       ),
       onMountUnmountCallbackWithState(
-        mount = ctx => render(ctx.thisNode.ref, example.code.value(amendedA)),
+        mount = ctx => render(ctx.thisNode.ref, example.code.value()),
         unmount = (_, root: Option[RootNode]) => root.foreach(_.unmount())
-      ),
-      onMountCallback { _ =>
-        locations.emit("https://site.nowhere/")
-      }
+      )
     )
   }
 

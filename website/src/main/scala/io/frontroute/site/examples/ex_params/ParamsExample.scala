@@ -4,17 +4,14 @@ package ex_params
 
 import com.yurique.embedded.FileAsString
 import io.frontroute.site.examples.CodeExample
-import io.laminext.AmAny
-import io.laminext.AmendedHtmlTag
-import org.scalajs.dom
 
 object ParamsExample
     extends CodeExample(
       id = "query-parameters",
       title = "Query parameters",
       description = FileAsString("description.md")
-    )((a: AmendedHtmlTag[dom.html.Anchor, AmAny]) => {
-      import com.raquo.laminar.api.L.{a => _, _}
+    )(() => {
+      import com.raquo.laminar.api.L._
       import io.frontroute._
 
       val route =

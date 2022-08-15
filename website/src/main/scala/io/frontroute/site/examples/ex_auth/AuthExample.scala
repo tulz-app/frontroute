@@ -4,18 +4,15 @@ package ex_auth
 
 import io.frontroute.site.examples.CodeExample
 import com.yurique.embedded.FileAsString
-import io.laminext.AmAny
-import io.laminext.AmendedHtmlTag
-import org.scalajs.dom
 
 object AuthExample
     extends CodeExample(
       id = "auth",
       title = "Auth",
       description = FileAsString("description.md")
-    )((a: AmendedHtmlTag[dom.html.Anchor, AmAny]) => {
+    )(() => {
       import io.frontroute._
-      import com.raquo.laminar.api.L.{a => _, _}
+      import com.raquo.laminar.api.L._
 
       case class User(id: String)
 

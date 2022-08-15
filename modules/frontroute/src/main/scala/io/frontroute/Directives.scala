@@ -154,6 +154,18 @@ trait Directives {
     )
   }
 
+  def noneMatched: Directive0 = {
+    Directive[Unit](inner =>
+      (location, previous, state) => {
+        if (location.otherMatched) {
+          rejected
+        } else {
+          inner(())(location, previous, state.enter)
+        }
+      }
+    )
+  }
+
   def testPath[T](m: PathMatcher[T]): Directive[T] = {
     Directive[T](inner =>
       (location, previous, state) => {
