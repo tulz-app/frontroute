@@ -13,7 +13,7 @@ private[frontroute] trait ElementWithLocationState extends js.Any {
 }
 
 private[frontroute] class LocationState(
-  $providedLocation: Signal[Option[RouteLocation]],
+  $providedLocation: StrictSignal[Option[RouteLocation]],
   $siblingMatched: StrictSignal[Boolean],
   matchedObserver: Observer[Unit],
   owner: Owner
@@ -29,10 +29,9 @@ private[frontroute] class LocationState(
   val onChildMatched: Observer[Unit]       = childMatchedVar.writer.contramap(_ => true)
   val $childMatched: StrictSignal[Boolean] = childMatchedVar.signal
 
-  private val locationSubscription = $providedLocation.changes.foreach { l =>
-    locationVar.set(l)
-    childMatchedVar.set(false)
-  }(owner)
+  private var locationSubscription: Subscription = _
+
+  var currentState: RoutingState = RoutingState.empty
 
   def siblingMatched: Boolean = $siblingMatched.now()
 
@@ -43,8 +42,18 @@ private[frontroute] class LocationState(
   def emitRemaining(remaining: Option[RouteLocation]): Unit =
     remainingVar.set(remaining)
 
+  def start(): Unit = {
+    if (locationSubscription == null) {
+      locationSubscription = $providedLocation.changes.foreach { l =>
+        locationVar.set(l)
+        childMatchedVar.set(false)
+      }(owner)
+    }
+  }
+
   def kill(): Unit = {
     locationSubscription.kill()
+    locationSubscription = null
   }
 
 }
