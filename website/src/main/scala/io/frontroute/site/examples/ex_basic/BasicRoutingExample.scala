@@ -39,7 +39,9 @@ object BasicRoutingExample
               path("some-page") {
                 /* </focus> */
                 div(cls := "text-2xl", "Some page.")
+                /* <focus> */
               },
+              /* </focus> */
               /* <focus> */
               path("another-page") {
                 /* </focus> */

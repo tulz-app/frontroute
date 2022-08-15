@@ -59,7 +59,7 @@ object CodeExampleDisplay {
           example.code.source
             .replaceAll(
               "/\\* <focus> \\*/\\n\\s*",
-              "/\\* <focus> \\*/"
+              "/* <focus> */"
             ).replaceAll(
               "\\n\\s*/\\* </focus> \\*/",
               "/* </focus> */"
