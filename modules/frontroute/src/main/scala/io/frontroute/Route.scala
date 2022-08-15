@@ -94,6 +94,7 @@ trait Route extends ((RouteLocation, RoutingState, RoutingState) => EventStream[
 
           case RouteResult.Rejected =>
             killPrevious()
+            currentState = RoutingState.empty
             currentResult.set(None)
         }
     }
