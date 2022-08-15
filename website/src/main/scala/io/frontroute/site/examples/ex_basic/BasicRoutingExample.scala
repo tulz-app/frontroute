@@ -21,22 +21,35 @@ object BasicRoutingExample
           cls := "p-4 min-h-[300px]",
           /* <focus> */
           pathEnd {
+            /* </focus> */
             div(cls := "text-2xl", "Index page.")
           },
+          /* <focus> */
           (path("new-path") | path("legacy-path")) {
+            /* </focus> */
             div(cls := "text-2xl", "new-path OR legacy-path")
           },
+          /* <focus> */
           pathPrefix("some-section") {
+            /* </focus> */
+            /* <focus> */
             concat(
+              /* </focus> */
+              /* <focus> */
               path("some-page") {
+                /* </focus> */
                 div(cls := "text-2xl", "Some page.")
               },
+              /* <focus> */
               path("another-page") {
+                /* </focus> */
                 div(cls := "text-2xl", "Another page.")
               }
             )
           },
+          /* <focus> */
           (noneMatched & extractUnmatchedPath) { unmatched =>
+            /* </focus> */
             div(
               div(cls := "text-2xl", "Not Found"),
               div(
@@ -46,7 +59,6 @@ object BasicRoutingExample
               )
             )
           }
-          /* </focus> */
         ),
         div(
           cls := "bg-blue-900 -mx-4 -mb-4 p-2",

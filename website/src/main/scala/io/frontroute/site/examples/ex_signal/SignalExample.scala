@@ -16,36 +16,33 @@ object SignalExample
 
       val mySignal = Var("Test")
 
-      val route =
-        /* <focus> */
-        signal(mySignal.signal) { signalValue =>
-          /* </focus> */
-          concat(
-            pathEnd {
-              div(
-                div(cls := "text-2xl", "Index page."),
-                div(s"Signal value: $signalValue")
-              )
-            },
-            path("some-page") {
-              div(
-                div(cls := "text-2xl", "Some page."),
-                div(s"Signal value: $signalValue")
-              )
-            },
-            extractUnmatchedPath { unmatched =>
-              div(
-                div(cls := "text-2xl", "Not Found"),
-                div(unmatched.mkString("/", "/", ""))
-              )
-            }
-          )
-        }
-
       div(
         div(
           cls := "p-4 min-h-[300px]",
-          route
+          /* <focus> */
+          signal(mySignal.signal) { signalValue =>
+            /* </focus> */
+            concat(
+              pathEnd {
+                div(
+                  div(cls := "text-2xl", "Index page."),
+                  div(s"Signal value: $signalValue")
+                )
+              },
+              path("some-page") {
+                div(
+                  div(cls := "text-2xl", "Some page."),
+                  div(s"Signal value: $signalValue")
+                )
+              },
+              extractUnmatchedPath { unmatched =>
+                div(
+                  div(cls := "text-2xl", "Not Found"),
+                  div(unmatched.mkString("/", "/", ""))
+                )
+              }
+            )
+          }
         ),
         div(
           cls := "bg-blue-900 -mx-4 -mb-4 p-2 space-y-2",

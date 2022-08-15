@@ -18,23 +18,21 @@ object PathMatchingExample
         div(
           cls := "p-4 min-h-[300px]",
           /* <focus> */
-          concat(
-            pathEnd {
-              div(cls := "text-2xl", "Index page.")
-            },
-            path("user" / long) { userId =>
-              div(div(cls := "text-2xl", "User page."), div(s"User ID: $userId"))
-            },
-            path(Set("page-1", "page-2", "page-3")) { page =>
-              div(div(cls := "text-2xl", "Some page."), div(s"Page name: $page"))
-            },
-            extractUnmatchedPath { unmatched =>
-              div(
-                div(cls := "text-2xl", "Not Found"),
-                div(unmatched.mkString("/", "/", ""))
-              )
-            }
-          )
+          pathEnd {
+            div(cls := "text-2xl", "Index page.")
+          },
+          path("user" / long) { userId =>
+            div(div(cls := "text-2xl", "User page."), div(s"User ID: $userId"))
+          },
+          path(Set("page-1", "page-2", "page-3")) { page =>
+            div(div(cls := "text-2xl", "Some page."), div(s"Page name: $page"))
+          },
+          (noneMatched & extractUnmatchedPath) { unmatched =>
+            div(
+              div(cls := "text-2xl", "Not Found"),
+              div(unmatched.mkString("/", "/", ""))
+            )
+          }
           /* </focus> */
         ),
         div(

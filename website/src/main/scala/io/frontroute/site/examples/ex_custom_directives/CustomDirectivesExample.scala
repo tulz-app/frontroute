@@ -28,24 +28,21 @@ object CustomDirectivesExample
       div(
         div(
           cls := "p-4 min-h-[300px]",
-          concat(
-            pathEnd {
-              div(cls := "text-2xl", "Index page.")
-            },
-            (path("movie") &
-              /* <focus> */
-              longParam("id")
-            /* </focus> */
-            ) { movieId =>
-              div(div(cls := "text-2xl", "Movie page."), div(s"Movie ID (long): $movieId"))
-            },
-            extractUnmatchedPath { unmatched =>
-              div(
-                div(cls := "text-2xl", "Not Found"),
-                div(unmatched.mkString("/", "/", ""))
-              )
-            }
-          )
+          pathEnd {
+            div(cls := "text-2xl", "Index page.")
+          },
+          (path("movie") &
+            /* <focus> */
+            longParam("id") /* </focus> */
+          ) { movieId =>
+            div(div(cls := "text-2xl", "Movie page."), div(s"Movie ID (long): $movieId"))
+          },
+          (noneMatched & extractUnmatchedPath) { unmatched =>
+            div(
+              div(cls := "text-2xl", "Not Found"),
+              div(unmatched.mkString("/", "/", ""))
+            )
+          }
         ),
         div(
           cls := "bg-blue-900 -mx-4 -mb-4 p-2",

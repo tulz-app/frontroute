@@ -61,8 +61,8 @@ object CodeExampleDisplay {
               "/\\* <focus> \\*/\\n\\s*",
               "/\\* <focus> \\*/"
             ).replaceAll(
-              "\\n/\\* </focus> \\*/",
-              "/* <focus> */"
+              "\\n\\s*/\\* </focus> \\*/",
+              "/* </focus> */"
             )
         }
       )

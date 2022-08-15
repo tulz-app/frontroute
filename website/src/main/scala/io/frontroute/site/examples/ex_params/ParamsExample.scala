@@ -14,33 +14,26 @@ object ParamsExample
       import com.raquo.laminar.api.L._
       import io.frontroute._
 
-      val route =
-        concat(
+      div(
+        div(
+          cls := "p-4 min-h-[300px]",
           pathEnd {
             div(cls := "text-2xl", "Index page.")
           },
           /* <focus> */
-          (path("movie") & param("id")) { movieId =>
-            /* </focus> */
+          (path("movie") & param("id")) { movieId => /* </focus> */
             div(div(cls := "text-2xl", "Movie page."), div(s"Movie ID: $movieId"))
           },
           /* <focus> */
-          (path("movies" / "search") & maybeParam("director") & maybeParam("year")) { (maybeDirector, maybeYear) =>
-            /* </focus> */
+          (path("movies" / "search") & maybeParam("director") & maybeParam("year")) { (maybeDirector, maybeYear) => /* </focus> */
             div(div(cls := "text-2xl", "Movie search page."), div(s"Director: $maybeDirector"), div(s"Year: $maybeYear"))
           },
-          extractUnmatchedPath { unmatched =>
+          (noneMatched & extractUnmatchedPath) { unmatched =>
             div(
               div(cls := "text-2xl", "Not Found"),
               div(unmatched.mkString("/", "/", ""))
             )
           }
-        )
-
-      div(
-        div(
-          cls := "p-4 min-h-[300px]",
-          route
         ),
         div(
           cls := "bg-blue-900 -mx-4 -mb-4 p-2",

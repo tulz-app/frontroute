@@ -16,8 +16,9 @@ object TabsExample
       import io.laminext.syntax.core._
       import com.raquo.laminar.api.L._
 
-      val route =
-        concat(
+      div(
+        div(
+          cls := "p-4 min-h-[300px]",
           /* <focus> */
           (pathEnd.mapTo("tab-1") | path(Set("tab-1", "tab-2"))).signal { tab =>
             /* </focus> */
@@ -50,18 +51,12 @@ object TabsExample
               )
             )
           },
-          extractUnmatchedPath { unmatched =>
+          (noneMatched & extractUnmatchedPath) { unmatched =>
             div(
               div(cls := "text-2xl", "Not Found"),
               div(unmatched.mkString("/", "/", ""))
             )
           }
-        )
-
-      div(
-        div(
-          cls := "p-4 min-h-[300px]",
-          route
         ),
         div(
           cls := "bg-blue-900 -mx-4 -mb-4 p-2 space-y-2",

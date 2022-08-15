@@ -49,8 +49,7 @@ object AuthExample
             },
             pathPrefix("private") {
               /* <focus> */
-              requireAuthentication { user =>
-                /* </focus> */
+              requireAuthentication { user => /* </focus> */
                 path("profile") {
                   div(
                     div(cls := "text-2xl", "Profile page."),

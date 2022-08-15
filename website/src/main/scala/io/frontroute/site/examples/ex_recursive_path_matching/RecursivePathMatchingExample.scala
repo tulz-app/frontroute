@@ -23,30 +23,23 @@ object RecursivePathMatchingExample
         }
       /* </focus> */
 
-      val route =
-        concat(
+      div(
+        div(
+          cls := "p-4 min-h-[300px]",
           pathEnd {
             div(cls := "text-2xl", "Index page.")
           },
           (pathPrefix("recursive") &
             /* <focus> */
-            recursivePathMatch
-          /* </focus> */
-          ) { segments =>
+            recursivePathMatch /* </focus> */ ) { segments =>
             div(div(cls := "text-2xl", "Recursive page."), div(s"Segments: ${segments.mkString(", ")}"))
           },
-          extractUnmatchedPath { unmatched =>
+          (noneMatched & extractUnmatchedPath) { unmatched =>
             div(
               div(cls := "text-2xl", "Not Found"),
               div(unmatched.mkString("/", "/", ""))
             )
           }
-        )
-
-      div(
-        div(
-          cls := "p-4 min-h-[300px]",
-          route
         ),
         div(
           cls := "bg-blue-900 -mx-4 -mb-4 p-2",
