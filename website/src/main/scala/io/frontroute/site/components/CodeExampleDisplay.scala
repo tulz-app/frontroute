@@ -46,7 +46,7 @@ object CodeExampleDisplay {
 
     val codeNode = (dim: Boolean) => {
       val theCode = pre(
-        cls := "w-full text-sm",
+        cls := "w-full text-sm language-scala",
         fixIndentation {
           example.code.source
         }
@@ -245,7 +245,6 @@ object CodeExampleDisplay {
     var childrenOpaque = opaque
     val newChildNodes  = element.childNodes.flatMap { child =>
       if (child.nodeName == "#text") {
-        dom.console.log(child)
         val span = dom.document.createElement("span").asInstanceOf[html.Element]
         span.innerText = child.textContent
         span.style.color = opaqueColor(elementColor, childrenOpaque, dim)
@@ -253,12 +252,12 @@ object CodeExampleDisplay {
       } else {
         if (child.innerText.contains("<focus>")) {
           childrenOpaque += 1
-          Some(child)
-//          None
+//          Some(child)
+          None
         } else if (child.innerText.contains("</focus>")) {
           childrenOpaque -= 1
-          Some(child)
-//          None
+//          Some(child)
+          None
         } else {
           Some(setOpacityRecursively(child.asInstanceOf[html.Element], childrenOpaque, dim))
         }
@@ -271,7 +270,7 @@ object CodeExampleDisplay {
   private def hideFocusMarkers(element: html.Element): Unit =
     element.childNodes.foreach { child =>
       if (child.nodeName != "#text") {
-        if (child.innerText == "/* <focus> */" || child.innerText == "/* </focus> */") {
+        if (child.innerText.contains("<focus>") || child.innerText.contains("</focus>")) {
           child.asInstanceOf[html.Element].style.display = "none"
         } else {
           hideFocusMarkers(child.asInstanceOf[html.Element])

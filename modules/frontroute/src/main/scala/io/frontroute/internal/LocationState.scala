@@ -1,63 +1,23 @@
 package io.frontroute.internal
 
 import com.raquo.laminar.api.L._
+import io.frontroute.DefaultLocationProvider
 import io.frontroute.Route
 import io.frontroute.RouteLocation
 import org.scalajs.dom
 
 import scala.annotation.tailrec
 import scala.scalajs.js
-
-private[frontroute] object ElementWithLocationState {
-
-  def getOrInit(node: dom.Node, init: () => LocationState): LocationState = {
-    val resultWithState = node.asInstanceOf[ElementWithLocationState]
-    if (resultWithState.____locationState.isEmpty) {
-      resultWithState.____locationState = init()
-    }
-    resultWithState.____locationState.get
-  }
-
-  @tailrec
-  def getClosestOrInit(node: dom.Node, init: () => LocationState): LocationState = {
-    val withState = node.asInstanceOf[ElementWithLocationState]
-    if (withState.____locationState.isEmpty) {
-      if (node.parentNode != null) {
-        getClosestOrInit(node.parentNode, init)
-      } else {
-        val initialized = init()
-        withState.____locationState = initialized
-        initialized
-      }
-    } else {
-      withState.____locationState.get
-    }
-  }
-
-  @tailrec
-  def getClosest(node: dom.Node): Option[LocationState] = {
-    val withState = node.asInstanceOf[ElementWithLocationState]
-    if (withState.____locationState.isEmpty) {
-      if (node.parentNode != null) {
-        getClosest(node.parentNode)
-      } else {
-        None
-      }
-    } else {
-      Some(withState.____locationState.get)
-    }
-  }
-
-}
+import scala.scalajs.js.UndefOr
 
 @js.native
-private[frontroute] trait ElementWithLocationState extends js.Any {
+private[internal] trait ElementWithLocationState extends js.Any {
 
   var ____locationState: js.UndefOr[LocationState]
 
 }
 
-private[frontroute] class RoutingStateRef {
+private[frontroute] class RouterStateRef {
 
   private var states: Map[Route, RoutingState] = Map.empty
 
@@ -73,43 +33,71 @@ private[frontroute] class RoutingStateRef {
 
 }
 
-private[frontroute] class LocationState(
-  $providedLocation: StrictSignal[Option[RouteLocation]],
-  $siblingMatched: StrictSignal[Boolean],
-  matchedObserver: Observer[Unit],
-  val currentState: RoutingStateRef,
-  owner: Owner
-) {
+private[frontroute] object LocationState {
 
-  private val locationVar                           = Var(Option.empty[RouteLocation])
-  val location: StrictSignal[Option[RouteLocation]] = locationVar.signal
+  lazy val default: LocationState = {
+    var siblingMatched = false
+    DefaultLocationProvider.location.foreach { _ => siblingMatched = false }(unsafeWindowOwner)
+
+    val state = new LocationState(
+      location = DefaultLocationProvider.location,
+      siblingMatched = () => siblingMatched,
+      notifyMatched = () => { siblingMatched = true },
+      routerState = new RouterStateRef,
+    )
+    state.start()(unsafeWindowOwner)
+    state
+  }
+
+  def apply(el: Element): UndefOr[LocationState] =
+    el.ref.asInstanceOf[ElementWithLocationState].____locationState
+
+  @tailrec
+  def closestOrDefault(node: dom.Node): LocationState = {
+    val withState = node.asInstanceOf[ElementWithLocationState]
+    if (withState.____locationState.isEmpty) {
+      if (node.parentNode != null) {
+        closestOrDefault(node.parentNode)
+      } else {
+        withState.____locationState = default
+        default
+      }
+    } else {
+      withState.____locationState.get
+    }
+  }
+
+  def initIfMissing(node: dom.Node, init: () => LocationState): Unit = {
+    val resultWithState = node.asInstanceOf[ElementWithLocationState]
+    if (resultWithState.____locationState.isEmpty) {
+      resultWithState.____locationState = init()
+    }
+  }
+
+}
+
+private[frontroute] class LocationState(
+  val location: StrictSignal[Option[RouteLocation]],
+  val siblingMatched: () => Boolean,
+  val notifyMatched: () => Unit,
+  val routerState: RouterStateRef,
+) {
 
   private val remainingVar                           = Var(Option.empty[RouteLocation])
   val remaining: StrictSignal[Option[RouteLocation]] = remainingVar.signal
 
-  private val childMatchedVar              = Var(false)
-  val onChildMatched: Observer[Unit]       = childMatchedVar.writer.contramap(_ => true)
-  val $childMatched: StrictSignal[Boolean] = childMatchedVar.signal
+  def setRemaining(remaining: Option[RouteLocation]): Unit = remainingVar.set(remaining)
+
+  private var _childMatched       = false
+  val onChildMatched: () => Unit  = () => { _childMatched = true }
+  val childMatched: () => Boolean = () => _childMatched
 
   private var locationSubscription: Subscription = _
 
-  def siblingMatched: Boolean = $siblingMatched.now()
-
-  def notifyMatched(): Unit = {
-    matchedObserver.onNext(())
-  }
-
-  def emitRemaining(remaining: Option[RouteLocation]): Unit =
-    remainingVar.set(remaining)
-
-  def start(): LocationState = {
+  def start()(implicit owner: Owner): Unit = {
     if (locationSubscription == null) {
-      locationSubscription = $providedLocation.changes.foreach { l =>
-        locationVar.set(l)
-        childMatchedVar.set(false)
-      }(owner)
+      locationSubscription = location.changes.foreach { _ => _childMatched = false }
     }
-    this
   }
 
   def kill(): Unit = {
