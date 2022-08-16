@@ -47,9 +47,10 @@ object Site {
     SiteModule(
       path = "getting-started",
       title = "Getting started",
-      index = docPage("", "Installation", FileAsString("/doc/getting-started/installation.md")),
-      ""                   -> Seq(
-        docPage("older-versions", "Older versions", FileAsString("/doc/getting-started/older-versions.md"))
+      index = docPage("", "Installation", FileAsString("/doc/getting-started/index.md")),
+      "Introduction"       -> Seq(
+        docPage("first-steps", "First steps", FileAsString("/doc/getting-started/first-steps.md")),
+        docPage("adding-routes", "Adding routes", FileAsString("/doc/getting-started/adding-routes.md"))
       )
     ),
     SiteModule(

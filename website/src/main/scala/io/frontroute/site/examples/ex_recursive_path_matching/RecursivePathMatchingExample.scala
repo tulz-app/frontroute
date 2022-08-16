@@ -9,7 +9,16 @@ object RecursivePathMatchingExample
     extends CodeExample(
       id = "recursive-path-matching",
       title = "Recursive path matching",
-      description = FileAsString("description.md")
+      description = FileAsString("description.md"),
+      links = Seq(
+        "/",
+        "/recursive",
+        "/recursive/1",
+        "/recursive/1/2",
+        "/recursive/1/2/3",
+        "/recursive/1/2/3/4",
+        "/recursive/1/2/3/4/5"
+      )
     )(() => {
       import com.raquo.laminar.api.L._
       import io.frontroute._
@@ -43,51 +52,6 @@ object RecursivePathMatchingExample
               div(unmatched.mkString("/", "/", ""))
             )
           }
-        ),
-        div(
-          cls := "bg-blue-900 -mx-4 -mb-4 p-2",
-          div(
-            cls := "font-semibold text-2xl text-blue-200",
-            "Navigation"
-          ),
-          div(
-            cls := "flex flex-col p-2",
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/",
-              "➜ /"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/recursive",
-              "➜ /recursive"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/recursive/1",
-              "➜ /recursive/1"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/recursive/1/2",
-              "➜ /recursive/1/2"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/recursive/1/2/3",
-              "➜ /recursive/1/2/3"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/recursive/1/2/3/4",
-              "➜ /recursive/1/2/3/4"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/recursive/1/2/3/4/5",
-              "➜ /recursive/1/2/3/4/5"
-            )
-          )
         )
       )
     })

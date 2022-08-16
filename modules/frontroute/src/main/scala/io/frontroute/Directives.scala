@@ -13,19 +13,6 @@ trait Directives {
   private[frontroute] def extract[T](f: RouteLocation => T): Directive[T] =
     extractContext.map(f)
 
-  def state[T](initial: => T): Directive[T] =
-    Directive[T] { inner => (location, previous, state) =>
-      val next = state.enter
-      state.getPersistentValue[T](next.path.key) match {
-        case None =>
-          val newStateValue = initial
-          inner(newStateValue)(location, previous, next.setPersistentValue(newStateValue))
-
-        case Some(existing) =>
-          inner(existing)(location, previous, next)
-      }
-    }
-
   def signal[T](signal: Signal[T]): Directive[T] =
     Directive[T] { inner => (location, previous, state) =>
       signal.flatMap { extracted =>

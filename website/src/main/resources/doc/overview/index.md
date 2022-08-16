@@ -3,6 +3,24 @@
 * define a [route](/overview/route) using [directives](/overview/directive)
 * get a location provider
 
+`frontroute` uses and depends on the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History).
+
+
+
+You can pass an `Element` or a `Signal[Element]` to `complete`: implicit conversions from those to `ToComplete`
+are provided out of the box:
+
+```scala
+implicit def elementToComplete(value: Element): ToComplete
+implicit def signalToComplete(value: Signal[Element]): ToComplete
+```
+
+```scala
+complete(div())
+complete(Val(div()))
+```
+
+
 
 ## How it works
 

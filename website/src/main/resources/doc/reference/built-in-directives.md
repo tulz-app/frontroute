@@ -1,47 +1,131 @@
-### reject
+### `pathEnd`
 
 ```scala
-val reject: Route
+val pathEnd: Directive0
 ```
 
-Returns a `Route` that always rejects.
+Matches if the current path is empty.
 
 
 
-### complete
-
-```
-def complete(result: => ToComplete): Route
-```
-
-Returns a `Route` that always matches and renders the element provided by the `result: => ToComplete`.
-
-You can pass an `Element` or a `Signal[Element]` to `complete`: implicit conversions from those to `ToComplete`
-are provided out of the box:
+### `pathPrefix`
 
 ```scala
-implicit def elementToComplete(value: Element): ToComplete
-implicit def signalToComplete(value: Signal[Element]): ToComplete
+def pathPrefix[T](m: PathMatcher[T]): Directive[T]
 ```
+
+Applies the given `PathMatcher` to the current path. 
+
+If it matches: 
+* the directive matches as well, with the value provided by the path matcher;
+* the parts matched by the path matcher are removed from unmatched path (for the subsequent directives and routes).
+
+If the path matcher rejects, the directive rejects as well.
 
 ```scala
-complete(div())
-complete(Val(div()))
+pathPrefix("user")
 ```
 
+This `pathPrefix` matches if the current path starts with a `"user"` segment.
+
+It's a `Directive0` because a string constant (`"user"` in this case) is implicitly converted into 
+a `PathMatcher[Unit]`.
+
+```scala
+pathPrefix("user" / segment)
+```
+
+This `pathPrefix` matches if the current path starts with a `"user"` segment followed by at least one more segment.
+
+It's a `Directive[String]` because `segment` is a `PathMatcher[String]`.
 
 
-### provide
+See [Path matching]({{sitePrefix}}/overview/path-matcher) for more details.
+
+### `path`
+
+```scala
+def path[T](m: PathMatcher[T]): Directive[T]
+```
+
+Effectively the same as `pathPrefix(m) & pathEnd`
+
+
+
+### `testPathPrefix`
+
+```scala
+def testPathPrefix[T](m: PathMatcher[T]): Directive[T]
+```
+
+Same as `pathPrefix` but does not consume the segments of the unmatched path.
+
+
+
+### `testPath`
+
+```scala
+def testPath[T](m: PathMatcher[T]): Directive[T]
+```
+
+Same as `path` but does not consume the segments of the unmatched path.
+
+
+
+### `extractUnmatchedPath`
+
+```scala
+val extractUnmatchedPath: Directive[List[String]]
+```
+
+Always matches. Provides the current path without "consuming" it.
+
+
+
+### `param`
+
+```scala
+def param(name: String): Directive[String]
+```
+
+Matches if the search query contains the given parameter. Provides the value of the parameter in the search query.
+
+
+
+### `maybeParam`
+
+```scala
+def maybeParam(name: String): Directive[Option[String]]
+```
+
+Always matches. If the search query contains the given parameter, provides its value in a `Some()`. Otherwise,
+provides `None`.
+
+
+
+### `signal`
+
+```scala
+def signal[T](signal: Signal[T]): Directive[T]
+```
+
+Always matches. Provides the value inside the signal. Whenever the signal value changes, forces the route to be
+re-evaluated.
+
+See [example]({{sitePrefix}}/examples/signal).
+
+
+### `provide`
 
 ```scala
 def provide[L](value: L): Directive[L]
 ```
 
-Always matches. Provides the given `value`.
+Always matches with the given `value`.
 
 
 
-### noneMatched
+### `noneMatched`
 
 ```scala
 val noneMatched: Directive0
@@ -58,7 +142,7 @@ div(
 
 
 
-### debug
+### `debug`
 
 ```scala
 def debug(message: Any, optionalParams: Any*)(subRoute: Route): Route
@@ -68,99 +152,10 @@ Always matches. Prints a debug message (using `dom.console.debug`) before invoki
 
 
 
-### pathEnd
-
-```scala
-val pathEnd: Directive0
-```
-
-Matches if the unmatched path is empty.
 
 
 
-### pathPrefix
-
-```scala
-def pathPrefix[T](m: PathMatcher[T]): Directive[T]
-```
-
-Matches if the given path matcher matches the unmatched path. Provides the value provided by the path matcher. Removes
-the parts matched by the path matcher from unmatched path for the nested routes.
-
-```scala
-pathPrefix("user")
-// directive matches if the "unmatched path" starts with a "user" segment
-// this is a Directive0 as the constant string path matcher doesn't provide a value
-
-pathPrefix("user" / segment)
-// matches if the "unmatched path" starts with a "user" segment followed by another segment
-// this is a Directive[String] because the 'segment' path matcher is a PathMatcher[String] 
-```
-
-
-
-### path
-
-```scala
-def path[T](m: PathMatcher[T]): Directive[T]
-```
-
-Effectively the same as `pathPrefix(m) & pathEnd`
-
-
-
-### testPathPrefix
-
-```scala
-def testPathPrefix[T](m: PathMatcher[T]): Directive[T]
-```
-
-Same as `pathPrefix` but does not consume the unmatched path.
-
-
-
-### testPath
-
-```scala
-def testPath[T](m: PathMatcher[T]): Directive[T]
-```
-
-Same as `path` but does not consume the unmatched path.
-
-
-
-### extractUnmatchedPath
-
-```scala
-val extractUnmatchedPath: Directive[List[String]]
-```
-
-Always matches. Provides the unmatched path without "consuming" (see [Path-matching](/overview/path-matcher)) it.
-
-
-
-### param
-
-```scala
-def param(name: String): Directive[String]
-```
-
-Matches if the search query contains the given parameter. Provides the value of the parameter in the search query.
-
-
-
-### maybeParam
-
-```scala
-def maybeParam(name: String): Directive[Option[String]]
-```
-
-Always matches. If the search query contains the given parameter, provides its value in a `Some()`. Otherwise,
-provides `None`.
-
-
-
-### state
+### `state`
 
 ```scala
 def state[T](initial: => T): Directive[T]
@@ -171,20 +166,10 @@ Provides the memoized value.
 
 
 
-### signal
-
-```scala
-def signal[T](signal: Signal[T]): Directive[T]
-```
-
-Always matches. Provides the value inside the signal. Whenever the signal value changes, forces the route to be
-re-evaluated.
-
-See [example]({{sitePrefix}}/examples/signal).
 
 
 
-### historyState
+### `historyState`
 
 ```scala
 def historyState: Directive[Option[js.Any]]
@@ -192,12 +177,12 @@ def historyState: Directive[Option[js.Any]]
 
 Always matches. Provides the history state if it was set by `pushState` or `replaceState`. Otherwise, provides `None`.
 
-Extracts the history state (will only work if [BrowserNavigation]({{sitePrefix}}/overview/navigation) is used for `pushState`
-/`replaceState`).
+Extracts the history state (this will only work if [BrowserNavigation]({{sitePrefix}}/overview/navigation) is used for `pushState`
+/`replaceState`, not direct calls to the History API).
 
 
 
-### historyScroll
+### `historyScroll`
 
 ```scala
 def historyScroll: Directive[Option[ScrollPosition]]
@@ -212,7 +197,7 @@ This directive returns the preserved window scroll position (if any).
 
 
 
-### extractHostname
+### `extractHostname`
 
 ```scala
 val extractHostname: Directive[String]
@@ -222,7 +207,7 @@ Always matches. Provides the `hostname` part of the location (`window.location.h
 
 
 
-### extractPort
+### `extractPort`
 
 ```scala
 val extractPort: Directive[String]
@@ -232,7 +217,7 @@ Always matches. Provides the `port` part of the location (`window.location.port`
 
 
 
-### extractHost
+### `extractHost`
 
 ```scala
 val extractHost: Directive[String]
@@ -242,7 +227,7 @@ Always matches. Provides the `host` part of the location (`window.location.host`
 
 
 
-### extractProtocol
+### `extractProtocol`
 
 ```scala
 val extractProtocol: Directive[String]
@@ -252,10 +237,12 @@ Always matches. Provides the `protocol` part of the location (`window.location.p
 
 
 
-### extractOrigin
+### `extractOrigin`
 
 ```scala
 val extractOrigin: Directive[Option[String]]
 ```
 
 Always matches. Provides the `origin` part of the location (`window.location.origin`).
+
+

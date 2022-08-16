@@ -9,7 +9,11 @@ object SignalExample
     extends CodeExample(
       id = "signal",
       title = "Signal",
-      description = FileAsString("description.md")
+      description = FileAsString("description.md"),
+      links = Seq(
+        "/",
+        "/some-page"
+      )
     )(() => {
       import io.frontroute._
       import com.raquo.laminar.api.L._
@@ -47,9 +51,9 @@ object SignalExample
           /* </focus> */
         ),
         div(
-          cls := "bg-blue-900 -mx-4 -mb-4 p-2 space-y-2",
+          cls := "bg-blue-900 -mx-6 p-2 space-y-2",
           div(
-            cls := "font-semibold text-2xl text-blue-200",
+            cls := "font-semibold text-xl text-blue-200",
             "Set signal"
           ),
           div(
@@ -57,23 +61,6 @@ object SignalExample
               tpe         := "text",
               placeholder := "Input a value and hit enter...",
               onKeyDown.filter(_.key == "Enter").stopPropagation.mapToValue --> mySignal
-            )
-          ),
-          div(
-            cls := "font-semibold text-2xl text-blue-200",
-            "Navigation"
-          ),
-          div(
-            cls := "flex flex-col p-2",
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/",
-              "➜ /"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/some-page",
-              "➜ /some-page"
             )
           )
         )

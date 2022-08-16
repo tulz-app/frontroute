@@ -1,4 +1,4 @@
-#### Checklist
+### Prerequisites
 
 * [Scala.js](https://www.scala-js.org/) `v1.10.1`+ 
 * Scala 2.13 or {{scala3version}}+
@@ -24,8 +24,6 @@ libraryDependencies ++= Seq(
 
 ### Mill
 
-Basic Mill build.sc file:
-
 ```scala
 import $ivy.`com.lihaoyi::mill-contrib-bloop:$MILL_VERSION`
 import mill._
@@ -43,11 +41,13 @@ object counter extends ScalaJSModule {
 }
 ```
 
-### Imports
+### Previous versions
 
-In order to use `frontroute` you will need a single import: 
+#### frontroute `v0.15.x`
 
-```scala
-import io.frontroute.*
-```
+See [documentation](https://frontroute.dev/v/0.15.x/).
+
+---
+
+Older versions of `frontroute` are no longer maintained and documentation is not available.
 

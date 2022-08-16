@@ -8,6 +8,7 @@ import io.laminext.highlight.Highlight
 import io.laminext.highlight.HighlightJavaScript
 import io.laminext.highlight.HighlightJson
 import io.laminext.highlight.HighlightScala
+import io.laminext.highlight.HighlightXml
 import io.laminext.tailwind.modal.Modal
 import io.laminext.tailwind.theme.DefaultTheme
 import io.laminext.tailwind.theme.Theme
@@ -26,6 +27,7 @@ object Main {
       Highlight.registerLanguage("scala", HighlightScala)
       Highlight.registerLanguage("javascript", HighlightJavaScript)
       Highlight.registerLanguage("json", HighlightJson)
+      Highlight.registerLanguage("html", HighlightXml)
       if (dom.window.location.pathname.startsWith(Site.thisVersionHref("/example-frame/"))) {
         renderExample()
       } else {

@@ -9,7 +9,13 @@ object CustomDirectivesExample
     extends CodeExample(
       id = "custom-directives",
       title = "Custom directives",
-      description = FileAsString("description.md")
+      description = FileAsString("description.md"),
+      links = Seq(
+        "/",
+        "/movie?id=1",
+        "/movie?id=2",
+        "/movie?id=not-long"
+      )
     )(() => {
       import com.raquo.laminar.api.L._
       import io.frontroute._
@@ -45,36 +51,6 @@ object CustomDirectivesExample
               div(unmatched.mkString("/", "/", ""))
             )
           }
-        ),
-        div(
-          cls := "bg-blue-900 -mx-4 -mb-4 p-2",
-          div(
-            cls := "font-semibold text-2xl text-blue-200",
-            "Navigation"
-          ),
-          div(
-            cls := "flex flex-col p-2",
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/",
-              "➜ /"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/movie?id=1",
-              "➜ /movie?id=1"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/movie?id=2",
-              "➜ /movie?id=2"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/movie?id=not-long",
-              "➜ /movie?id=not-long"
-            )
-          )
         )
       )
     })

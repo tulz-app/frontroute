@@ -22,8 +22,6 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
 
   val reject: Route = (_, _, _) => rejected
 
-  def complete(result: => ToComplete): Route = (location, _, state) => Val(RouteResult.Matched(state, location, () => result.get))
-
   def debug(message: Any, optionalParams: Any*)(subRoute: Route): Route = { (location, previous, state) =>
     dom.console.debug(message, optionalParams: _*)
     subRoute(location, previous, state)
@@ -53,6 +51,8 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
     val result = directive.tapply(_ => subRoute)(ctx, previous, state)
     result
   }
+
+  private def complete(result: => ToComplete): Route = (location, _, state) => Val(RouteResult.Matched(state, location, () => result.get))
 
   implicit def elementToRoute(e: => Element): Route = complete(e)
 

@@ -9,7 +9,14 @@ object BasicRoutingExample
     extends CodeExample(
       id = "basic-routing",
       title = "Basic routing",
-      description = FileAsString("description.md")
+      description = FileAsString("description.md"),
+      links = Seq(
+        "/",
+        "/new-path",
+        "/legacy-path",
+        "/some-section/some-page",
+        "/some-section/another-page"
+      )
     )(() => {
       import com.raquo.laminar.api.L._
       /* <focus> */
@@ -71,41 +78,6 @@ object BasicRoutingExample
             /* <focus> */
           }
           /* </focus> */
-        ),
-        div(
-          cls := "bg-blue-900 -mx-4 -mb-4 p-2",
-          div(
-            cls := "font-semibold text-2xl text-blue-200",
-            "Navigation"
-          ),
-          div(
-            cls := "flex flex-col p-2",
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/",
-              "➜ /"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/new-path",
-              "➜ /new-path"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/legacy-path",
-              "➜ /legacy-path"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/some-section/some-page",
-              "➜ /some-section/some-page"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/some-section/another-page",
-              "➜ /some-section/another-page"
-            )
-          )
         )
       )
     })

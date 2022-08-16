@@ -1,6 +1,6 @@
 # Path matchers 
 
-Path matchers are used to match a URL path against some defined "patterns" and (optionally) return an extracted value 
+Path matchers are used to match a URL path against a defined "pattern" and (optionally) return an extracted value 
 (similar to directives).
 
 A path matcher can either "match" (and provide a value) or "reject".
@@ -13,12 +13,9 @@ unmatched path and `PathMatcherResult` can be one of the following:
   but the subsequent transformation (`.filter`, `.collect`, etc) has failed.
 * `PathMatcherResult.NoMatch` – means that a matcher needed to consume a segment, but the unmatched path was empty.
 
-`NoMatch` 
-`Rejected`   
+The way to use path matchers is to pass them as arguments to the path-matching directives like `path` or `pathPrefix`: see [built-in directives]({{sitePrefix}}/reference/directives)
 
-The way to use path matchers is to pass them as arguments to the path-matching directives like `path` or `pathPrefix`: see [built-in directives](/reference/directives)
-
-Those directives will be providing the values provided by the corresponding path matchers as is (or rejecting if the path matcher rejects):
+Those directives will be "matching" with the values provided by the corresponding path matchers as is, or rejecting if the path matcher rejects:
 
 ```scala
 val d1: Directive[String] = pathPrefix(segment) // because segment is a PathMatcher[String]
@@ -34,7 +31,7 @@ Path matchers can be combined using the `/` combinator (the provided values, exc
 val d: Directive[(String, Long)] = path("prefix" / segment / "page" / long)
 ```
 
-See also: [built-in path matchers](/reference/path-matchers) and [path matcher combinators](/reference/path-matcher-combinators).
+See also: [built-in path matchers]({{sitePrefix}}/reference/path-matchers) and [path matcher combinators]({{sitePrefix}}/reference/path-matcher-combinators).
 
 ## Path matching process
 

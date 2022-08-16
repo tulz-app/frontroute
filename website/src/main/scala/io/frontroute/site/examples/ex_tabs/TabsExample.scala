@@ -9,7 +9,13 @@ object TabsExample
     extends CodeExample(
       id = "tabs",
       title = "Tabs",
-      description = FileAsString("description.md")
+      description = FileAsString("description.md"),
+      links = Seq(
+        "/",
+        "/tab-1",
+        "/tab-2",
+        "/some-page"
+      )
     )(() => {
       import io.frontroute._
 
@@ -65,36 +71,6 @@ object TabsExample
               div(unmatched.mkString("/", "/", ""))
             )
           }
-        ),
-        div(
-          cls := "bg-blue-900 -mx-4 -mb-4 p-2 space-y-2",
-          div(
-            cls := "font-semibold text-2xl text-blue-200",
-            "Navigation"
-          ),
-          div(
-            cls := "flex flex-col p-2",
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/",
-              "➜ /"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/tab-1",
-              "➜ /tab-1"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/tab-2",
-              "➜ /tab-2"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/some-page",
-              "➜ /some-page"
-            )
-          )
         )
       )
     })

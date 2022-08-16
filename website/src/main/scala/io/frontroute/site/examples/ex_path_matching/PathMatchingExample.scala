@@ -9,7 +9,17 @@ object PathMatchingExample
     extends CodeExample(
       id = "path-matching",
       title = "Path matching",
-      description = FileAsString("description.md")
+      description = FileAsString("description.md"),
+      links = Seq(
+        "/",
+        "/user/1",
+        "/user/2",
+        "/user/not-long",
+        "/page-1",
+        "/page-2",
+        "/page-3",
+        "/page-4"
+      )
     )(() => {
       import com.raquo.laminar.api.L._
       import io.frontroute._
@@ -48,56 +58,6 @@ object PathMatchingExample
             /* <focus> */
           }
           /* </focus> */
-        ),
-        div(
-          cls := "bg-blue-900 -mx-4 -mb-4 p-2",
-          div(
-            cls := "font-semibold text-2xl text-blue-200",
-            "Navigation"
-          ),
-          div(
-            cls := "flex flex-col p-2",
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/",
-              "➜ /"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/user/1",
-              "➜ /user/1"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/user/2",
-              "➜ /user/2"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/user/not-long",
-              "➜ /user/not-long"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/page-1",
-              "➜ /page-1"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/page-2",
-              "➜ /page-2"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/page-3",
-              "➜ /page-3"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/page-4",
-              "➜ /page-4"
-            )
-          )
         )
       )
     })

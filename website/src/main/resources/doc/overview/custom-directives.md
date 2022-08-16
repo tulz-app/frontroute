@@ -1,3 +1,17 @@
+`TODO`
+
+
+### `reject`
+
+```scala
+val reject: Route
+```
+
+Returns a `Route` that always rejects.
+
+
+
+
 # Custom directives 
 
 In order to create a custom directive, you should start with an existing one and build

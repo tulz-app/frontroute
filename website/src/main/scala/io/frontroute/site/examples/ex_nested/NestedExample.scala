@@ -7,7 +7,13 @@ object NestedExample
     extends CodeExample(
       id = "nested",
       title = "Nested",
-      description = FileAsString("description.md")
+      description = FileAsString("description.md"),
+      links = Seq(
+        "/",
+        "/tabs/tab-1",
+        "/tabs/tab-2",
+        "/some-page"
+      )
     )(() => {
       import io.frontroute._
 
@@ -78,36 +84,6 @@ object NestedExample
               div(unmatched.mkString("/", "/", ""))
             )
           }
-        ),
-        div(
-          cls := "bg-blue-900 -mx-4 -mb-4 p-2 space-y-2",
-          div(
-            cls := "font-semibold text-2xl text-blue-200",
-            "Navigation"
-          ),
-          div(
-            cls := "flex flex-col p-2",
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/",
-              "➜ /"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/tabs/tab-1",
-              "➜ /tabs/tab-1"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/tabs/tab-2",
-              "➜ /tabs/tab-2"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/some-page",
-              "➜ /some-page"
-            )
-          )
         )
       )
     })

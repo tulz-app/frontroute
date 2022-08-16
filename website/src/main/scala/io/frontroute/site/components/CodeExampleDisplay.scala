@@ -14,6 +14,7 @@ import io.frontroute._
 import io.frontroute.site.TemplateVars
 import org.scalajs.dom
 import org.scalajs.dom.HTMLIFrameElement
+import org.scalajs.dom.Location
 import org.scalajs.dom.html
 import org.scalajs.dom.window
 
@@ -172,10 +173,11 @@ object CodeExampleDisplay {
   }
 
   def frame(example: CodeExample): Element = {
+    def pathAndSearch(url: Location): String =
+      url.pathname + (if (url.search != null && url.search.nonEmpty) url.search else "")
+
     val currentUrl = windowEvents.onPopState
-      .mapTo(window.location.toString).map { case UrlString(url) =>
-        url.pathname
-      }
+      .mapTo(window.location.toString).map { case UrlString(url) => pathAndSearch(url) }
       .startWith("/")
 
     val urlInput = input(
@@ -185,26 +187,40 @@ object CodeExampleDisplay {
     )
 
     div(
-      cls := "w-full h-full border-4 border-dashed border-blue-400 bg-blue-300 text-blue-900 rounded-lg p-6",
+      cls := "border-4 border-dashed border-blue-400 bg-blue-300 text-blue-900 rounded-lg p-6",
       div(
-        cls := "-mx-4 -mt-4 p-4 w-full h-full bg-blue-500 flex space-x-1",
+        cls := "-mx-6 -mt-6 p-2 rounded-t-lg bg-blue-500 flex space-x-1",
         urlInput.amend(
           cls := "flex-1",
           thisEvents(onKeyDown.filter(_.key == "Enter").preventDefault.stopPropagation).sample(urlInput.value) --> { case UrlString(url) =>
-            BrowserNavigation.pushState(url = url.pathname)
+            BrowserNavigation.pushState(url = pathAndSearch(url))
           }
         ),
         button(
           cls := "btn-md-outline-white",
           "Go",
           thisEvents(onClick).sample(urlInput.value) --> { case UrlString(url) =>
-            BrowserNavigation.pushState(url = url.pathname)
+            BrowserNavigation.pushState(url = pathAndSearch(url))
           }
         )
       ),
-      onMountUnmountCallbackWithState(
-        mount = ctx => render(ctx.thisNode.ref, example.code.value()),
-        unmount = (_, root: Option[RootNode]) => root.foreach(_.unmount())
+      example.code.value(),
+      div(
+        cls := "rounded-b-lg bg-blue-900 -mx-6 -mb-6 p-2",
+        div(
+          cls := "font-semibold text-xl text-blue-200",
+          "Navigation"
+        ),
+        div(
+          cls := "flex flex-col p-2",
+          example.links.map { path =>
+            a(
+              cls  := "text-blue-300 hover:text-blue-100",
+              href := path,
+              s"➜ $path"
+            )
+          }
+        )
       )
     )
   }

@@ -9,7 +9,11 @@ object AuthExample
     extends CodeExample(
       id = "auth",
       title = "Auth",
-      description = FileAsString("description.md")
+      description = FileAsString("description.md"),
+      links = Seq(
+        "/",
+        "/private/profile"
+      )
     )(() => {
       import io.frontroute._
       import com.raquo.laminar.api.L._
@@ -76,10 +80,10 @@ object AuthExample
           route
         ),
         div(
-          cls := "bg-blue-900 -mx-4 -mb-4 p-2 space-y-2",
+          cls := "bg-blue-900 -mx-6 p-2 space-y-2",
           div(
-            cls := "font-semibold text-2xl text-blue-200",
-            "Sign in a user (empty for log out) ..."
+            cls := "font-semibold text-xl text-blue-200",
+            "Sign in a user (empty for log out):"
           ),
           div(
             input(
@@ -92,23 +96,6 @@ object AuthExample
                   AuthenticationEvent.SignedIn(userId)
                 }
               } --> authenticationEvents
-            )
-          ),
-          div(
-            cls := "font-semibold text-2xl text-blue-200",
-            "Navigation"
-          ),
-          div(
-            cls := "flex flex-col p-2",
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/",
-              "➜ /"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/private/profile",
-              "➜ /private/profile"
             )
           )
         )

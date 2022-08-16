@@ -71,7 +71,8 @@ trait Route extends ((RouteLocation, RoutingState, RoutingState) => Signal[Route
             route(
               currentUnmatched.copy(otherMatched = locationState.siblingMatched),
               routingState.resetPath,
-              RoutingState.withPersistentData(routingState.persistent, routingState.async)
+              RoutingState.empty
+//              RoutingState.withPersistentData()
             )
           )
         }
