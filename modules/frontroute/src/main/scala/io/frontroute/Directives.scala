@@ -58,17 +58,17 @@ trait Directives {
       inner(maybeParamValue)(location, previous, state.enterAndSet(maybeParamValue))
     }
 
-  def extractUnmatchedPath: Directive[List[String]] = extract(_.unmatchedPath)
+  val extractUnmatchedPath: Directive[List[String]] = extract(_.unmatchedPath)
 
-  def extractHostname: Directive[String] = extract(_.hostname)
+  val extractHostname: Directive[String] = extract(_.hostname)
 
-  def extractPort: Directive[String] = extract(_.port)
+  val extractPort: Directive[String] = extract(_.port)
 
-  def extractHost: Directive[String] = extract(_.host)
+  val extractHost: Directive[String] = extract(_.host)
 
-  def extractProtocol: Directive[String] = extract(_.protocol)
+  val extractProtocol: Directive[String] = extract(_.protocol)
 
-  def extractOrigin: Directive[Option[String]] = extract(_.origin)
+  val extractOrigin: Directive[Option[String]] = extract(_.origin)
 
   def provide[L](value: L): Directive[L] =
     Directive { inner => (location, previous, state) =>
@@ -91,7 +91,7 @@ trait Directives {
       }
     }
 
-  def pathEnd: Directive0 =
+  val pathEnd: Directive0 =
     Directive[Unit] { inner => (location, previous, state) =>
       if (location.unmatchedPath.isEmpty) {
         inner(())(location, previous, state.enter)
@@ -108,15 +108,6 @@ trait Directives {
       }
     }
 
-  def noneMatched: Directive0 =
-    Directive[Unit] { inner => (location, previous, state) =>
-      if (location.otherMatched) {
-        rejected
-      } else {
-        inner(())(location, previous, state.enter)
-      }
-    }
-
   def testPath[T](m: PathMatcher[T]): Directive[T] =
     Directive[T] { inner => (location, previous, state) =>
       m(location.unmatchedPath) match {
@@ -125,7 +116,16 @@ trait Directives {
       }
     }
 
-  def when(condition: => Boolean): Directive0 =
+  val noneMatched: Directive0 =
+    Directive[Unit] { inner => (location, previous, state) =>
+      if (location.otherMatched) {
+        rejected
+      } else {
+        inner(())(location, previous, state.enter)
+      }
+    }
+
+  def whenTrue(condition: => Boolean): Directive0 =
     Directive[Unit] { inner => (location, previous, state) =>
       if (condition) {
         inner(())(location, previous, state)

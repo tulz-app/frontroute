@@ -28,15 +28,21 @@ object TabsExample
                 cls := "flex space-x-2",
                 a(
                   href := "/tab-1",
-                  "Tab 1",
-                  cls  := "text-xl p-1 rounded",
-                  cls.toggle("bg-blue-400 text-blue-100") <-- tab.valueIs("tab-1")
+                  cls  := "text-xl px-4 py-1 rounded border-b-2",
+                  /* <focus> */
+                  cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- tab.map(_ == "tab-1"),
+                  cls.toggle("border-transparent text-blue-700") <-- tab.map(_ != "tab-1"),
+                  /* </focus> */
+                  "Tab 1"
                 ),
                 a(
                   href := "/tab-2",
-                  "Tab 2",
-                  cls  := "text-xl p-1 rounded",
-                  cls.toggle("bg-blue-400 text-blue-100") <-- tab.valueIs("tab-2")
+                  cls  := "text-xl px-4 py-1 rounded border-b-2",
+                  /* <focus> */
+                  cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- tab.map(_ == "tab-2"),
+                  cls.toggle("border-transparent text-blue-700") <-- tab.map(_ != "tab-2"),
+                  /* </focus> */
+                  "Tab 2"
                 )
               ),
               div(
@@ -50,7 +56,9 @@ object TabsExample
                 )
               )
             )
+            /* <focus> */
           },
+          /* </focus> */
           (noneMatched & extractUnmatchedPath) { unmatched =>
             div(
               div(cls := "text-2xl", "Not Found"),

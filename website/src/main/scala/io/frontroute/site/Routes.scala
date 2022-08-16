@@ -56,15 +56,19 @@ class Routes {
         cls := "contents",
         thisVersionPrefix(
           concat(
-            (pathEnd.mapTo(Some((Site.indexModule, Site.indexModule.index))) |
-              (modulePrefix & pathEnd).map(m => Some((m, m.index))) |
-              moduleAndPagePrefix.map(moduleAndPage => Some(moduleAndPage))).signal { moduleAndPage =>
+            (
+              pathEnd.mapTo(Some((Site.indexModule, Site.indexModule.index))) |
+                (modulePrefix & pathEnd).map(m => Some((m, m.index))) |
+                moduleAndPagePrefix.map(moduleAndPage => Some(moduleAndPage))
+            ).signal { moduleAndPage =>
               PageWrap(moduleAndPage, mobileMenuContent.writer)
             },
             div("Not Found")
           )
         ),
-        div("TODO: reload")
+        noneMatched {
+          div("TODO: reload")
+        }
       )
     )
     com.raquo.laminar.api.L.render(menuContainer, TW.modal(mobileMenuContent.signal, mobileMenuModal))

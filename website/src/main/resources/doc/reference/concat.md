@@ -1,9 +1,7 @@
 # `concat`
 
-`concat` takes a list of alternative routes and returns a new route (lets call it `concat-route`):
-
-* if any of the alternative routes completes (or order) – `concat-route` will complete with the same result
-* if all the alternative routes reject – `concat-route` will reject as well
+`concat` takes a list of alternative routes and returns a new route which tries to apply the alternatives in the order
+they are provided. 
 
 ```scala
 concat(

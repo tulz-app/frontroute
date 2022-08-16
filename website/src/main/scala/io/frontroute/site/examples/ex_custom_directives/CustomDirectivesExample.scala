@@ -15,8 +15,8 @@ object CustomDirectivesExample
       import io.frontroute._
       import scala.util._
 
-      /* <focus> */
       def longParam(paramName: String): Directive[Long] =
+        /* <focus> */
         param(paramName).flatMap { paramValue =>
           Try(paramValue.toLong).fold(
             _ => reject,
@@ -31,9 +31,11 @@ object CustomDirectivesExample
           pathEnd {
             div(cls := "text-2xl", "Index page.")
           },
-          (path("movie") &
-            /* <focus> */
-            longParam("id") /* </focus> */
+          (
+            path("movie") &
+              /* <focus> */
+              longParam("id")
+            /* </focus> */
           ) { movieId =>
             div(div(cls := "text-2xl", "Movie page."), div(s"Movie ID (long): $movieId"))
           },

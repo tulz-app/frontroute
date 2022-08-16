@@ -73,7 +73,7 @@ private[frontroute] class RoutingStateRef {
 
 }
 
-private[frontroute] class LocationState private (
+private[frontroute] class LocationState(
   $providedLocation: StrictSignal[Option[RouteLocation]],
   $siblingMatched: StrictSignal[Boolean],
   matchedObserver: Observer[Unit],
@@ -102,13 +102,14 @@ private[frontroute] class LocationState private (
   def emitRemaining(remaining: Option[RouteLocation]): Unit =
     remainingVar.set(remaining)
 
-  def start(): Unit = {
+  def start(): LocationState = {
     if (locationSubscription == null) {
       locationSubscription = $providedLocation.changes.foreach { l =>
         locationVar.set(l)
         childMatchedVar.set(false)
       }(owner)
     }
+    this
   }
 
   def kill(): Unit = {
@@ -116,28 +117,6 @@ private[frontroute] class LocationState private (
       locationSubscription.kill()
       locationSubscription = null
     }
-  }
-
-}
-
-object LocationState {
-
-  def apply(
-    $providedLocation: StrictSignal[Option[RouteLocation]],
-    $siblingMatched: StrictSignal[Boolean],
-    matchedObserver: Observer[Unit],
-    currentState: RoutingStateRef,
-    owner: Owner
-  ): LocationState = {
-    val state = new LocationState(
-      $providedLocation,
-      $siblingMatched,
-      matchedObserver,
-      currentState,
-      owner
-    )
-    state.start()
-    state
   }
 
 }

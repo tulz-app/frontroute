@@ -23,12 +23,16 @@ object BasicRoutingExample
           pathEnd {
             /* </focus> */
             div(cls := "text-2xl", "Index page.")
+            /* <focus> */
           },
+          /* </focus> */
           /* <focus> */
           (path("new-path") | path("legacy-path")) {
             /* </focus> */
             div(cls := "text-2xl", "new-path OR legacy-path")
+            /* <focus> */
           },
+          /* </focus> */
           /* <focus> */
           pathPrefix("some-section") {
             /* </focus> */
@@ -46,9 +50,13 @@ object BasicRoutingExample
               path("another-page") {
                 /* </focus> */
                 div(cls := "text-2xl", "Another page.")
+                /* <focus> */
               }
+              /* </focus> */
             )
+            /* <focus> */
           },
+          /* </focus> */
           /* <focus> */
           (noneMatched & extractUnmatchedPath) { unmatched =>
             /* </focus> */
@@ -60,7 +68,9 @@ object BasicRoutingExample
                 span(unmatched.mkString("/", "/", ""))
               )
             )
+            /* <focus> */
           }
+          /* </focus> */
         ),
         div(
           cls := "bg-blue-900 -mx-4 -mb-4 p-2",

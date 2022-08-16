@@ -22,43 +22,37 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
 
   val reject: Route = (_, _, _) => rejected
 
-  def complete(result: => ToComplete[Element]): Route = (location, _, state) => Val(RouteResult.Complete(state, location, () => result.get))
+  def complete(result: => ToComplete): Route = (location, _, state) => Val(RouteResult.Matched(state, location, () => result.get))
 
-  def debug(message: Any, optionalParams: Any*)(subRoute: Route): Route =
-    (location, previous, state) => {
-      dom.console.debug(message, optionalParams: _*)
-      subRoute(location, previous, state)
-    }
+  def debug(message: Any, optionalParams: Any*)(subRoute: Route): Route = { (location, previous, state) =>
+    dom.console.debug(message, optionalParams: _*)
+    subRoute(location, previous, state)
+  }
 
   def concat(routes: Route*): Route = (location, previous, state) => {
+
     def findFirst(rs: List[(Route, Int)]): Signal[RouteResult] =
       rs match {
         case Nil                    => rejected
         case (route, index) :: tail =>
           route(location, previous, state.enterConcat(index)).flatMap {
-            case RouteResult.Complete(state, location, result) => Val(RouteResult.Complete(state, location, result))
-            case RouteResult.Rejected                          => findFirst(tail)
+            case RouteResult.Matched(state, location, result) => Val(RouteResult.Matched(state, location, result))
+            case RouteResult.Rejected                         => findFirst(tail)
           }
       }
 
     findFirst(routes.zipWithIndex.toList)
   }
 
-  implicit def addDirectiveApply[L](directive: Directive[L])(implicit hac: ApplyConverter[L, Route]): hac.In => Route =
-    subRoute =>
-      (ctx, previous, state) => {
-        val result = directive.tapply(hac(subRoute))(ctx, previous, state)
-        result
-      }
+  implicit def addDirectiveApply[L](directive: Directive[L])(implicit hac: ApplyConverter[L, Route]): hac.In => Route = { subRoute => (ctx, previous, state) =>
+    val result = directive.tapply(hac(subRoute))(ctx, previous, state)
+    result
+  }
 
-  implicit def addNullaryDirectiveApply(directive: Directive0): Route => Route =
-    subRoute =>
-      (ctx, previous, state) => {
-        val result = directive.tapply(_ => subRoute)(ctx, previous, state)
-        result
-      }
-
-  implicit def liftElementIntoVal(element: Element): Signal[Element] = Val(element)
+  implicit def addNullaryDirectiveApply(directive: Directive0): Route => Route = { subRoute => (ctx, previous, state) =>
+    val result = directive.tapply(_ => subRoute)(ctx, previous, state)
+    result
+  }
 
   implicit def elementToRoute(e: => Element): Route = complete(e)
 

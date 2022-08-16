@@ -35,22 +35,20 @@ trait Route extends ((RouteLocation, RoutingState, RoutingState) => Signal[Route
     route: Route,
     ctx: MountContext[HtmlElement]
   )(implicit owner: Owner): Signal[Option[Element]] = {
-    var latestRender  = Option.empty[Element]
     val currentRender = Var(Option.empty[Element])
     val locationState = ElementWithLocationState.getClosestOrInit(
       ctx.thisNode.ref,
-      init = {
+      () => {
         val siblingMatched   = Var(false)
         val onSiblingMatched = siblingMatched.writer.contramap { (_: Unit) => true }
         DefaultLocationProvider.location.foreach { _ => siblingMatched.set(false) }
-        () =>
-          LocationState(
-            DefaultLocationProvider.location,
-            siblingMatched.signal,
-            onSiblingMatched,
-            new RoutingStateRef,
-            owner
-          )
+        new LocationState(
+          DefaultLocationProvider.location,
+          siblingMatched.signal,
+          onSiblingMatched,
+          new RoutingStateRef,
+          owner
+        ).start()
       }
     )
     val childStateRef = new RoutingStateRef
@@ -78,9 +76,9 @@ trait Route extends ((RouteLocation, RoutingState, RoutingState) => Signal[Route
           )
         }
         .flatMap {
-          case RouteResult.Complete(nextState, location, createResult) =>
+          case RouteResult.Matched(nextState, location, createResult) =>
             val routingState = locationState.currentState.get(this)
-            if (!routingState.contains(nextState)) {
+            if (!routingState.contains(nextState) || currentRender.now().isEmpty) {
               SignalToStream(
                 createResult().map { result =>
                   RouteEvent.NextRender(nextState, location, result)
@@ -103,13 +101,13 @@ trait Route extends ((RouteLocation, RoutingState, RoutingState) => Signal[Route
             val _ = ElementWithLocationState.getOrInit(
               render.ref,
               () =>
-                LocationState(
+                new LocationState(
                   locationState.remaining,
                   locationState.$childMatched,
                   locationState.onChildMatched,
                   childStateRef,
                   owner
-                )
+                ).start()
             )
 
             locationState.currentState.set(this, nextState)
@@ -117,7 +115,6 @@ trait Route extends ((RouteLocation, RoutingState, RoutingState) => Signal[Route
             locationState.emitRemaining(Some(remaining))
             locationState.notifyMatched()
 
-            latestRender = Some(render)
             currentRender.set(Some(render))
 
           case RouteEvent.SameRender(nextState, remaining) =>
@@ -125,12 +122,10 @@ trait Route extends ((RouteLocation, RoutingState, RoutingState) => Signal[Route
 
             locationState.emitRemaining(Some(remaining))
             locationState.notifyMatched()
-            currentRender.set(latestRender)
 
           case RouteEvent.NoRender =>
             killPrevious()
             locationState.currentState.unset(this)
-            latestRender = None
             currentRender.set(None)
         }
 

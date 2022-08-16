@@ -35,7 +35,7 @@ object PageWrap {
           div(
             cls := "flex-1 bg-gray-200 overflow-auto md:p-4",
             div(
-              cls := "lg:container lg:mx-auto lg:max-w-4xl lg:p-8 p-4 bg-white min-h-full",
+              cls := "lg:container lg:mx-auto lg:max-w-4xl lg:p-8 p-4 bg-white min-h-full flex flex-col",
               child.maybe <-- $page.optionMap { case (_, page) => page.render() }
             )
           )

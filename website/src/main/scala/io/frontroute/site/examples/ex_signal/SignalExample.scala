@@ -42,7 +42,9 @@ object SignalExample
                 )
               }
             )
+            /* <focus> */
           }
+          /* </focus> */
         ),
         div(
           cls := "bg-blue-900 -mx-4 -mb-4 p-2 space-y-2",

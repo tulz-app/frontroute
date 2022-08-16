@@ -19,19 +19,33 @@ object PathMatchingExample
           cls := "p-4 min-h-[300px]",
           /* <focus> */
           pathEnd {
+            /* </focus> */
             div(cls := "text-2xl", "Index page.")
+            /* <focus> */
           },
+          /* </focus> */
+          /* <focus> */
           path("user" / long) { userId =>
+            /* </focus> */
             div(div(cls := "text-2xl", "User page."), div(s"User ID: $userId"))
+            /* <focus> */
           },
+          /* </focus> */
+          /* <focus> */
           path(Set("page-1", "page-2", "page-3")) { page =>
+            /* </focus> */
             div(div(cls := "text-2xl", "Some page."), div(s"Page name: $page"))
+            /* <focus> */
           },
+          /* </focus> */
+          /* <focus> */
           (noneMatched & extractUnmatchedPath) { unmatched =>
+            /* </focus> */
             div(
               div(cls := "text-2xl", "Not Found"),
               div(unmatched.mkString("/", "/", ""))
             )
+            /* <focus> */
           }
           /* </focus> */
         ),

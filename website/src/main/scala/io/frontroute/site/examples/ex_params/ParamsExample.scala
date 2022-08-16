@@ -21,13 +21,23 @@ object ParamsExample
             div(cls := "text-2xl", "Index page.")
           },
           /* <focus> */
-          (path("movie") & param("id")) { movieId => /* </focus> */
+          (path("movie") & param("id")) { movieId =>
+            /* </focus> */
             div(div(cls := "text-2xl", "Movie page."), div(s"Movie ID: $movieId"))
+            /* <focus> */
           },
+          /* </focus> */
           /* <focus> */
-          (path("movies" / "search") & maybeParam("director") & maybeParam("year")) { (maybeDirector, maybeYear) => /* </focus> */
+          (
+            path("movies" / "search") &
+              maybeParam("director") &
+              maybeParam("year")
+          ) { (maybeDirector, maybeYear) =>
+            /* </focus> */
             div(div(cls := "text-2xl", "Movie search page."), div(s"Director: $maybeDirector"), div(s"Year: $maybeYear"))
+            /* <focus> */
           },
+          /* </focus> */
           (noneMatched & extractUnmatchedPath) { unmatched =>
             div(
               div(cls := "text-2xl", "Not Found"),
@@ -50,28 +60,28 @@ object ParamsExample
             ),
             a(
               cls  := "text-blue-300 hover:text-blue-100",
-              href := "/movie?id=1",
-              "➜ /movie?id=1"
+              href := "/movie?id=0306414",
+              "➜ /movie?id=0306414"
             ),
             a(
               cls  := "text-blue-300 hover:text-blue-100",
-              href := "/movie?id=2",
-              "➜ /movie?id=2"
+              href := "/movie?id=0103064",
+              "➜ /movie?id=0103064"
             ),
             a(
               cls  := "text-blue-300 hover:text-blue-100",
-              href := "/movies/search?director=nolan&year=2014",
-              "➜ /movies/search?director=nolan&year=2014"
+              href := "/movies/search?director=cameron&year=1991",
+              "➜ /movies/search?director=cameron&year=1991"
             ),
             a(
               cls  := "text-blue-300 hover:text-blue-100",
-              href := "/movies/search?director=nolan",
-              "➜ /movies/search?director=nolan"
+              href := "/movies/search?director=cameron",
+              "➜ /movies/search?director=cameron"
             ),
             a(
               cls  := "text-blue-300 hover:text-blue-100",
-              href := "/movies/search?year=2014",
-              "➜ /movies/search?year=2014"
+              href := "/movies/search?year=1991",
+              "➜ /movies/search?year=1991"
             )
           )
         )

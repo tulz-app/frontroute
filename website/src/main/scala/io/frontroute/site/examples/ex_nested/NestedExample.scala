@@ -16,36 +16,48 @@ object NestedExample
       def MyComponent(): Element =
         div(
           cls := "space-y-2",
-          div(
-            cls := "flex space-x-2",
-            a(
-              href := "tab-1",
-              cls  := "text-xl p-1 rounded",
-              navMod { active =>
-                cls.toggle("bg-blue-400 text-blue-100") <-- active
-              },
-              "Tab 1"
-            ),
-            a(
-              href := "tab-2",
-              cls  := "text-xl p-1 rounded",
-              navMod { active =>
-                cls.toggle("bg-blue-400 text-blue-100") <-- active
-              },
-              "Tab 2"
+          /* <focus> */
+          path(segment).signal { tab =>
+            /* </focus> */
+            div(
+              cls := "flex space-x-2",
+              a(
+                href := "tab-1",
+                cls  := "text-xl px-4 py-1 rounded border-b-2",
+                /* <focus> */
+                cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- tab.map(_ == "tab-1"),
+                cls.toggle("border-transparent text-blue-700") <-- tab.map(_ != "tab-1"),
+                /* </focus> */
+                "Tab 1"
+              ),
+              a(
+                href := "tab-2",
+                cls  := "text-xl px-4 py-1 rounded border-b-2",
+                /* <focus> */
+                cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- tab.map(_ == "tab-2"),
+                cls.toggle("border-transparent text-blue-700") <-- tab.map(_ != "tab-2"),
+                /* </focus> */
+                "Tab 2"
+              )
             )
-          ),
+            /* <focus> */
+          },
+          /* </focus> */
           div(
             /* <focus> */
             path("tab-1") {
               /* </focus> */
-              div("Content one.", cls := "bg-blue-100 text-blue-500 p-4")
+              div("Content one.", cls := "bg-blue-100 text-blue-600 p-4")
+              /* <focus> */
             },
+            /* </focus> */
             /* <focus> */
             path("tab-2") {
               /* </focus> */
-              div("Content two", cls := "bg-blue-100 text-blue-500 p-4")
+              div("Content two", cls := "bg-blue-100 text-blue-600 p-4")
+              /* <focus> */
             }
+            /* </focus> */
           )
         )
 

@@ -38,7 +38,7 @@ object PageNavigation {
                 navigationItem($page, page)(
                   a(
                     cls  := "ml-6 flex font-display font-medium tracking-wide",
-                    href := Site.thisVersionHref(s"/${module.path}/${page.path}"),
+                    href := Site.thisVersionHref(s"/${module.path}/${page.link}"),
                     page.title
                   )
                 )

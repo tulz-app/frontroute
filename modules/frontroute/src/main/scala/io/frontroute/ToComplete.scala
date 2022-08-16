@@ -1,20 +1,19 @@
 package io.frontroute
 
-import com.raquo.laminar.api.L
 import com.raquo.laminar.api.L._
 
-trait ToComplete[A] {
-  def get: Signal[A]
+trait ToComplete {
+  def get: Signal[Element]
 }
 
 object ToComplete {
 
-  implicit def liftToComplete[A](value: A): ToComplete[A] = new ToComplete[A] {
-    override def get: L.Signal[A] = Val(value)
+  implicit def elementToComplete(value: Element): ToComplete = new ToComplete {
+    override val get: Signal[Element] = Val(value)
   }
 
-  implicit def signalToComplete[A](value: Signal[A]): ToComplete[A] = new ToComplete[A] {
-    override def get: L.Signal[A] = value
+  implicit def signalToComplete(value: Signal[Element]): ToComplete = new ToComplete {
+    override val get: Signal[Element] = value
   }
 
 }

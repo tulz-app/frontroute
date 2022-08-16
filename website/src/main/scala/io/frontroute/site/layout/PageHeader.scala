@@ -46,7 +46,7 @@ object PageHeader {
       nav(
         cls := "hidden md:flex flex-1 space-x-4",
         div(
-          cls := "flex flex-wrap justify-start items-center",
+          cls := "flex flex-wrap justify-start items-center space-x-2",
           Site.modules.drop(1).map(moduleLink($page))
         )
       ),
@@ -164,7 +164,7 @@ object PageHeader {
           "text-gray-300 hover:border-gray-300 hover:text-white "
         ),
       href := Site.thisVersionHref(s"/${module.path}"),
-      module.index.title
+      module.title
     )
 
 }

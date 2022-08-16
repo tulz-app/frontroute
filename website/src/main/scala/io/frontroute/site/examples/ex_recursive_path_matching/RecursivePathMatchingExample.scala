@@ -14,8 +14,8 @@ object RecursivePathMatchingExample
       import com.raquo.laminar.api.L._
       import io.frontroute._
 
-      /* <focus> */
       def recursivePathMatch: Directive[List[String]] =
+        /* <focus> */
         pathEnd.mapTo(List.empty[String]) | pathPrefix(segment).flatMap { head =>
           recursivePathMatch.map { rest =>
             head :: rest
@@ -29,9 +29,12 @@ object RecursivePathMatchingExample
           pathEnd {
             div(cls := "text-2xl", "Index page.")
           },
-          (pathPrefix("recursive") &
-            /* <focus> */
-            recursivePathMatch /* </focus> */ ) { segments =>
+          (
+            pathPrefix("recursive") &
+              /* <focus> */
+              recursivePathMatch
+            /* </focus> */
+          ) { segments =>
             div(div(cls := "text-2xl", "Recursive page."), div(s"Segments: ${segments.mkString(", ")}"))
           },
           (noneMatched & extractUnmatchedPath) { unmatched =>

@@ -2,14 +2,7 @@
 
 * define a [route](/overview/route) using [directives](/overview/directive)
 * get a location provider
-* pass the route and the location provider to the `runRoute` function
 
-> #### Location Provider
->
-> Location provider a lightweight abstraction over the current URL in the browser and the events of this URL being
-changed (`EventStream[RouteLocation]`).
->
-> [More about location providers.](/overview/location-provider)
 
 ## How it works
 

@@ -14,17 +14,18 @@ object Site {
 
   private def examplePage(
     example: CodeExample
-  ): Page = Page(example.id, example.title, CodeExamplePage(example))
+  ): Page = Page(example.id, example.id + "/live", example.title, CodeExamplePage(example))
 
   private def docPage(
     path: String,
     title: String,
     markdown: String
-  ): Page = Page(path, title, DocumentationPage(title, markdown))
+  ): Page = Page(path, path, title, DocumentationPage(title, markdown))
 
   val indexModule: SiteModule =
     SiteModule(
       path = "",
+      title = "frontroute",
       index = docPage("", "frontroute", FileAsString("/doc/index.md"))
     )
 
@@ -44,28 +45,38 @@ object Site {
   val modules: Seq[SiteModule] = Seq(
     indexModule,
     SiteModule(
+      path = "getting-started",
+      title = "Getting started",
+      index = docPage("", "Installation", FileAsString("/doc/getting-started/installation.md")),
+      ""                   -> Seq(
+        docPage("older-versions", "Older versions", FileAsString("/doc/getting-started/older-versions.md"))
+      )
+    ),
+    SiteModule(
       path = "overview",
+      title = "Overview",
       index = docPage("", "Overview", FileAsString("/doc/overview/index.md")),
       "Concepts"           -> Seq(
-        docPage("route", "Route", FileAsString("/doc/overview/concepts/route.md")),
         docPage("directive", "Directive", FileAsString("/doc/overview/concepts/directive.md")),
-        docPage("path-matcher", "Path-matching", FileAsString("/doc/overview/concepts/path-matcher.md")),
-        docPage("location-provider", "Location Provider", FileAsString("/doc/overview/concepts/location-provider.md"))
+        docPage("path-matcher", "Path-matching", FileAsString("/doc/overview/concepts/path-matcher.md"))
       ),
       "Navigation"         -> Seq(
         docPage("navigation", "Browser navigation", FileAsString("/doc/overview/navigation.md")),
         docPage("link-handler", "Link handler", FileAsString("/doc/overview/link-handler.md"))
       ),
       "Utilities"          -> Seq(
-        docPage("directive-utilities", "Directive Utilities", FileAsString("/doc/overview/directive-utilities.md")),
-        docPage("debugging", "Debugging", FileAsString("/doc/overview/debugging.md"))
+        docPage("directive-utilities", "Directive utilities", FileAsString("/doc/overview/directive-utilities.md"))
       ),
       "Extending"          -> Seq(
-        docPage("custom-directives", "Custom Directives", FileAsString("/doc/overview/custom-directives.md"))
+        docPage("custom-directives", "Custom directives", FileAsString("/doc/overview/custom-directives.md"))
+      ),
+      "Under the hood"     -> Seq(
+        docPage("route", "Route", FileAsString("/doc/overview/under-the-hood/route.md"))
       )
     ),
     SiteModule(
       path = "reference",
+      title = "Reference",
       index = docPage("", "Reference", FileAsString("/doc/reference/index.md")),
       "Alternative Routes" -> Seq(
         docPage("concat", "concat", FileAsString("/doc/reference/concat.md"))
@@ -80,13 +91,11 @@ object Site {
       "Path Matchers"      -> Seq(
         docPage("path-matchers", "Built-in path matchers", FileAsString("/doc/reference/built-in-path-matchers.md")),
         docPage("path-matcher-combinators", "Path matcher combinators", FileAsString("/doc/reference/path-matcher-combinators.md"))
-      ),
-      "Other Classes"      -> Seq(
-        docPage("route-result", "Route Result", FileAsString("/doc/reference/route-result.md"))
       )
     ),
     SiteModule(
       path = "examples",
+      title = "Examples",
       index = docPage("", "Examples", FileAsString("/doc/examples/index.md")),
       ""                   -> examples.map(ex => examplePage(ex))
     )
