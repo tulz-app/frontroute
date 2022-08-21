@@ -6,7 +6,7 @@ import org.scalajs.dom
 
 trait LocationProvider {
 
-  def current: Option[RouteLocation]
+  def current: Option[Location]
   val changes: EventStream[Unit]
 
 }

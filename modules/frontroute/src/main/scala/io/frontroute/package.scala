@@ -48,8 +48,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
   }
 
   implicit def addNullaryDirectiveApply(directive: Directive0): Route => Route = { subRoute => (ctx, previous, state) =>
-    val result = directive.tapply(_ => subRoute)(ctx, previous, state)
-    result
+    directive.tapply(_ => subRoute)(ctx, previous, state)
   }
 
   private def complete(result: => ToComplete): Route = (location, _, state) => Val(RouteResult.Matched(state, location, () => result.get))

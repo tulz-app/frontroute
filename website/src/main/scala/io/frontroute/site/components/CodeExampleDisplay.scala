@@ -5,13 +5,13 @@ import io.frontroute.BrowserNavigation
 import io.frontroute.internal.UrlString
 import io.laminext.syntax.core._
 import io.laminext.syntax.tailwind._
-import io.laminext.syntax.markdown._
 import io.laminext.highlight.Highlight
 import io.frontroute.site.examples.CodeExample
 import io.frontroute.site.Site
 import io.frontroute.site.Styles
 import io.frontroute._
 import io.frontroute.site.TemplateVars
+import io.laminext.markdown.markedjs.Marked
 import org.scalajs.dom
 import org.scalajs.dom.HTMLIFrameElement
 import org.scalajs.dom.Location
@@ -116,7 +116,7 @@ object CodeExampleDisplay {
         div(
           cls := "flex-1 flex flex-col space-y-2",
           div(
-            cls            := "flex-1 flex flex-col space-y-2",
+            cls := "flex-1 flex flex-col space-y-2",
             cls.toggle("hidden") <-- tab.map(_ != "source"),
             div(
               cls := "flex space-x-4 items-center",
@@ -146,7 +146,7 @@ object CodeExampleDisplay {
             )
           ),
           div(
-            cls            := "flex-1 flex flex-col",
+            cls := "flex-1 flex flex-col",
             cls.toggle("hidden") <-- tab.map(_ != "live"),
             iframe(
               cls := "flex-1",
@@ -158,9 +158,15 @@ object CodeExampleDisplay {
             )
           ),
           div(
-            cls            := "flex-1 flex flex-col prose max-w-none",
+            cls := "flex-1 flex flex-col prose max-w-none",
             cls.toggle("hidden") <-- tab.map(_ != "description"),
-            unsafeMarkdown := TemplateVars(example.description),
+            new Modifier[HtmlElement] {
+              override def apply(element: HtmlElement): Unit = element.ref.innerHTML = Marked
+                .parse(TemplateVars(example.description)).replace(
+                  """<a href="/""",
+                  s"""<a href="${Site.thisVersionPrefix}"""
+                )
+            },
             onMountCallback { ctx =>
               ctx.thisNode.ref.querySelectorAll("pre > code").foreach { codeElement =>
                 Highlight.highlightElement(codeElement)
@@ -252,11 +258,9 @@ object CodeExampleDisplay {
       } else {
         if (child.innerText.contains("<focus>")) {
           childrenOpaque += 1
-//          Some(child)
           None
         } else if (child.innerText.contains("</focus>")) {
           childrenOpaque -= 1
-//          Some(child)
           None
         } else {
           Some(setOpacityRecursively(child.asInstanceOf[html.Element], childrenOpaque, dim))

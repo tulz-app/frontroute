@@ -40,7 +40,7 @@ This `pathPrefix` matches if the current path starts with a `"user"` segment fol
 It's a `Directive[String]` because `segment` is a `PathMatcher[String]`.
 
 
-See [Path matching]({{sitePrefix}}/overview/path-matcher) for more details.
+See [Path matching](/overview/path-matcher) for more details.
 
 ### `path`
 
@@ -112,7 +112,7 @@ def signal[T](signal: Signal[T]): Directive[T]
 Always matches. Provides the value inside the signal. Whenever the signal value changes, forces the route to be
 re-evaluated.
 
-See [example]({{sitePrefix}}/examples/signal).
+See [example](/examples/signal).
 
 
 ### `provide`
@@ -177,7 +177,7 @@ def historyState: Directive[Option[js.Any]]
 
 Always matches. Provides the history state if it was set by `pushState` or `replaceState`. Otherwise, provides `None`.
 
-Extracts the history state (this will only work if [BrowserNavigation]({{sitePrefix}}/overview/navigation) is used for `pushState`
+Extracts the history state (this will only work if [BrowserNavigation](/overview/navigation) is used for `pushState`
 /`replaceState`, not direct calls to the History API).
 
 
@@ -190,7 +190,7 @@ def historyScroll: Directive[Option[ScrollPosition]]
 
 Always matches. Provides the window scroll position if it was stored in the state. Otherwise, provides `None`.
 
-When [BrowserNavigation]({{sitePrefix}}/overview/navigation) is used for `pushState`/`replaceState`, it can preserve the
+When [BrowserNavigation](/overview/navigation) is used for `pushState`/`replaceState`, it can preserve the
 window scroll position when navigating (enabled by default). 
 
 This directive returns the preserved window scroll position (if any).

@@ -7,10 +7,10 @@ import scala.scalajs.js
 
 trait Directives {
 
-  private[frontroute] def extractContext: Directive[RouteLocation] =
-    Directive[RouteLocation](inner => (location, previous, state) => inner(location)(location, previous, state))
+  private[frontroute] def extractContext: Directive[Location] =
+    Directive[Location](inner => (location, previous, state) => inner(location)(location, previous, state))
 
-  private[frontroute] def extract[T](f: RouteLocation => T): Directive[T] =
+  private[frontroute] def extract[T](f: Location => T): Directive[T] =
     extractContext.map(f)
 
   def signal[T](signal: Signal[T]): Directive[T] =

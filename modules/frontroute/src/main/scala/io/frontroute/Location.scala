@@ -4,7 +4,7 @@ import io.frontroute.internal.HistoryState
 import org.scalajs.dom
 import scala.scalajs.js
 
-final case class RouteLocation(
+final case class Location(
   hostname: String,
   port: String,
   protocol: String,
@@ -17,7 +17,7 @@ final case class RouteLocation(
   otherMatched: Boolean
 ) {
 
-  @inline def withUnmatchedPath(path: List[String]): RouteLocation = this.copy(unmatchedPath = path)
+  @inline def withUnmatchedPath(path: List[String]): Location = this.copy(unmatchedPath = path)
 
   private[frontroute] val parsedState = HistoryState.tryParse(state)
 
@@ -30,11 +30,11 @@ final case class RouteLocation(
 
 }
 
-object RouteLocation {
+object Location {
 
-  def apply(location: dom.Location, state: js.UndefOr[js.Any]): RouteLocation = {
+  def apply(location: dom.Location, state: js.UndefOr[js.Any]): Location = {
     val path = extractPath(location)
-    new RouteLocation(
+    new Location(
       hostname = location.hostname,
       port = location.port,
       protocol = location.protocol,

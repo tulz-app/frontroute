@@ -8,7 +8,7 @@ import io.frontroute.internal.RoutingState
 import io.frontroute.internal.RouterStateRef
 import io.frontroute.internal.SignalToStream
 
-trait Route extends ((RouteLocation, RoutingState, RoutingState) => Signal[RouteResult]) with Mod[HtmlElement] {
+trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResult]) with Mod[HtmlElement] {
 
   import Route._
 
@@ -16,11 +16,12 @@ trait Route extends ((RouteLocation, RoutingState, RoutingState) => Signal[Route
 
   private def bind: Binder[HtmlElement] = {
     Binder { el =>
-      ReactiveElement.bindSubscription(el) { ctx =>
+      ReactiveElement.bindCallback(el) { ctx =>
         val locationState = LocationState.closestOrDefault(el.ref)
         val childStateRef = new RouterStateRef
 
-        SignalToStream(locationState.location)
+        // the returned subscription will be managed by the ctx.owner
+        val _ = SignalToStream(locationState.location)
           .delay(0)
           .collect { case Some(currentUnmatched) => currentUnmatched }
           .flatMap { currentUnmatched =>
@@ -107,13 +108,13 @@ object Route {
 
     case class NextRender(
       nextState: RoutingState,
-      remaining: RouteLocation,
+      remaining: Location,
       render: Element
     ) extends RouteEvent
 
     case class SameRender(
       nextState: RoutingState,
-      remaining: RouteLocation
+      remaining: Location
     ) extends RouteEvent
 
     case object NoRender extends RouteEvent

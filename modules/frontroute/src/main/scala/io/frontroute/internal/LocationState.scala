@@ -3,7 +3,7 @@ package io.frontroute.internal
 import com.raquo.laminar.api.L._
 import io.frontroute.DefaultLocationProvider
 import io.frontroute.Route
-import io.frontroute.RouteLocation
+import io.frontroute.Location
 import org.scalajs.dom
 
 import scala.annotation.tailrec
@@ -77,16 +77,16 @@ private[frontroute] object LocationState {
 }
 
 private[frontroute] class LocationState(
-  val location: StrictSignal[Option[RouteLocation]],
+  val location: StrictSignal[Option[Location]],
   val siblingMatched: () => Boolean,
   val notifyMatched: () => Unit,
   val routerState: RouterStateRef,
 ) {
 
-  private val remainingVar                           = Var(Option.empty[RouteLocation])
-  val remaining: StrictSignal[Option[RouteLocation]] = remainingVar.signal
+  private val remainingVar                      = Var(Option.empty[Location])
+  val remaining: StrictSignal[Option[Location]] = remainingVar.signal
 
-  def setRemaining(remaining: Option[RouteLocation]): Unit = remainingVar.set(remaining)
+  def setRemaining(remaining: Option[Location]): Unit = remainingVar.set(remaining)
 
   private var _childMatched       = false
   val onChildMatched: () => Unit  = () => { _childMatched = true }

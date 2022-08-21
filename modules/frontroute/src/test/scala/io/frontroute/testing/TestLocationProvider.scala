@@ -3,7 +3,7 @@ package io.frontroute.testing
 import com.raquo.airstream.core.EventStream
 import com.raquo.airstream.eventbus.EventBus
 import io.frontroute.LocationProvider
-import io.frontroute.RouteLocation
+import io.frontroute.Location
 import io.frontroute.internal.HistoryState
 
 import scala.scalajs.js
@@ -17,8 +17,8 @@ class TestLocationProvider extends LocationProvider {
   private var currentParams: Map[String, List[String]] = Map.empty
   private var currentState: js.UndefOr[HistoryState]   = js.undefined
 
-  private var _current               = Option.empty[RouteLocation]
-  def current: Option[RouteLocation] = _current
+  private var _current          = Option.empty[Location]
+  def current: Option[Location] = _current
 
   private val bus = new EventBus[Unit]
 

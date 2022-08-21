@@ -13,7 +13,7 @@ unmatched path and `PathMatcherResult` can be one of the following:
   but the subsequent transformation (`.filter`, `.collect`, etc) has failed.
 * `PathMatcherResult.NoMatch` – means that a matcher needed to consume a segment, but the unmatched path was empty.
 
-The way to use path matchers is to pass them as arguments to the path-matching directives like `path` or `pathPrefix`: see [built-in directives]({{sitePrefix}}/reference/directives)
+The way to use path matchers is to pass them as arguments to the path-matching directives like `path` or `pathPrefix`: see [built-in directives](/reference/directives)
 
 Those directives will be "matching" with the values provided by the corresponding path matchers as is, or rejecting if the path matcher rejects:
 
@@ -31,7 +31,7 @@ Path matchers can be combined using the `/` combinator (the provided values, exc
 val d: Directive[(String, Long)] = path("prefix" / segment / "page" / long)
 ```
 
-See also: [built-in path matchers]({{sitePrefix}}/reference/path-matchers) and [path matcher combinators]({{sitePrefix}}/reference/path-matcher-combinators).
+See also: [built-in path matchers](/reference/path-matchers) and [path matcher combinators](/reference/path-matcher-combinators).
 
 ## Path matching process
 

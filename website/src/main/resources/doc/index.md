@@ -20,4 +20,4 @@ div(
 )
 ```
 
-See [Getting started]({{sitePrefix}}/examples) for installation instructions.
+See [Getting started](/examples) for installation instructions.

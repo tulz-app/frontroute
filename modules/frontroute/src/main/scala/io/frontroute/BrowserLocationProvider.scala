@@ -9,12 +9,12 @@ class BrowserLocationProvider(
   popStateEvents: EventStream[dom.PopStateEvent]
 ) extends LocationProvider {
 
-  private var _current               = Option(RouteLocation(dom.window.location, js.undefined))
-  def current: Option[RouteLocation] = _current
+  private var _current          = Option(Location(dom.window.location, js.undefined))
+  def current: Option[Location] = _current
 
   val changes: EventStream[Unit] =
     popStateEvents.map { event =>
-      _current = Some(RouteLocation(dom.window.location, event.state))
+      _current = Some(Location(dom.window.location, event.state))
     }
 
 }

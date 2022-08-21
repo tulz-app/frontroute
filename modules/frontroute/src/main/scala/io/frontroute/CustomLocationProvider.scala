@@ -7,12 +7,12 @@ import scala.scalajs.js
 
 class CustomLocationProvider(locationStrings: EventStream[String]) extends LocationProvider {
 
-  private var _current = Option.empty[RouteLocation]
+  private var _current = Option.empty[Location]
 
-  def current: Option[RouteLocation] = _current
+  def current: Option[Location] = _current
 
   val changes: EventStream[Unit] = locationStrings.collect { case UrlString(location) =>
-    _current = Some(RouteLocation(location, js.undefined))
+    _current = Some(Location(location, js.undefined))
   }
 
 }

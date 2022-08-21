@@ -4,9 +4,9 @@ import com.raquo.laminar.api.L._
 
 private[frontroute] object DefaultLocationProvider {
 
-  private val locationVar = Var(Option.empty[RouteLocation])
+  private val locationVar = Var(Option.empty[Location])
 
-  val location: StrictSignal[Option[RouteLocation]] = locationVar.signal
+  val location: StrictSignal[Option[Location]] = locationVar.signal
 
   private var subscription: Subscription = LocationProvider.windowLocationProvider.changes.foreach { _ =>
     locationVar.set(LocationProvider.windowLocationProvider.current)

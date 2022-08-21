@@ -9,8 +9,10 @@ object Site {
 
   val frontrouteVersion: String = "0.16.x"
 
+  val thisVersionPrefix = s"/v/$frontrouteVersion/"
+
   def thisVersionHref(href: String): String =
-    s"/v/$frontrouteVersion/${href.dropWhile(_ == '/')}"
+    s"${thisVersionPrefix}${href.dropWhile(_ == '/')}"
 
   private def examplePage(
     example: CodeExample
@@ -49,8 +51,8 @@ object Site {
       title = "Getting started",
       index = docPage("", "Installation", FileAsString("/doc/getting-started/index.md")),
       "Introduction"       -> Seq(
-        docPage("first-steps", "First steps", FileAsString("/doc/getting-started/first-steps.md")),
-        docPage("adding-routes", "Adding routes", FileAsString("/doc/getting-started/adding-routes.md"))
+        docPage("laminar-basics", "Laminar basics", FileAsString("/doc/getting-started/laminar-basics.md")),
+        docPage("first-routes", "First routes", FileAsString("/doc/getting-started/first-routes.md")),
       )
     ),
     SiteModule(
