@@ -1,9 +1,9 @@
 package io.frontroute.internal
 
 import com.raquo.laminar.api.L._
-import io.frontroute.DefaultLocationProvider
-import io.frontroute.Route
 import io.frontroute.Location
+import io.frontroute.LocationProvider
+import io.frontroute.Route
 import org.scalajs.dom
 
 import scala.annotation.tailrec
@@ -35,17 +35,20 @@ private[frontroute] class RouterStateRef {
 
 private[frontroute] object LocationState {
 
-  lazy val default: LocationState = {
+  lazy val default: LocationState = withLocationProvider(LocationProvider.windowLocationProvider)(unsafeWindowOwner)
+
+  def withLocationProvider(lp: LocationProvider)(implicit owner: Owner): LocationState = {
     var siblingMatched = false
-    DefaultLocationProvider.location.foreach { _ => siblingMatched = false }(unsafeWindowOwner)
+    lp.current.foreach { _ => siblingMatched = false }
 
     val state = new LocationState(
-      location = DefaultLocationProvider.location,
+      location = lp.current,
       siblingMatched = () => siblingMatched,
       notifyMatched = () => { siblingMatched = true },
       routerState = new RouterStateRef,
     )
-    state.start()(unsafeWindowOwner)
+    lp.start()
+    state.start()
     state
   }
 
@@ -77,7 +80,7 @@ private[frontroute] object LocationState {
 }
 
 private[frontroute] class LocationState(
-  val location: StrictSignal[Option[Location]],
+  val location: Signal[Option[Location]],
   val siblingMatched: () => Boolean,
   val notifyMatched: () => Unit,
   val routerState: RouterStateRef,

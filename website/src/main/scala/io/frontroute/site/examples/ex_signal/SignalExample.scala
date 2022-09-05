@@ -26,7 +26,7 @@ object SignalExample
           /* <focus> */
           signal(mySignal.signal) { signalValue =>
             /* </focus> */
-            concat(
+            firstMatch(
               pathEnd {
                 div(
                   div(cls := "text-2xl", "Index page."),

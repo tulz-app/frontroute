@@ -5,8 +5,8 @@ import com.yurique.embedded.FileAsString
 
 object NestedExample
     extends CodeExample(
-      id = "nested",
-      title = "Nested",
+      id = "nested-routes",
+      title = "Nested routes",
       description = FileAsString("description.md"),
       links = Seq(
         "/",

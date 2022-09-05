@@ -1,4 +1,4 @@
-#Directives 
+# Directives 
 
 * [Built-in directives](/reference/directives)
 * [.signal directive](/reference/signal-directive)

@@ -45,7 +45,7 @@ trait Directives {
       inner(maybeParamValue)(location, previous, state.enterAndSet(maybeParamValue))
     }
 
-  val extractUnmatchedPath: Directive[List[String]] = extract(_.unmatchedPath)
+  val extractUnmatchedPath: Directive[List[String]] = extract(_.path)
 
   val extractHostname: Directive[String] = extract(_.hostname)
 
@@ -64,7 +64,7 @@ trait Directives {
 
   def pathPrefix[T](m: PathMatcher[T]): Directive[T] =
     Directive[T] { inner => (location, previous, state) =>
-      m(location.unmatchedPath) match {
+      m(location.path) match {
         case PathMatchResult.Match(t, rest) => inner(t)(location.withUnmatchedPath(rest), previous, state.enterAndSet(t))
         case _                              => rejected
       }
@@ -72,7 +72,7 @@ trait Directives {
 
   def testPathPrefix[T](m: PathMatcher[T]): Directive[T] =
     Directive[T] { inner => (location, previous, state) =>
-      m(location.unmatchedPath) match {
+      m(location.path) match {
         case PathMatchResult.Match(t, _) => inner(t)(location, previous, state.enterAndSet(t))
         case _                           => rejected
       }
@@ -80,7 +80,7 @@ trait Directives {
 
   val pathEnd: Directive0 =
     Directive[Unit] { inner => (location, previous, state) =>
-      if (location.unmatchedPath.isEmpty) {
+      if (location.path.isEmpty) {
         inner(())(location, previous, state.enter)
       } else {
         rejected
@@ -89,7 +89,7 @@ trait Directives {
 
   def path[T](m: PathMatcher[T]): Directive[T] =
     Directive[T] { inner => (location, previous, state) =>
-      m(location.unmatchedPath) match {
+      m(location.path) match {
         case PathMatchResult.Match(t, Nil) => inner(t)(location.withUnmatchedPath(List.empty), previous, state.enterAndSet(t))
         case _                             => rejected
       }
@@ -97,7 +97,7 @@ trait Directives {
 
   def testPath[T](m: PathMatcher[T]): Directive[T] =
     Directive[T] { inner => (location, previous, state) =>
-      m(location.unmatchedPath) match {
+      m(location.path) match {
         case PathMatchResult.Match(t, Nil) => inner(t)(location, previous, state.enterAndSet(t))
         case _                             => rejected
       }
@@ -120,5 +120,7 @@ trait Directives {
         rejected
       }
     }
+
+  @inline def whenFalse(condition: => Boolean): Directive0 = whenTrue(!condition)
 
 }

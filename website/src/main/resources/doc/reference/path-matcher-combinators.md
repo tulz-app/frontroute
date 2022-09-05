@@ -67,7 +67,7 @@ pathPrefix(!"wrong-path") { // will match when the path is NOT /wrong-path
 }
 ```
 
-## `void`
+## `.void`
 
 Replaces the provided value with Unit.
 

@@ -6,20 +6,17 @@ import org.scalajs.dom
 
 trait LocationProvider {
 
-  def current: Option[Location]
-  val changes: EventStream[Unit]
+  def current: Signal[Option[Location]]
+  def start()(implicit owner: Owner): Subscription
 
 }
 
 object LocationProvider {
 
-  lazy val windowLocationProvider: LocationProvider = LocationProvider.browser(windowEvents.onPopState)
+  lazy val windowLocationProvider: LocationProvider = browser(windowEvents.onPopState)
 
-  @inline def browser(
-    popStateEvents: EventStream[dom.PopStateEvent]
-  ): LocationProvider =
-    new BrowserLocationProvider(popStateEvents = popStateEvents)
+  @inline def browser(popStateEvents: EventStream[dom.PopStateEvent]): LocationProvider = new BrowserLocationProvider(popStateEvents)
 
-  @inline def custom(locations: EventStream[String]) = new CustomLocationProvider(locations)
+  @inline def custom(locationStrings: Signal[String]) = new CustomLocationProvider(locationStrings)
 
 }

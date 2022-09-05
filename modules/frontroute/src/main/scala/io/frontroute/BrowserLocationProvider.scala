@@ -1,6 +1,6 @@
 package io.frontroute
 
-import com.raquo.airstream.core.EventStream
+import com.raquo.laminar.api.L._
 import org.scalajs.dom
 
 import scala.scalajs.js
@@ -9,12 +9,18 @@ class BrowserLocationProvider(
   popStateEvents: EventStream[dom.PopStateEvent]
 ) extends LocationProvider {
 
-  private var _current          = Option(Location(dom.window.location, js.undefined))
-  def current: Option[Location] = _current
+  private val currentVar                      = Var(Option(Location(dom.window.location, js.undefined)))
+  val current: StrictSignal[Option[Location]] = currentVar.signal
 
-  val changes: EventStream[Unit] =
-    popStateEvents.map { event =>
-      _current = Some(Location(dom.window.location, event.state))
-    }
+  def start()(implicit owner: Owner): Subscription = {
+    EventStream
+      .merge(
+        popStateEvents.map(_.state),
+        EventStream.fromValue(js.undefined: js.Any)
+      )
+      .foreach { state =>
+        currentVar.set(Some(Location(dom.window.location, state)))
+      }
+  }
 
 }

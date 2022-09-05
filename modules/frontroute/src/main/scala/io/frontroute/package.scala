@@ -5,8 +5,8 @@ import app.tulz.tuplez.ApplyConverter
 import app.tulz.tuplez.ApplyConverters
 import com.raquo.airstream.core.Signal
 import com.raquo.laminar.nodes.ReactiveHtmlElement
+import io.frontroute.internal.LocationState
 import io.frontroute.internal.UrlString
-import io.frontroute.ops.DirectiveOfOptionOps
 import org.scalajs.dom
 import org.scalajs.dom.HTMLAnchorElement
 
@@ -16,7 +16,19 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
 
   type Directive0 = Directive[Unit]
 
-  implicit def directiveOfOptionSyntax(underlying: Directive[Option[Element]]): DirectiveOfOptionOps = new DirectiveOfOptionOps(underlying)
+  def locationProvider(lp: LocationProvider): Modifier[Element] =
+    onMountCallback { ctx =>
+      val currentState = LocationState(ctx.thisNode)
+      if (currentState.isDefined) {
+        throw new IllegalStateException("initializing location provider: location state is already defined")
+      }
+      LocationState.initIfMissing(
+        ctx.thisNode.ref,
+        () => LocationState.withLocationProvider(lp)(ctx.owner)
+      )
+    }
+
+//  implicit def directiveOfOptionSyntax(underlying: Directive[Option[Element]]): DirectiveOfOptionOps = new DirectiveOfOptionOps(underlying)
 
   private[frontroute] val rejected: Signal[RouteResult] = Val(RouteResult.Rejected)
 
@@ -27,7 +39,10 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
     subRoute(location, previous, state)
   }
 
-  def concat(routes: Route*): Route = (location, previous, state) => {
+  @deprecated("use firstMatch instead", "0.16.0")
+  def concat(routes: Route*): Route = firstMatch(routes: _*)
+
+  def firstMatch(routes: Route*): Route = (location, previous, state) => {
 
     def findFirst(rs: List[(Route, Int)]): Signal[RouteResult] =
       rs match {
@@ -60,11 +75,12 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
   def navMod(mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
     inContext { el =>
       val UrlString(url) = el.ref.href
-      val active         =
-        DefaultLocationProvider.location.map {
+      val active         = {
+        LocationState.closestOrDefault(el.ref).location.map {
           case None    => false
           case Some(l) => l.fullPath.mkString("/", "/", "").startsWith(url.pathname)
         }
+      }
       mod(active)
     }
 

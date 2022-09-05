@@ -1,53 +1,23 @@
-### Prerequisites
+[Laminar basics](laminar-basics)
 
-* [Scala.js](https://www.scala-js.org/) `v1.10.1`+ 
-* Scala 2.13 or {{scala3version}}+
-* [Laminar](https://laminar.dev/) {{laminarVersion}} (it will be added to your project's dependencies transitively)
+A quick intro into Laminar.
 
-### sbt
+[First routes](first-routes)
 
-Add the [Scala.js](https://www.scala-js.org/) plugin to your `project/plugins.sbt` file.
+First steps and main concepts.
 
-```scala
-addSbtPlugin("org.scala-js" % "sbt-scalajs"  % {{scalajsVersion}})
-```
+[Handling 'Not Found'](handling-not-found)
 
-Enable the plugin and add the `frontroute` library to your `build.sbt` file:
+Displaying an element when none of the routes matches.
 
-```scala
-enablePlugins(ScalaJSPlugin)
+[Links and Navigation](links-and-navigation)
 
-libraryDependencies ++= Seq(
-  "io.frontroute" %%% "frontroute" % "{{frontrouteVersion}}"
-)
-```
+Single-page app navigation.
 
-### Mill
+[Building routes](building-routes)
 
-```scala
-import $ivy.`com.lihaoyi::mill-contrib-bloop:$MILL_VERSION`
-import mill._
-import mill.scalalib._
-import mill.scalajslib._
-import mill.scalajslib.api._
+Use-cases and examples.
 
-object counter extends ScalaJSModule {
-    def scalaVersion   = "3.1.2"
-    def scalaJSVersion = "1.10.1"
-    
-    def ivyDeps = Agg(ivy"io.frontroute::frontroute::{{frontrouteVersion}}")
-    
-    override def moduleKind = T(mill.scalajslib.api.ModuleKind.CommonJSModule)
-}
-```
+[Nested routes](nested-routes)
 
-### Previous versions
-
-#### frontroute `v0.15.x`
-
-See [documentation](https://frontroute.dev/v/0.15.x/).
-
----
-
-Older versions of `frontroute` are no longer maintained and documentation is not available.
-
+Splitting the routes across nested components.

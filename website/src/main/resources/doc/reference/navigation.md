@@ -37,9 +37,6 @@ def emitPopStateEvent(): Unit
 
 Emits (`dom.window.dispatchEvent`) a `popstate` event.
 
-You will most likely need to call this after your app with routes is mounted.
-
-
 
 ### preserveScroll
 
@@ -48,7 +45,6 @@ def preserveScroll(keep: Boolean): Unit
 ```
 
 Configures whether `BrowserNavigation` should preserve the window scroll location (in the history state) when pushing state (`pushState`).
-
 
 
 ## restoreScroll

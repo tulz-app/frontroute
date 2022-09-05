@@ -1,6 +1,8 @@
-# .signal directive
+# .signal
 
-* `.signal: Directive[Signal[L]]`
+```scala
+(d: Directive[L]).signal: Directive[Signal[L]]
+```
 
 Transforms a `Directive[L]` into a `Directive[Signal[L]]`.
 
@@ -17,32 +19,34 @@ param("param-name").signal { (paramSignal: Signal[String]) =>
 Consider the following example:
 
 ```scala
+def MyPage(selectedTab: String): Element = ???
+
 pathPrefix("dashboard") {
-  maybeParam("tab").map(_.getOrElse("summary")) { selectedTab => // : String 
-    render(Page.Dashboard(selectedTab))   
+  maybeParam("tab").map(_.getOrElse("summary")) { (selectedTab: String) =>  
+    MyPage(selectedTab)   
   }
 }
 ```
 
 In this case, whenever the query string changes to have a different value for the `tab` parameter, the route will 
-be re-evaluated and `render(Page.Dashboard(selectedTab))` will be called again. Depending on the way you implement 
-your "actions" inside the `complete`s, this might not be what you want.
+be re-evaluated and `MyPage(selectedTab)` will be called again.
 
-For example, you might be re-rendering (to keep things simple) the whole page from scratch whenever `render` 
-is called with a new `Page` value.
+For example, you might not want to re-render the whole page from scratch whenever `selectedTab` 
+changes. Rather, you might want to keep the rendered page with all the DOM and state, and only change a visibility of 
+some elements on the page according to the `selectedTab` parameter.
 
-But in this case you might want to keep the rendered page and all the DOM and state, but change a visibility of 
-some elements on the page according to the `tab` parameter.
-
-Now, if you use the `.signal` combinator:
+To achieve that, you can use the `.signal` combinator:
 
 ```scala
+def MyPage(selectedTab: Signal[String]): Element = ???
+
 pathPrefix("dashboard") {
-  maybeParam("tab").map(_.getOrElse("summary")).signal { (selectedTab: Signal[String]) => 
-    render(Page.Dashboard(selectedTab))   
+  maybeParam("tab").map(_.getOrElse("summary")).signal { (selectedTab: Signal[String]) =>
+    MyPage(selectedTab)   
   }
 }
 ```
 
-the `selectedTab` will become a `Signal[String]`, and when the `tab` parameter changes, `render` will not be called again — but rather the value inside the
+The `selectedTab` is now a `Signal[String]` (not a `String`), and when the `tab` parameter changes, 
+`MyPage` will not be called again — rather, the value inside the
 `selectedTab` signal will change, and you can react to it in your rendering logic.

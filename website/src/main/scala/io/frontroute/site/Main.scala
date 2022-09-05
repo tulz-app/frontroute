@@ -20,7 +20,6 @@ object Main {
     val _ = documentEvents.onDomContentLoaded.foreach { _ =>
       Theme.setTheme(DefaultTheme.theme)
       Modal.initialize()
-      LinkHandler.install()
       val wiring = Wiring()
       removeNoJsClass(wiring.ssrContext)
       insertJsClass(wiring.ssrContext)
@@ -40,7 +39,7 @@ object Main {
     val id           = dom.window.location.pathname.drop(Site.thisVersionHref("/example-frame/").length).takeWhile(_ != '/')
     val appContainer = dom.document.querySelector("#app")
     val content      = Site.examples.find(_.id == id).map(ex => CodeExampleDisplay.frame(ex)).getOrElse(div(s"EXAMPLE NOT FOUND: ${id}"))
-    val _            = com.raquo.laminar.api.L.render(appContainer, content)
+    val _            = com.raquo.laminar.api.L.render(appContainer, content.amend(LinkHandler.bind))
     BrowserNavigation.pushState(url = "/")
   }
 

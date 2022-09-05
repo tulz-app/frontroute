@@ -1,24 +1,26 @@
-### `pathEnd`
+## `pathEnd`
 
 ```scala
 val pathEnd: Directive0
 ```
 
-Matches if the current path is empty.
+Matches if the path is empty.
 
 
+---
 
-### `pathPrefix`
+
+## `pathPrefix`
 
 ```scala
 def pathPrefix[T](m: PathMatcher[T]): Directive[T]
 ```
 
-Applies the given `PathMatcher` to the current path. 
+Applies the given `PathMatcher` to the path. 
 
-If it matches: 
+If the path matcher matches: 
 * the directive matches as well, with the value provided by the path matcher;
-* the parts matched by the path matcher are removed from unmatched path (for the subsequent directives and routes).
+* the parts matched by the path matcher are removed from the path (for the subsequent directives and nested routes).
 
 If the path matcher rejects, the directive rejects as well.
 
@@ -26,7 +28,7 @@ If the path matcher rejects, the directive rejects as well.
 pathPrefix("user")
 ```
 
-This `pathPrefix` matches if the current path starts with a `"user"` segment.
+This `pathPrefix` matches if the path starts with a `"user"` segment.
 
 It's a `Directive0` because a string constant (`"user"` in this case) is implicitly converted into 
 a `PathMatcher[Unit]`.
@@ -35,14 +37,18 @@ a `PathMatcher[Unit]`.
 pathPrefix("user" / segment)
 ```
 
-This `pathPrefix` matches if the current path starts with a `"user"` segment followed by at least one more segment.
+This `pathPrefix` matches if the path starts with a `"user"` segment followed by at least one more segment.
 
 It's a `Directive[String]` because `segment` is a `PathMatcher[String]`.
 
 
 See [Path matching](/overview/path-matcher) for more details.
 
-### `path`
+
+---
+
+
+## `path`
 
 ```scala
 def path[T](m: PathMatcher[T]): Directive[T]
@@ -50,9 +56,10 @@ def path[T](m: PathMatcher[T]): Directive[T]
 
 Effectively the same as `pathPrefix(m) & pathEnd`
 
+---
 
 
-### `testPathPrefix`
+## `testPathPrefix`
 
 ```scala
 def testPathPrefix[T](m: PathMatcher[T]): Directive[T]
@@ -61,8 +68,10 @@ def testPathPrefix[T](m: PathMatcher[T]): Directive[T]
 Same as `pathPrefix` but does not consume the segments of the unmatched path.
 
 
+---
 
-### `testPath`
+
+## `testPath`
 
 ```scala
 def testPath[T](m: PathMatcher[T]): Directive[T]
@@ -71,18 +80,22 @@ def testPath[T](m: PathMatcher[T]): Directive[T]
 Same as `path` but does not consume the segments of the unmatched path.
 
 
+---
 
-### `extractUnmatchedPath`
+
+## `extractUnmatchedPath`
 
 ```scala
 val extractUnmatchedPath: Directive[List[String]]
 ```
 
-Always matches. Provides the current path without "consuming" it.
+Always matches. Provides the path segments without "consuming" anything.
 
 
+---
 
-### `param`
+
+## `param`
 
 ```scala
 def param(name: String): Directive[String]
@@ -91,8 +104,10 @@ def param(name: String): Directive[String]
 Matches if the search query contains the given parameter. Provides the value of the parameter in the search query.
 
 
+---
 
-### `maybeParam`
+
+## `maybeParam`
 
 ```scala
 def maybeParam(name: String): Directive[Option[String]]
@@ -102,8 +117,10 @@ Always matches. If the search query contains the given parameter, provides its v
 provides `None`.
 
 
+---
 
-### `signal`
+
+## `signal`
 
 ```scala
 def signal[T](signal: Signal[T]): Directive[T]
@@ -115,7 +132,10 @@ re-evaluated.
 See [example](/examples/signal).
 
 
-### `provide`
+---
+
+
+## `provide`
 
 ```scala
 def provide[L](value: L): Directive[L]
@@ -124,8 +144,10 @@ def provide[L](value: L): Directive[L]
 Always matches with the given `value`.
 
 
+---
 
-### `noneMatched`
+
+## `noneMatched`
 
 ```scala
 val noneMatched: Directive0
@@ -141,8 +163,10 @@ div(
 ```
 
 
+---
 
-### `debug`
+
+## `debug`
 
 ```scala
 def debug(message: Any, optionalParams: Any*)(subRoute: Route): Route
@@ -151,25 +175,10 @@ def debug(message: Any, optionalParams: Any*)(subRoute: Route): Route
 Always matches. Prints a debug message (using `dom.console.debug`) before invoking the `subRoute`.
 
 
+---
 
 
-
-
-### `state`
-
-```scala
-def state[T](initial: => T): Directive[T]
-```
-
-Always matches. The first time this directive is hit, creates the state value provided by `initial` and memoizes it.
-Provides the memoized value.
-
-
-
-
-
-
-### `historyState`
+## `historyState`
 
 ```scala
 def historyState: Directive[Option[js.Any]]
@@ -181,8 +190,10 @@ Extracts the history state (this will only work if [BrowserNavigation](/overview
 /`replaceState`, not direct calls to the History API).
 
 
+---
 
-### `historyScroll`
+
+## `historyScroll`
 
 ```scala
 def historyScroll: Directive[Option[ScrollPosition]]
@@ -196,8 +207,10 @@ window scroll position when navigating (enabled by default).
 This directive returns the preserved window scroll position (if any).
 
 
+---
 
-### `extractHostname`
+
+## `extractHostname`
 
 ```scala
 val extractHostname: Directive[String]
@@ -206,8 +219,10 @@ val extractHostname: Directive[String]
 Always matches. Provides the `hostname` part of the location (`window.location.hostname`).
 
 
+---
 
-### `extractPort`
+
+## `extractPort`
 
 ```scala
 val extractPort: Directive[String]
@@ -216,8 +231,10 @@ val extractPort: Directive[String]
 Always matches. Provides the `port` part of the location (`window.location.port`).
 
 
+---
 
-### `extractHost`
+
+## `extractHost`
 
 ```scala
 val extractHost: Directive[String]
@@ -226,8 +243,10 @@ val extractHost: Directive[String]
 Always matches. Provides the `host` part of the location (`window.location.host` – `hostname:port`)).
 
 
+---
 
-### `extractProtocol`
+
+## `extractProtocol`
 
 ```scala
 val extractProtocol: Directive[String]
@@ -236,13 +255,40 @@ val extractProtocol: Directive[String]
 Always matches. Provides the `protocol` part of the location (`window.location.protocol`).
 
 
+---
 
-### `extractOrigin`
+
+## `extractOrigin`
 
 ```scala
 val extractOrigin: Directive[Option[String]]
 ```
 
 Always matches. Provides the `origin` part of the location (`window.location.origin`).
+
+
+---
+
+
+## `whenTrue`
+
+```scala
+def whenTrue(condition: => Boolean): Directive0
+```
+
+Matches if the `condition` is `true`.
+
+
+
+---
+
+
+## `whenFalse`
+
+```scala
+def whenFalse(condition: => Boolean): Directive0
+```
+
+Matches if the `condition` is `false`.
 
 

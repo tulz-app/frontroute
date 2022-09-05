@@ -19,13 +19,15 @@ object PageNavigation {
       child.maybe <-- $page.optionMap { case (module, _) =>
         div(
           cls := "space-y-4",
-          navigationItem($page, module.index)(
-            a(
-              cls  := "ml-2 flex text-xl font-display font-bold",
-              href := Site.thisVersionHref(s"/${module.path}"),
-              module.index.title
+          when(module.index.title.nonEmpty) {
+            navigationItem($page, module.index)(
+              a(
+                cls  := "ml-2 flex text-xl font-display font-bold",
+                href := Site.thisVersionHref(s"/${module.path}"),
+                module.index.title
+              )
             )
-          ),
+          },
           module.navigation.map { case (title, pages) =>
             div(
               when(title.nonEmpty) {

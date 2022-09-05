@@ -54,8 +54,9 @@ class Routes {
       appContainer,
       div(
         cls := "contents",
+        LinkHandler.bind,
         thisVersionPrefix(
-          concat(
+          firstMatch(
             (
               pathEnd.mapTo(Some((Site.indexModule, Site.indexModule.index))) |
                 (modulePrefix & pathEnd).map(m => Some((m, m.index))) |
@@ -71,8 +72,7 @@ class Routes {
         }
       )
     )
-    com.raquo.laminar.api.L.render(menuContainer, TW.modal(mobileMenuContent.signal, mobileMenuModal))
-    BrowserNavigation.emitPopStateEvent()
+    val _ = com.raquo.laminar.api.L.render(menuContainer, TW.modal(mobileMenuContent.signal, mobileMenuModal))
   }
 
 }

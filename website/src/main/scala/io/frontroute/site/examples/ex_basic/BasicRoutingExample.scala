@@ -44,7 +44,7 @@ object BasicRoutingExample
           pathPrefix("some-section") {
             /* </focus> */
             /* <focus> */
-            concat(
+            firstMatch(
               /* </focus> */
               /* <focus> */
               path("some-page") {

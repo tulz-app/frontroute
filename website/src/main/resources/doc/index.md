@@ -20,4 +20,61 @@ div(
 )
 ```
 
-See [Getting started](/examples) for installation instructions.
+See [getting started](/getting-started).
+
+## Installation
+
+### Prerequisites
+
+* [Scala.js](https://www.scala-js.org/) `v1.10.1`+
+* Scala 2.13 or {{scala3version}}+
+* [Laminar](https://laminar.dev/) {{laminarVersion}} (it will be added to your project's dependencies transitively)
+
+### sbt
+
+Add the [Scala.js](https://www.scala-js.org/) plugin to your `project/plugins.sbt` file.
+
+```scala
+addSbtPlugin("org.scala-js" % "sbt-scalajs"  % {{scalajsVersion}})
+```
+
+Enable the plugin and add the `frontroute` library to your `build.sbt` file:
+
+```scala
+enablePlugins(ScalaJSPlugin)
+
+libraryDependencies ++= Seq(
+  "io.frontroute" %%% "frontroute" % "{{frontrouteVersion}}"
+)
+```
+
+### Mill
+
+```scala
+import $ivy.`com.lihaoyi::mill-contrib-bloop:$MILL_VERSION`
+import mill._
+import mill.scalalib._
+import mill.scalajslib._
+import mill.scalajslib.api._
+
+object counter extends ScalaJSModule {
+    def scalaVersion   = "3.1.2"
+    def scalaJSVersion = "1.10.1"
+    
+    def ivyDeps = Agg(ivy"io.frontroute::frontroute::{{frontrouteVersion}}")
+    
+    override def moduleKind = T(mill.scalajslib.api.ModuleKind.CommonJSModule)
+}
+```
+
+### Previous versions
+
+#### frontroute `v0.15.x`
+
+See [documentation](https://frontroute.dev/v/0.15.x/).
+
+---
+
+Older versions of `frontroute` are no longer maintained and documentation is not available.
+
+

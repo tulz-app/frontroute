@@ -44,7 +44,7 @@ object AuthExample
         /* <focus> */
         signal(authenticatedUser.signal) { implicit maybeUser =>
           /* </focus> */
-          concat(
+          firstMatch(
             pathEnd {
               div(
                 div(cls := "text-2xl", "Index page."),

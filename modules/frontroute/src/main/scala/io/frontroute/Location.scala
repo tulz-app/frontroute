@@ -10,19 +10,19 @@ final case class Location(
   protocol: String,
   host: String,
   origin: Option[String],
-  unmatchedPath: List[String],
+  path: List[String],
   fullPath: List[String],
   params: Map[String, Seq[String]],
   state: js.UndefOr[js.Any],
   otherMatched: Boolean
 ) {
 
-  @inline def withUnmatchedPath(path: List[String]): Location = this.copy(unmatchedPath = path)
+  @inline def withUnmatchedPath(path: List[String]): Location = this.copy(path = path)
 
   private[frontroute] val parsedState = HistoryState.tryParse(state)
 
   override def toString: String =
-    s"${unmatchedPath.mkString("/")}${if (params.nonEmpty) "?" else ""}${params
+    s"${path.mkString("/")}${if (params.nonEmpty) "?" else ""}${params
         .flatMap { case (name, values) =>
           values.map(value => s"$name=$value")
         }
@@ -40,7 +40,7 @@ object Location {
       protocol = location.protocol,
       host = location.host,
       origin = location.origin.toOption,
-      unmatchedPath = path,
+      path = path,
       fullPath = path,
       params = LocationUtils.parseLocationParams(location),
       state = state,

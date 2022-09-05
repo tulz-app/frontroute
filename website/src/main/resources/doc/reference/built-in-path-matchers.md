@@ -1,12 +1,16 @@
-See also: [Path Matcher](/overview/path-matcher).
+See also: [path-matching](/reference/under-the-hood/path-matching).
 
 ## `segment: PathMatcher[String]`
 
-* Matches (and consumes*) a single segment of the unmatched path.
-* Provides the segment as the value.
-* Rejects if there are no more unmatched segments left.
+If the path is non-empty:
+* matches (and consumes*) a single segment of the path,
+* provides the segment as the value.
 
-> "consumes" – this means the nested route will see the unmatched path without the consumed prefix
+Rejects if there are no more segments left.
+
+<div class="bg-sky-200 px-8 py-2 text-sm">
+"consumes" – this means the subsequent directives and nested routes will see the unmatched path without the consumed prefix.
+</div>
 
 ```scala
 path(segment) { (s: String) => 
@@ -16,10 +20,13 @@ path(segment) { (s: String) =>
 
 ## `long: PathMatcher[Long]`
 
-* Matches (and consumes) a single segment of the unmatched path if it can be parsed as a `Long`.
-* Provides the parsed value.
-* Rejects if the segment can't be parsed as a `Long`.
-* Rejects if there are no more unmatched segments left.
+If the path is non-empty:
+
+* matches (and consumes) a single segment of the path if it can be parsed as a `Long`,
+* provides the parsed `Long` value;
+* rejects if the segment cannot be parsed as a `Long`.
+
+Rejects if there are no more segments left.
 
 ```scala
 path(long) { (l: Long) => 
@@ -29,10 +36,13 @@ path(long) { (l: Long) =>
 
 ## `double: PathMatcher[Double]`
 
-* Matches (and consumes) a single segment of the unmatched path if it can be parsed as a `Double`.
-* Provides the parsed value.
-* Rejects if the segment can't be parsed as a `Double`.
-* Rejects if there are no more unmatched segments left.
+If the path is non-empty:
+
+* matches (and consumes) a single segment of the unmatched path if it can be parsed as a `Double`,
+* provides the parsed `Double` value;
+* rejects if the segment cannot be parsed as a `Double`.
+
+Rejects if there are no more segments left.
 
 ```scala
 path(double) { (d: Double) => 
@@ -42,10 +52,13 @@ path(double) { (d: Double) =>
 
 ## `segment(s: String): PathMatcher0`
 
-* Matches (and consumes) a single segment if it is equal to the provided string.
-* Rejects if the segment doesn't match the provided string.
-* Doesn't provide a value.
-* Rejects if there are no more unmatched segments left.
+If the path is non-empty:
+
+* matches (and consumes) a single segment if it is equal to the provided string,
+* doesn't provide a value;
+* rejects if the segment doesn't match the provided string.
+
+Rejects if there are no more segments left.
 
 > `PathMatcher0` is an alias for `PathMatcher[Unit]`
 
@@ -67,10 +80,13 @@ path("some-page") {
 
 ## `segment(oneOf: Seq[String]): PathMatcher[String]` and `segment(oneOf: Set[String]): PathMatcher[String]` 
 
-* Matches (and consumes) a single segment if it is contained in the provided `oneOf` collection.
-* Rejects if the segment doesn't match the provided string.
-* Provides the matched segment.
-* Rejects if there are no more unmatched segments left.
+If the path is non-empty:
+
+* matches (and consumes) a single segment if it is contained in the provided `oneOf` collection.
+* provides the matched segment;
+* rejects if the segment doesn't match the provided string.
+
+Rejects if there are no more segments left.
 
 ```scala
 path(segment(Seq("some-page", "another-page"))) { matched =>   
@@ -80,11 +96,14 @@ path(segment(Seq("some-page", "another-page"))) { matched =>
 
 ## `regex(e: Regex): PathMatcher[Regex.Match]`
 
-* Matches (and consumes) a single segment of the unmatched path if it matches 
-the regular expression.
-* Rejects if the segment doesn't match the provided regex.
-* Rejects if there are no more unmatched segments left.
-* Provides the corresponding `Regex.Match`.
+If the path is non-empty:
+
+* matches (and consumes) a single segment of the unmatched path if it matches 
+the regular expression,
+* provides the corresponding `Regex.Match`;
+* rejects if the segment doesn't match the provided regex.
+
+Rejects if there are no more segments left.
 
 
 ```scala

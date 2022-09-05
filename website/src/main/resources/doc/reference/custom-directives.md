@@ -24,37 +24,35 @@ your directive using the combinators that directives provide:
 
 ## Example
 
-Say, you wanted to check if the matched segment (part of the URI path delimited by `/`) is a number.
+Say, you wanted to check if the next segment in the path is a number.
 
-Let's create an `isNumber` directive for that, we will use it like this:
+Let's create an `asNumber` directive which we will use like this:
 
 ```scala
-val route = concat(
-  // ...
-  path("user" / segment) { userId =>
-    isNumber(userId) { userIdAsInt =>
-      userByIdPage(userId) 
-    }
+path("user" / segment) { userId =>
+  asNumber(userId) { userIdAsInt =>
+    userByIdPage(userId) 
   }
-  // ...
-)
+}
 ```
 
-> For this particular case, using the `long` path matcher would make much more sense, but let's try this anyway,
+<div class="bg-sky-200 px-8 py-2 text-sm">
+For this particular case, using the `long` path matcher would make much more sense, but let's try this anyway,
 to keep things simple.
-
-Let's define the directive now:
+</div>
 
 ```scala
-  def isNumber(s: String): Directive[Int] = 
-    Try(s.toInt) match {
-      case Success(int) => provide(int)
-      case Failure(_) => reject
-    }  
+def asNumber(s: String): Directive[Int] = 
+  Try(s.toInt) match {
+    case Success(int) => provide(int)
+    case Failure(_) => reject
+  }  
 ```
 
-> Now, this is an extremely simple example, but most directives, no matter how complicated, can be
+<div class="bg-sky-200 px-8 py-2 text-sm">
+This is an extremely simple example, but most directives, no matter how complicated, can be
 derived as easily from the more powerful existing directives and more powerful combinators (like, for example, 
 the `signal` directive or the `flatMap` combinator).
+</div>
 
 [Live example](/examples/custom-directives) 

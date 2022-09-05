@@ -1,10 +1,12 @@
-package io.frontroute.ops
+package io.frontroute
+package ops
 
-import com.raquo.laminar.api.L._
-import io.frontroute.Directive
+class DirectiveOfOptionOps[A](underlying: Directive[Option[A]]) {
 
-class DirectiveOfOptionOps(underlying: Directive[Option[Element]]) {
+  @inline def mapOption[R](f: A => R): Directive[Option[R]] = underlying.map(_.map(f))
 
-  @inline def optionMap[R](f: Element => R): Directive[Option[R]] = underlying.map(_.map(f))
+  @inline def default(v: => A): Directive[A] = underlying.map(_.getOrElse(v))
+
+  @inline def collectOption[R](f: PartialFunction[A, R]): Directive[Option[R]] = underlying.map(_.collect(f))
 
 }

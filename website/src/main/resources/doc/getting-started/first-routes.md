@@ -1,113 +1,123 @@
-### Routes
+## First routes
 
-`frontroute`'s `Route`-s are regular Laminar modifiers, and they act similarly to the `child.maybe <-- ...` modifier:
+First, let's make a simple app with a couple of routes to see what routing with `frontroute` looks like.
 
-* when there is a "match", the corresponding element is inserted into the parent,
-* when there is no "match", the element is removed.
+Say we want the following:
 
-And because routes are just modifiers, all we need to do is put them inside our view tree:
-
-```scala
-div(
-  pathEnd {
-    div("Path is /")
-  }
-)
-```
-
-<div class="bg-blue-100 p-2 text-sm">
-
-Under the hood, a route is defined by a function, with a signature that approximately looks like
-this: `Signal[Location] => Option[Element]`
-(the actual signature is a bit more complicated, but that is an implementation detail, and we will not be dealing with
-it directly). `Location` is an equivalent of the
-[Window.location](https://developer.mozilla.org/en-US/docs/Web/API/Window/location). Because we're in a single page
-application, and `Window.location` can change dynamically, the "current location" is modeled as a `Signal[Location]`.
-
-When a `Route` is mounted, it subscribes to the relevant `Signal[Location]` and reacts to changes in it.
-
-There is a top-level location signal, which (by default) is derived directly from `Window.location`, and changes
-whenever a [popstate event](https://developer.mozilla.org/en-US/docs/Web/API/Window/popstate_event)
-is emitted in the DOM. Top-level routes will be subscribing to this signal.
-
-Routes can (and often do) "consume" parts of the path in the location, leaving the remaining path ("unmatchedPath") for
-the nested routes. Nested routes do not subscribe to the top-level location signal: rather, they get their own signals
-with a location that may have been partially "consumed" by the parent routes.
-
-</div>
-
-Let's build a simple app with routes:
+* when the location is `/blog`, it should render `<div>Blog</div>`,
+* when the location is `/news`, it should render `<div>News</div>`.
 
 ```scala
 import com.raquo.laminar.api.L.*
 import io.frontroute.*
 
-val myApp: Element =
-  div(
-    pathEnd {
-      div("Path is /")
-    },
-    path("my-path") {
-      div(s"Path is /my-path")
-    },
-    noneMatched {
-      div("Path is something else")
-    }
-  )
+val myApp = div(
+
+  path("blog") {
+    div("Blog")
+  },
+
+  path("news") {
+    div("News")
+  }
+
+)
 ```
 
-Here we've defined the following three routes:
+And that is all it takes to have routing in our app. It looks like a regular Laminar app, except we added two new
+constructs:
 
-* `pathEnd { ... }`,
-* `path("my-path") { ... }`, and
-* `noneMatched { ... }`.
+* `path("blog") { ... }`, and
+* `path("news") { ... }`.
 
-When we mount `myApp`, one of the three nested `div()` elements will be rendered – depending on the current path in the
-browser.
+These are the `Route`-s.
 
-#### Routes and Directives
+A route is a regular Laminar modifier which acts similarly to the `child.maybe <-- ...` modifier:
 
-Routes are defined using directives.
+* when the route matches, the corresponding element is inserted into the parent,
+* otherwise, the element is removed.
 
-<div class="bg-blue-100 p-2 text-sm">
+Thus, all we need to do is put the routes inside our view tree. When we mount `myApp`, one of the two nested `div()`
+elements will be rendered – depending on the current path in the browser. If the path is neither `/news` nor `/blog` –
+none of the routes will match and none of the nested `div()` elements will be rendered.
+
+### Routing basics
+
+The task of the router is to render elements on the page according to the
+URL ([window.location](https://developer.mozilla.org/en-US/docs/Web/API/Window/location)).
+
+<div class="bg-sky-200 px-8 py-2 text-sm">
+
+In `frontroute`, `window.location` is parsed into a `Location` case class:
+
+```scala
+case class Location(
+  path: List[String],
+  // ...
+)
+```
+
+`path` is a parsed list of segments in the `window.location.pathname`:
+
+* `/` -> `List.empty`,
+* `/blog/posts/42` -> `List("blog", "posts", "42")`, etc.
+
+Because we're in a single page application, and `window.location` can change dynamically, location is modeled as
+a `Signal[Location]`.
+
+</div>
+
+In order for `frontroute` to know which elements to render, we need to describe the "routing rules". We do this
+with `Route`-s. A route comprises a "routing rule" and a corresponding element to be rendered when the rule matches.
+
+In `frontroute`, "routing rules" are defined using `Directives`. In the example above we've used the `path` directive, which
+checks if the path consists of a single segment (`/blog` or `/news`):
+
+* `path("blog")`, and
+* `path("news")`.
+
+
+
+<div class="bg-sky-200 px-8 py-2 text-sm">
 
 `frontroute` routes and directives are inspired
 by [Akka HTTP routing DSL](https://doc.akka.io/docs/akka-http/current/routing-dsl/directives/index.html).
 
 </div>
 
-In the example above, there are three directives: `pathEnd`, `path`, and `noneMatched`. Directives alone are not routes,
-nor they are modifiers, and cannot be applied to elements. The following will not compile (nor does it have any
-meaning):
+### Directives
+
+Directives alone are not routes, nor they are modifiers, and cannot be applied to elements. The following will not
+compile (nor does it have any meaning):
 
 ```scala
 div(
-  pathEnd
+  path("news")
 )
 ```
 
-The role of a directive is to do the actual matching of the `Location`. While matching, directives also "extract"
-information from the location (or from [other sources](/reference/injecting-external-signal)) and provide it to the
-rendered element.
+The role of a directive is to do the actual matching against the current URL. While matching, directives can also
+extract information from the location and provide it to the rendered element.
 
-In order to get a `Route`, we need to also provide an `Element` that will be rendered when the directive matches. This
-is done by calling the `.apply` method on the directive. With `.apply` spelled out explicitly, the `pathEnd { ... }`
+Thus, in order to get a `Route`, we start with a directive and provide an `Element` to be rendered when the directive
+matches. This is done by calling the `.apply` method on the directive. With `.apply` spelled out explicitly,
+the `path("blog") { ... }`
 route from the above example would look like this:
 
 ```scala
-pathEnd.apply {
-  div("Path is /")
+path("blog").apply {
+  div("Blog")
 }
 ```
 
 Directives have a type parameter which describes the value that the directive will extract.
 
-The three directives we've seen so far happen to not extract anything and have type `Directive[Unit]` (aliased
+The directives we've seen so far happen to not extract anything and have type `Directive[Unit]` (aliased
 as `Directive0`). The syntax for such directives might have looked like the following:
 
 ```scala
-pathEnd { (_: Unit) =>
-  div("Path is /")
+path("blog") { (_: Unit) =>
+  div("Blog")
 }
 ```
 
@@ -116,13 +126,13 @@ nice), we have a special syntax for `Directive0`-s, which allows us to pass an e
 the examples above):
 
 ```scala
-pathEnd {
-  div("Path is /")
+path("blog") {
+  div("Path is /") // passed by-name, will not be evaluated until it's needed  
 }
 ```
 
-For directives that **do** extract (and provide) a value, instead of a by-name element, we provide a function that
-accepts the output of the directive and returns an element:
+For directives that **do** extract a non-unit value, instead of a by-name element, we provide a function that accepts
+the output of the directive and returns an element:
 
 ```scala
 div(
@@ -136,70 +146,62 @@ In this example, `path(segment)` is a `Directive[String]`, so we pass a `String 
 directive's `.apply` method. This function will be called every time the extracted value changes (and it will **not** be
 called if the location changes, but the extracted value remains the same).
 
-<div class="bg-blue-100 p-2 text-sm">
+<div class="bg-sky-200 px-8 py-2 text-sm">
 
-We have seen the `path` directive already, in the first example: `path("my-path")`. There, it was a `Directive[Unit]`.
-In this case, `path(segment)` is a `Directive[String]`. This is because the output of path-matching directives is
-defined by the "path matcher" that we use:
+We have seen the `path` directive already, in the first example: `path("blog")` and `path("news")`.
 
-* `"my-path"` is implicitly converted into a `PathMatcher[Unit]`, which checks if the "unmatchedPath" contains a single
-  segment and if it's equal to `"my-path"`, and does not extract anything;
-* `segment` is built-in path matcher, which checks if the "unmatchedPath" contains a single segment, and extracts that
-  segment as its output.
+There, it was a `Directive[Unit]`, while in this case, `path(segment)` is a `Directive[String]`.
 
-Thus, `path("my-path")` is a `Directive[Unit]`, and `path(segment)` is a `Directive[String]`.
+This is because the output the `path` directive is defined by the "path matcher" that we use:
+
+* a string `"blog"` is implicitly converted into a `PathMatcher[Unit]`, which checks if the current `path` contains a
+  single segment equal to `"blog"`, and does not extract anything; this can be done explicitly:
+  ```scala
+  path(segment("blog"))
+  ```
+* `segment` (without parameters) is built-in path matcher with type `PathMatcher[String]`, which checks if the
+  current `path` contains a single segment
+  (without checking its value), and extracts that segment as the output.
+
+Thus, `path("blog")` is a `Directive[Unit]`, and `path(segment)` is a `Directive[String]`.
 
 </div>
 
 #### Nesting directives
 
-The description above is not 100% accurate, though: the `.apply` method of a directive accepts not a by-name element or
-a function that returns an element: it accepts a `Route` (or a function that returns a `Route`). Rather, elements are
-implicitly converted into `Routes` (to enable the simplified syntax: we don't have to use – or have – the `complete`
-function, like we have in Akka HTTP or in earlier versions of `frontroute`).
+The description above is not 100% accurate, though.
 
-This enables us to "nest" directives:
+We do not pass an `Element` directly to the `.apply` method of a directive: we pass a `Route`.
+
+`Element`-s are implicitly converted into `Routes` to enable the simplified syntax (we don't have to use – or have –
+the `complete`
+function, like in Akka HTTP or in earlier versions of `frontroute`).
+
+This enables us to "nest" the directives:
 
 ```scala
 pathPrefix("posts") {
   path(segment) { postId =>
-    div("Post ID: $postId")
+    div("Post ID: $postId") // div() is implicitly converted into a Route
   }
 }
 ```
 
 Here, the `pathPrefix("posts")` directive will be executed first. When it matches, it will run the inner route
 – `path(segment) { ... }`. The inner route will "see" the location with the "posts" segment removed from the path – it
-will have been "consumed" by the `pathPrefix("posts")` directive.
-
-<div class="bg-blue-100 p-2 text-sm">
-
-This looks and behaves very similar to nested routes:
-
-```scala
-pathPrefix("posts") {
-  div(
-    path(segment) {
-      postId
-      div("Post ID: $postId")
-    }
-  )
-}
-```
-
-The difference is that in case of "nested directives", there will be a single modifier applied to the element and a
-single subscription to the location signal that will drive the whole "tree of routes".
-</div>
+will have been "consumed" by the `pathPrefix("posts")` directive. If the `path(segment)` directive matches as well, the
+whole route will match and `div("Post ID: $postId")` will be
+rendered ([more about path matching](/overview/path-matcher)).
 
 #### Combining directives
 
 Nesting is one way of combining directives. We also have conjunction (`directive1 & directive2`) and
 disjunction (`directive1 | directive2`).
 
-<div class="bg-blue-100 p-2 text-sm">
+<div class="bg-sky-200 px-8 py-2 text-sm">
 
-Directives are monads, so they also have `.map` and `.flatMap`. This is covered in
-the [custom directives](/overview/custom-directives) section.
+Directives also have `.map` and `.flatMap`. This is covered in the [custom directives](/overview/custom-directives)
+section.
 
 </div>
 
@@ -212,7 +214,7 @@ Conjunction creates a single directive out of two directives: `directive1 & dire
 * the combined directive will match only if **both** directives match;
 * the outputs of the directives will be combined.
 
-<div class="bg-blue-100 p-2 text-sm">
+<div class="bg-sky-200 px-8 py-2 text-sm">
 
 The outputs are combined into a tuple (or a scalar, or a unit – depending on the outputs of the combined directives)
 **and** "flattened".
@@ -283,54 +285,55 @@ There are two ways of describing alternative routes. One is to have multiple sib
 
 ```scala
 div(
-  pathEnd {
-    div("Path is /")
+  path("news") {
+    div("News")
   },
-  path("my-path") {
-    div(s"Path is /my-path")
-  },
-  noneMatched {
-    div("Path is something else")
+  path("blog") {
+    div(s"Blog")
   }
 )
 ```
 
-In this case, the three routes are mutually exclusive:
-
-* the path cannot be `/` and `/my-path` at the same time, so `pathEnd` and `path("my-path")` cannot both match;
-* `noneMatched` is a special directive which matches **only** when none of the **previous** sibling routes had matched.
+In this case, the three routes are mutually exclusive: the path cannot be `/news` and `/blog` at the same time, so
+the `path("news")` and `path("blog")` directives cannot both match;
 
 But it is possible to have sibling routes that can both match:
 
 ```scala
 div(
-  pathEnd {
-    div("Path is /")
+  path("news") {
+    div("News")
   },
-  pathEnd {
-    div(s"Path is /, again.")
+  path("news") {
+    div("Also news")
   }
 )
 ```
 
-Another way to describe alternative routes is the `concat(routes: Route*): Route` function:
+Here, if the path is `/news`, both nested `div()` elements will be rendered.
+
+#### firstMatch
+
+Another way to describe alternative routes is the `firstMatch(routes: Route*): Route` function:
 
 ```scala
 div(
-  concat(
-    pathEnd {
-      div("Path is /")
+  firstMatch(
+    path("news") {
+      div("News")
     },
-    path("my-path") {
-      div(s"Path is /my-path")
+    path("blog") {
+      div(s"Blog")
     },
-    div("Path is something else")
+    path("something-else") {
+      div(s"Something else")
+    }
   )
 )
 ```
 
-When using `concat`, at most **one** of the routes will match (the rest will not be evaluated). Another difference is
-that, similar to "nesting" directives, only one combined route will be applied as a modifier to the element, with just
-one subscription to the location signal to drive it.
+When using `firstMatch`, at most **one** of the routes will match (the rest will not be evaluated). Another difference
+is that, similar to "nesting" directives, only one combined route will be applied as a modifier to the element, with a
+single subscription to the location signal to drive it.
 
 Both approaches are valid – we can use whichever we like more.

@@ -1,5 +1,6 @@
 package io.frontroute
 
+import com.raquo.laminar.api.L._
 import io.frontroute.internal.UrlString
 import org.scalajs.dom
 import scala.scalajs.js
@@ -16,7 +17,7 @@ object LinkHandler {
           !href.startsWith("http://") && !href.startsWith("https://") ||
           dom.window.location.origin.exists(origin => href.startsWith(origin))
 
-      if (sameOrigin && (js.isUndefined(rel) || rel == null || rel == "")) {
+      if (sameOrigin && (js.isUndefined(rel) || rel == null || rel == "" || rel == "replace")) {
         event.preventDefault()
         val shouldPush = UrlString.unapply(anchor.href).fold(true) { location =>
           location.pathname != dom.window.location.pathname ||
@@ -24,7 +25,11 @@ object LinkHandler {
           location.hash != dom.window.location.hash
         }
         if (shouldPush) {
-          BrowserNavigation.pushState(url = anchor.href)
+          if (rel == "replace") {
+            BrowserNavigation.replaceState(url = anchor.href)
+          } else {
+            BrowserNavigation.pushState(url = anchor.href)
+          }
         }
       } else if (rel == "external") {
         event.preventDefault()
@@ -33,13 +38,15 @@ object LinkHandler {
     }
   }
 
-  def install(): Unit = {
-    dom.document.addEventListener("click", clickListener)
-  }
-
-  def uninstall(): Unit = {
-    dom.document.removeEventListener("click", clickListener)
-  }
+  val bind: Modifier[Element] =
+    onMountUnmountCallback(
+      { ctx =>
+        ctx.thisNode.ref.addEventListener("click", clickListener)
+      },
+      { el =>
+        el.ref.removeEventListener("click", clickListener)
+      }
+    )
 
   @scala.annotation.tailrec
   private def findParent(nodeName: String, element: dom.Node): js.UndefOr[dom.Node] = {

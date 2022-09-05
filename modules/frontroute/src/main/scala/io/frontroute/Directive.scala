@@ -1,6 +1,7 @@
 package io.frontroute
 
 import com.raquo.laminar.api.L._
+import io.frontroute.ops.DirectiveOfOptionOps
 
 class Directive[L](
   val tapply: (L => Route) => Route
@@ -22,6 +23,17 @@ class Directive[L](
         inner(mapped)(location, previous, state.enterAndSet(mapped))
       }
     }
+
+  def emap[R](f: L => Either[Any, R]): Directive[R] =
+    this.flatMap { value =>
+      f(value).fold(
+        _ => reject,
+        r => provide(r)
+      )
+    }
+
+  def opt: Directive[Option[L]] =
+    this.map(v => Option(v)) | provide(None)
 
   @inline def some: Directive[Option[L]] = map(Some(_))
 
@@ -102,5 +114,7 @@ object Directive {
         )(location, previous, state)
     )
   }
+
+  implicit def directiveOfOptionSyntax[A](underlying: Directive[Option[A]]): DirectiveOfOptionOps[A] = new DirectiveOfOptionOps[A](underlying)
 
 }
