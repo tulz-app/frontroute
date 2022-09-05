@@ -57,10 +57,12 @@ div(
 ```
 
 <div class="bg-sky-200 px-8 py-2 text-sm">
+
 `pathEnd` is a directive that matches whenever the `path` is empty (either because the URL is `/` or because 
 all segments have been consumed by the previous directives).
 
-`pathPrefix` is similar to the `path` directive, but also matches if the path has more segments. 
+`pathPrefix` is similar to the `path` directive, but also matches if the path has more segments.
+
 </div>
 
 In this particular case we had to introduce the `firstMatch`, which arguably makes the route look less
@@ -102,10 +104,10 @@ Here, we define a custom directive `intParam`:
 * first, we use the built-in `param` directive, which will extract the query parameter (it will reject
   if the parameter is missing)
 * next, we use the `.emap` combinator – we try parsing the value as an `Int` and return an `Either`
-* the directive `.emap` creates will reject, if the `Either` is a `Left` (ignoring the left value).
+* the directive created by `.emap` will reject when the returned `Either` is a `Left` (ignoring the left value).
 
 Next, we use this directive: 
-* `intParam("page")` – will reject if there is no "page" parameter or it cannot be parsed as an `Int`
+* `intParam("page")` – will reject if there is no "page" parameter or it cannot be parsed as an `Int`,
 * make it optional (`.opt`) – will never reject, but provides an `Option[Int]`,
 * and finally, we provide a default value (`.default(0)`).
 
