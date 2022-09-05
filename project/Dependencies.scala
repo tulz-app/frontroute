@@ -22,9 +22,16 @@ object Dependencies {
     )
   }
 
-  val utest: Def.Initialize[Seq[ModuleID]] = Def.setting {
+  val domtestutils: Def.Initialize[Seq[ModuleID]] = Def.setting {
     Seq(
-      "com.lihaoyi" %%% "utest" % DependencyVersions.utest % Test
+      "com.raquo" %%% "domtestutils" % DependencyVersions.domtestutils % Test
+    )
+  }
+
+  val scalatest: Def.Initialize[Seq[ModuleID]] = Def.setting {
+    Seq(
+      "org.scalatest" %%% "scalatest" % DependencyVersions.scalatest % Test,
+//      ("org.scala-js" %%% "scalajs-java-securerandom" % DependencyVersions.`scalajs-java-securerandom` % Test).cross(CrossVersion.for3Use2_13)
     )
   }
 

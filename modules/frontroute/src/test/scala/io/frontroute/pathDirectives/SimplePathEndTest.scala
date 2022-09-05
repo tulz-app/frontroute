@@ -2,28 +2,23 @@ package io.frontroute.pathDirectives
 
 import io.frontroute._
 import io.frontroute.testing.TestBase
-import utest._
 
-object SimplePathEndTest extends TestBase {
+class SimplePathEndTest extends TestBase {
 
-  val tests: Tests = Tests {
-
-    test("simple pathEnd") {
-      routeTest(
-        route = probe =>
-          pathEnd {
-            testComplete {
-              probe.append("end")
-            }
-          },
-        init = locationProvider => {
-          locationProvider.path()
-        }
-      ) { probe =>
-        probe.toList ==> List("end")
+  test("simple pathEnd") {
+    routeTest(
+      route = probe =>
+        pathEnd {
+          testComplete {
+            probe.append("end")
+          }
+        },
+      init = locationProvider => {
+        locationProvider.path()
       }
+    ) { probe =>
+      probe.toList shouldBe List("end")
     }
-
   }
 
 }

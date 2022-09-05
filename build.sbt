@@ -55,17 +55,18 @@ inThisBuild(
 lazy val frontroute =
   project
     .in(file("modules/frontroute"))
-    .enablePlugins(ScalaJSPlugin, ScalaJSJUnitPlugin)
+    .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin)
+    .settings(bundlerSettings)
     .settings(
       name                     := "frontroute",
       libraryDependencies ++=
         Seq.concat(
           Dependencies.laminar.value,
           Dependencies.`tuplez-apply`.value,
-          Dependencies.utest.value,
+          Dependencies.scalatest.value,
+          Dependencies.domtestutils.value,
           Dependencies.`scala-js-macrotask-executor`.value.map(_ % Test)
         ),
-      testFrameworks += new TestFramework("utest.runner.Framework"),
       Test / parallelExecution := false,
       ScalaOptions.fixOptions,
       scalacOptions ++= {
@@ -108,6 +109,13 @@ lazy val website = project
   .dependsOn(
     frontroute
   )
+
+lazy val bundlerSettings = Seq(
+//  jsEnv                  := new net.exoego.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
+  installJsdom / version := DependencyVersions.jsdom,
+  Test / requireJsDomEnv := true,
+  useYarn                := true
+)
 
 lazy val noPublish = Seq(
   publishLocal / skip := true,
