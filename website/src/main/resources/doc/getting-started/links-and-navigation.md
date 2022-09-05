@@ -60,13 +60,13 @@ When `LinkHandler` is active, it will add a listener to the `onClick` events of 
 bound to (including those that will be added to the DOM subsequently).
 
 The `onClick` handler will do the following:
-* if the origin of the link is the same as the current origin:
+* if the origin of the link is the same as the current origin AND the `rel` of the `<a>` element 
+  is either not defined, set to `"replace"`, or set to `""`:
   * if the path, query and hash of the link match the current path, query and hash – the click will be ignored;
   * otherwise, if the `rel` of the `<a>` element is `"replace"` – the `BrowserNavigation.replaceState` will be called
   * otherwise, the `BrowserNavigation.pushState` will be called
-* if the origin of the link is different from the current origin:
-  * if the `rel` of the `<a>` element is `"external"` – the link will be opened in a new tab;
-  * otherwise, the default browser navigation will happen.
+* if the `rel` of the `<a>` element is set to `"external"` – the link will be opened in a new tab; 
+* otherwise, the default browser navigation will happen.
 
 
 ### `BrowserNavigation`
