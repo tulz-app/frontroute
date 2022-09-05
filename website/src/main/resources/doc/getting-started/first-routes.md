@@ -191,7 +191,7 @@ Here, the `pathPrefix("posts")` directive will be executed first. When it matche
 – `path(segment) { ... }`. The inner route will "see" the location with the "posts" segment removed from the path – it
 will have been "consumed" by the `pathPrefix("posts")` directive. If the `path(segment)` directive matches as well, the
 whole route will match and `div("Post ID: $postId")` will be
-rendered ([more about path matching](/overview/path-matcher)).
+rendered ([more about path matching](/reference/path-matching)).
 
 #### Combining directives
 
@@ -200,7 +200,7 @@ disjunction (`directive1 | directive2`).
 
 <div class="bg-sky-200 px-8 py-2 text-sm">
 
-Directives also have `.map` and `.flatMap`. This is covered in the [custom directives](/overview/custom-directives)
+Directives also have `.map` and `.flatMap`. This is covered in the [custom directives](/reference/custom-directives)
 section.
 
 </div>
