@@ -1,7 +1,5 @@
 package io.frontroute.site
 
-//import io.frontroute.site.examples.CodeExample
-//import io.frontroute.site.pages.CodeExamplePage
 import io.frontroute.site.pages.CodeExamplePage
 import io.frontroute.site.pages.DocumentationPage
 import com.yurique.embedded.FileAsString
@@ -10,6 +8,8 @@ import io.frontroute.site.examples.CodeExample
 object Site {
 
   val frontrouteVersion: String = "0.15.x"
+
+  val thisVersionPrefix = s"/v/$frontrouteVersion/"
 
   def thisVersionHref(href: String): String =
     s"/v/$frontrouteVersion/${href.dropWhile(_ == '/')}"
