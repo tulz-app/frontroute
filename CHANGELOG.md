@@ -1,11 +1,20 @@
 # Changelog
 
-### 0,.16.x
+### 0.16.x
 
-* memoize is gone (event streams in routes interfere with `noneMatched`)
-* `when` --> `whenTrue` (conflict with laminext)
-* `mapOption` -> `optionMap`
+frontroute now depends on Laminar and is only usable with Laminar (previously, frontroute 
+depended only on Airstream).
+
+The way to use frontroute has changed significantly (all the boilerplate is gone). 
+The directives, path matchers and routes remained mostly the same.
+
+Please see the documentation for more details: https://frontroute.dev/v/0.16.x/
+
+A non-exclusive list of breaking changes:
+* `memoize` directive is gone (event streams in routes interfere with `noneMatched`)
 * `state` directive is gone
+* `mapOption` -> `optionMap`
+* `when` --> `whenTrue` (conflict with laminext)
 
 ### 0.15.2
 
