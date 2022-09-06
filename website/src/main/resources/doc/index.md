@@ -1,69 +1,80 @@
-# frontroute
-
-`frontroute` is a front-end router library for single-page applications (SPA) built
-with [Scala.js](http://www.scala-js.org/), with an API inspired
-by [Akka HTTP](https://doc.akka.io/docs/akka-http/current/).
-
-## Getting started
-
-`frontroute` is available for [Scala.js](http://www.scala-js.org/) `v1.7.1`+ (published for Scala 2.13 and 3.0.2).
+`frontroute` is a router library for [Scala.js](https://www.scala-js.org/) + [Laminar](https://laminar.dev/) applications.
 
 ```scala
-libraryDependencies += "io.frontroute" %%% "frontroute" % "{{frontrouteVersion}}"
+import com.raquo.laminar.api.L.*
+import io.frontroute.*
+
+div(
+  pathEnd {
+    IndexPage()
+  },
+  path("sign-in") {
+    SignInPage()
+  },
+  path("sign-up") {
+    SignUpPage()
+  },
+  noneMatched {
+    NotFoundPage()
+  }
+)
 ```
 
+See [getting started](/getting-started).
+
+## Installation
+
+### Prerequisites
+
+* [Scala.js](https://www.scala-js.org/) `v1.10.1`+
+* Scala 2.13 or {{scala3version}}+
+* [Laminar](https://laminar.dev/) {{laminarVersion}} (it will be added to your project's dependencies transitively)
+
+### sbt
+
+Add the [Scala.js](https://www.scala-js.org/) plugin to your `project/plugins.sbt` file.
+
 ```scala
-import io.frontroute._
+addSbtPlugin("org.scala-js" % "sbt-scalajs"  % {{scalajsVersion}})
 ```
 
-For Airstream `v0.12.x`:
+Enable the plugin and add the `frontroute` library to your `build.sbt` file:
 
 ```scala
-libraryDependencies += "io.frontroute" %%% "frontroute" % "0.12.2"
+enablePlugins(ScalaJSPlugin)
+
+libraryDependencies ++= Seq(
+  "io.frontroute" %%% "frontroute" % "{{frontrouteVersion}}"
+)
 ```
 
-For Airstream `v0.11.x`:
+### Mill
 
 ```scala
-libraryDependencies += "io.frontroute" %%% "frontroute" % "0.11.7"
-```
+import $ivy.`com.lihaoyi::mill-contrib-bloop:$MILL_VERSION`
+import mill._
+import mill.scalalib._
+import mill.scalajslib._
+import mill.scalajslib.api._
 
-
-## Sneak peek
-
-Defining routes with `frontroute` looks like this:
-
-```scala
-import io.frontroute._
-val $currentUser: Signal[User] = ???
-
-signal($currentUser) { implicit currentUser =>
-  concat(
-    pathEnd {
-      render(IndexPage.render)
-    },
-    path("sign-in") {
-      render(SignInPage.render)
-    },
-    path("sign-up") {
-      render(SignUpPage.render)
-    },
-    pathPrefix("account") {
-      concat(
-        path("settings") {
-          render(AccountSettingsPage.render)
-        },
-        (path("things" / segment) & maybeParam("page")) { (segment: String, page: Option[String]) =>
-          render(ThingsPage.render(page))
-        }
-      )
-    }
-  )
+object counter extends ScalaJSModule {
+    def scalaVersion   = "3.1.2"
+    def scalaJSVersion = "1.10.1"
+    
+    def ivyDeps = Agg(ivy"io.frontroute::frontroute::{{frontrouteVersion}}")
+    
+    override def moduleKind = T(mill.scalajslib.api.ModuleKind.CommonJSModule)
 }
-
 ```
 
-Next, see [overview](/overview) – for the overview of how `frontroute` works.
+### Previous versions
 
-Also, check out the [reference](/reference).
+#### frontroute `v0.15.x`
+
+See [documentation](https://frontroute.dev/v/0.15.x/).
+
+---
+
+Older versions of `frontroute` are no longer maintained and documentation is not available.
+
 

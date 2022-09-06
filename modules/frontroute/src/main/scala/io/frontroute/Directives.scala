@@ -1,201 +1,126 @@
 package io.frontroute
 
-import com.raquo.airstream.core.EventStream
-import com.raquo.airstream.core.Signal
+import com.raquo.laminar.api.L._
 import io.frontroute.internal.PathMatchResult
-import io.frontroute.internal.Util
-import org.scalajs.dom
+
 import scala.scalajs.js
 
-trait Directives extends DirectiveApplyConverters {
+trait Directives {
 
-  def reject: Route = (_, _, _) => Util.rejected
+  private[frontroute] def extractContext: Directive[Location] =
+    Directive[Location](inner => (location, previous, state) => inner(location)(location, previous, state))
 
-  private[frontroute] def extractContext: Directive[RouteLocation] =
-    Directive[RouteLocation](inner => (location, previous, state) => inner(location)(location, previous, state))
-
-  private[frontroute] def extract[T](f: RouteLocation => T): Directive[T] =
+  private[frontroute] def extract[T](f: Location => T): Directive[T] =
     extractContext.map(f)
 
-  def state[T](initial: => T): Directive[T] = {
-    Directive[T](inner =>
-      (location, previous, state) => {
-        val next = state.enter
-        state.getPersistentValue[T](next.path.key) match {
-          case None =>
-            val newStateValue = initial
-            inner(newStateValue)(location, previous, next.setPersistentValue(newStateValue))
-
-          case Some(existing) =>
-            inner(existing)(location, previous, next)
-        }
+  def signal[T](signal: Signal[T]): Directive[T] =
+    Directive[T] { inner => (location, previous, state) =>
+      signal.flatMap { extracted =>
+        inner(extracted)(location, previous, state.enterAndSet(extracted))
       }
-    )
-  }
+    }
 
-  def signal[T](signal: Signal[T]): Directive[T] = {
-    Directive[T](inner =>
-      (location, previous, state) => {
-        signal.flatMap { extracted =>
-          inner(extracted)(location, previous, state.enterAndSet(extracted))
-        }
+  def param(name: String): Directive[String] =
+    Directive[String] { inner => (location, previous, state) =>
+      location.params.get(name).flatMap(_.headOption) match {
+        case Some(paramValue) => inner(paramValue)(location, previous, state.enterAndSet(paramValue))
+        case None             => rejected
       }
-    )
-  }
+    }
 
-  def memoize[T](retrieve: () => EventStream[T]): Directive[T] = {
-    Directive[T](inner =>
-      (location, previous, state) => {
-        state.async.get((state.path.key, state.data)) match {
-          case Some(value) =>
-            inner(value.asInstanceOf[T])(location, previous, state.enterAndSet(value.asInstanceOf[T]))
-          case _           =>
-            var retrieved = 0
-            retrieve()
-              .filter { _ =>
-                retrieved = retrieved + 1
-                retrieved == 1
-              }
-              .flatMap { retrieved =>
-                val newState = state.copy(
-                  async = state.async.updated((state.path.key, state.data), retrieved)
-                )
-                inner(retrieved)(location, previous, newState.enterAndSet(retrieved))
-              }
-        }
-      }
-    )
-  }
-
-  def param(name: String): Directive[String] = {
-    Directive[String](inner =>
-      (location, previous, state) => {
-        location.params.get(name).flatMap(_.headOption) match {
-          case Some(paramValue) => inner(paramValue)(location, previous, state.enterAndSet(paramValue))
-          case None             => Util.rejected
-        }
-      }
-    )
-  }
-
-  def historyState: Directive[Option[js.Any]] = {
+  def historyState: Directive[Option[js.Any]] =
     extractContext.map(_.parsedState.flatMap(_.user.toOption))
-  }
 
-  def historyScroll: Directive[Option[ScrollPosition]] = {
+  def historyScroll: Directive[Option[ScrollPosition]] =
     extractContext.map(_.parsedState.flatMap(_.internal.toOption).flatMap(_.scroll.toOption).map { scroll =>
       ScrollPosition(
         scrollX = scroll.scrollX.toOption.map(_.round.toInt),
         scrollY = scroll.scrollY.toOption.map(_.round.toInt)
       )
     })
-  }
 
   def maybeParam(name: String): Directive[Option[String]] =
-    Directive[Option[String]](inner =>
-      (location, previous, state) => {
-        val maybeParamValue = location.params.get(name).flatMap(_.headOption)
-        inner(maybeParamValue)(location, previous, state.enterAndSet(maybeParamValue))
-      }
-    )
-
-  def extractUnmatchedPath: Directive[List[String]] = extract(_.unmatchedPath)
-
-  def extractHostname: Directive[String] = extract(_.hostname)
-
-  def extractPort: Directive[String] = extract(_.port)
-
-  def extractHost: Directive[String] = extract(_.host)
-
-  def extractProtocol: Directive[String] = extract(_.protocol)
-
-  def extractOrigin: Directive[Option[String]] = extract(_.origin)
-
-  def provide[L](value: L): Directive[L] =
-    Directive(inner => (location, previous, state) => inner(value)(location, previous, state.enterAndSet(value)))
-
-  def pathPrefix[T](m: PathMatcher[T]): Directive[T] = {
-    Directive[T](inner =>
-      (location, previous, state) => {
-        m(location.unmatchedPath) match {
-          case PathMatchResult.Match(t, rest) => inner(t)(location.withUnmatchedPath(rest), previous, state.enterAndSet(t))
-          case _                              => Util.rejected
-        }
-      }
-    )
-  }
-
-  def testPathPrefix[T](m: PathMatcher[T]): Directive[T] = {
-    Directive[T](inner =>
-      (location, previous, state) => {
-        m(location.unmatchedPath) match {
-          case PathMatchResult.Match(t, _) => inner(t)(location, previous, state.enterAndSet(t))
-          case _                           => Util.rejected
-        }
-      }
-    )
-  }
-
-  def pathEnd: Directive0 =
-    Directive[Unit](inner =>
-      (location, previous, state) => {
-        if (location.unmatchedPath.isEmpty) {
-          inner(())(location, previous, state.enter)
-        } else {
-          Util.rejected
-        }
-      }
-    )
-
-  def path[T](m: PathMatcher[T]): Directive[T] = {
-    Directive[T](inner =>
-      (location, previous, state) => {
-        m(location.unmatchedPath) match {
-          case PathMatchResult.Match(t, Nil) => inner(t)(location.withUnmatchedPath(List.empty), previous, state.enterAndSet(t))
-          case _                             => Util.rejected
-        }
-      }
-    )
-  }
-
-  def testPath[T](m: PathMatcher[T]): Directive[T] = {
-    Directive[T](inner =>
-      (location, previous, state) => {
-        m(location.unmatchedPath) match {
-          case PathMatchResult.Match(t, Nil) => inner(t)(location, previous, state.enterAndSet(t))
-          case _                             => Util.rejected
-        }
-      }
-    )
-  }
-
-  def completeN[T](events: => EventStream[() => Unit]): Route = (_, _, state) => EventStream.fromValue(RouteResult.Complete(state, events))
-
-  def complete[T](action: => Unit): Route = (_, _, state) =>
-    EventStream.fromValue(
-      RouteResult.Complete(state, EventStream.fromValue(() => action))
-    )
-
-  def debug(message: Any, optionalParams: Any*)(subRoute: Route): Route =
-    (location, previous, state) => {
-      dom.console.debug(message, optionalParams: _*)
-      subRoute(location, previous, state)
+    Directive[Option[String]] { inner => (location, previous, state) =>
+      val maybeParamValue = location.params.get(name).flatMap(_.headOption)
+      inner(maybeParamValue)(location, previous, state.enterAndSet(maybeParamValue))
     }
 
-  def concat(routes: Route*): Route = (location, previous, state) => {
-    def findFirst(rs: List[(Route, Int)]): EventStream[RouteResult] =
-      rs match {
-        case Nil                    => Util.rejected
-        case (route, index) :: tail =>
-          route(location, previous, state.enterConcat(index)).flatMap {
-            case complete: RouteResult.Complete => EventStream.fromValue(complete)
-            case RouteResult.Rejected           => findFirst(tail)
-          }
+  val extractUnmatchedPath: Directive[List[String]] = extract(_.path)
+
+  val extractHostname: Directive[String] = extract(_.hostname)
+
+  val extractPort: Directive[String] = extract(_.port)
+
+  val extractHost: Directive[String] = extract(_.host)
+
+  val extractProtocol: Directive[String] = extract(_.protocol)
+
+  val extractOrigin: Directive[Option[String]] = extract(_.origin)
+
+  def provide[L](value: L): Directive[L] =
+    Directive { inner => (location, previous, state) =>
+      inner(value)(location, previous, state.enterAndSet(value))
+    }
+
+  def pathPrefix[T](m: PathMatcher[T]): Directive[T] =
+    Directive[T] { inner => (location, previous, state) =>
+      m(location.path) match {
+        case PathMatchResult.Match(t, rest) => inner(t)(location.withUnmatchedPath(rest), previous, state.enterAndSet(t))
+        case _                              => rejected
       }
+    }
 
-    findFirst(routes.zipWithIndex.toList)
-  }
+  def testPathPrefix[T](m: PathMatcher[T]): Directive[T] =
+    Directive[T] { inner => (location, previous, state) =>
+      m(location.path) match {
+        case PathMatchResult.Match(t, _) => inner(t)(location, previous, state.enterAndSet(t))
+        case _                           => rejected
+      }
+    }
 
-  implicit def toDirective[L](route: Route): Directive[L] = Directive[L](_ => route)
+  val pathEnd: Directive0 =
+    Directive[Unit] { inner => (location, previous, state) =>
+      if (location.path.isEmpty) {
+        inner(())(location, previous, state.enter)
+      } else {
+        rejected
+      }
+    }
+
+  def path[T](m: PathMatcher[T]): Directive[T] =
+    Directive[T] { inner => (location, previous, state) =>
+      m(location.path) match {
+        case PathMatchResult.Match(t, Nil) => inner(t)(location.withUnmatchedPath(List.empty), previous, state.enterAndSet(t))
+        case _                             => rejected
+      }
+    }
+
+  def testPath[T](m: PathMatcher[T]): Directive[T] =
+    Directive[T] { inner => (location, previous, state) =>
+      m(location.path) match {
+        case PathMatchResult.Match(t, Nil) => inner(t)(location, previous, state.enterAndSet(t))
+        case _                             => rejected
+      }
+    }
+
+  val noneMatched: Directive0 =
+    Directive[Unit] { inner => (location, previous, state) =>
+      if (location.otherMatched) {
+        rejected
+      } else {
+        inner(())(location, previous, state.enter)
+      }
+    }
+
+  def whenTrue(condition: => Boolean): Directive0 =
+    Directive[Unit] { inner => (location, previous, state) =>
+      if (condition) {
+        inner(())(location, previous, state)
+      } else {
+        rejected
+      }
+    }
+
+  @inline def whenFalse(condition: => Boolean): Directive0 = whenTrue(!condition)
 
 }

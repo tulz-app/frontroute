@@ -1,9 +1,26 @@
 package io.frontroute.site
 
-import io.frontroute.site.pages.PageRender
+import com.raquo.laminar.api.L._
 
-final case class Page(
-  path: String,
-  title: String,
-  render: PageRender
+final class Page private (
+  val path: String,
+  val link: String,
+  val title: String,
+  val render: () => Element
 )
+
+object Page {
+
+  def apply(
+    path: String,
+    link: String,
+    title: String,
+    render: => Element
+  ): Page = new Page(
+    path,
+    link,
+    title,
+    () => render
+  )
+
+}

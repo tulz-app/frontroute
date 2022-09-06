@@ -1,6 +1,7 @@
 package io.frontroute.internal
 
 import org.scalajs.dom
+
 import scala.scalajs.js
 
 private[frontroute] class HistoryStateScrollPosition(
@@ -9,7 +10,6 @@ private[frontroute] class HistoryStateScrollPosition(
 ) extends js.Object
 
 private[frontroute] class FrontrouteHistoryState(
-  val title: String,
   val scroll: js.UndefOr[HistoryStateScrollPosition]
 ) extends js.Object
 

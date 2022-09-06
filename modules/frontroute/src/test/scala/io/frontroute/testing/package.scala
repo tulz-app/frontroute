@@ -8,7 +8,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 package object testing {
 
-  def delayedFuture[V](duration: FiniteDuration): Future[Unit] =
+  def delayedFuture(duration: FiniteDuration): Future[Unit] =
     Future.unit.delayed(duration)
 
   implicit class FutureExt[T](f: => Future[T]) {

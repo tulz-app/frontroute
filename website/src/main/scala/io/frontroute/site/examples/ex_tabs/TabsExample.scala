@@ -1,107 +1,76 @@
-package io.frontroute.site.examples.ex_tabs
+package io.frontroute.site
+package examples
+package ex_tabs
 
 import io.frontroute.site.examples.CodeExample
 import com.yurique.embedded.FileAsString
-import io.frontroute.LocationProvider
-import io.laminext.AmAny
-import io.laminext.AmendedHtmlTag
-import org.scalajs.dom
 
 object TabsExample
     extends CodeExample(
       id = "tabs",
       title = "Tabs",
-      description = FileAsString("description.md")
-    )((locationProvider: LocationProvider, a: AmendedHtmlTag[dom.html.Anchor, AmAny]) => {
+      description = FileAsString("description.md"),
+      links = Seq(
+        "/",
+        "/tab-1",
+        "/tab-2",
+        "/some-page"
+      )
+    )(() => {
       import io.frontroute._
+
       import io.laminext.syntax.core._
-      import com.raquo.laminar.api.L.{a => _, _}
-
-      val (renders, route) = makeRoute[HtmlElement] { render =>
-        concat(
-          /* <focus> */
-          (pathEnd.mapTo("tab-1") | path(Set("tab-1", "tab-2"))).signal { tab =>
-            /* </focus> */
-            render {
-              div(
-                cls := "space-y-2",
-                div(
-                  cls := "flex space-x-2",
-                  a(
-                    href := "/tab-1",
-                    "Tab 1",
-                    cls  := "text-xl p-1 rounded",
-                    cls.toggle("bg-blue-400 text-blue-100") <-- tab.signal.valueIs("tab-1")
-                  ),
-                  a(
-                    href := "/tab-2",
-                    "Tab 2",
-                    cls  := "text-xl p-1 rounded",
-                    cls.toggle("bg-blue-400 text-blue-100") <-- tab.signal.valueIs("tab-2")
-                  )
-                ),
-                div(
-                  div(
-                    cls.toggle("hidden") <-- !tab.signal.valueIs("tab-1"),
-                    textArea("tab-1 text area", cls := "bg-blue-100 text-blue-500")
-                  ),
-                  div(
-                    cls.toggle("hidden") <-- !tab.signal.valueIs("tab-2"),
-                    textArea("tab-2 text area", cls := "bg-blue-100 text-blue-500")
-                  )
-                )
-              )
-            }
-          },
-          extractUnmatchedPath { unmatched =>
-            render {
-              div(
-                div(cls := "text-2xl", "Not Found"),
-                div(unmatched.mkString("/", "/", ""))
-              )
-            }
-          }
-        )
-
-      }
+      import com.raquo.laminar.api.L._
 
       div(
         div(
           cls := "p-4 min-h-[300px]",
-          child <-- renders.map(_.getOrElse(div("loading...")))
-        ),
-        div(
-          cls := "bg-blue-900 -mx-4 -mb-4 p-2 space-y-2",
-          div(
-            cls := "font-semibold text-2xl text-blue-200",
-            "Navigation"
-          ),
-          div(
-            cls := "flex flex-col",
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/",
-              "➜ /"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/tab-1",
-              "➜ /tab-1"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/tab-2",
-              "➜ /tab-2"
-            ),
-            a(
-              cls  := "text-blue-300 hover:text-blue-100",
-              href := "/some-page",
-              "➜ /some-page"
+          /* <focus> */
+          (pathEnd.mapTo("tab-1") | path(Set("tab-1", "tab-2"))).signal { tab =>
+            /* </focus> */
+            div(
+              cls := "space-y-2",
+              div(
+                cls := "flex space-x-2",
+                a(
+                  href := "/tab-1",
+                  cls  := "text-xl px-4 py-1 rounded border-b-2",
+                  /* <focus> */
+                  cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- tab.map(_ == "tab-1"),
+                  cls.toggle("border-transparent text-blue-700") <-- tab.map(_ != "tab-1"),
+                  /* </focus> */
+                  "Tab 1"
+                ),
+                a(
+                  href := "/tab-2",
+                  cls  := "text-xl px-4 py-1 rounded border-b-2",
+                  /* <focus> */
+                  cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- tab.map(_ == "tab-2"),
+                  cls.toggle("border-transparent text-blue-700") <-- tab.map(_ != "tab-2"),
+                  /* </focus> */
+                  "Tab 2"
+                )
+              ),
+              div(
+                div(
+                  cls.toggle("hidden") <-- !tab.valueIs("tab-1"),
+                  textArea("tab-1 text area", cls := "bg-blue-100 text-blue-500")
+                ),
+                div(
+                  cls.toggle("hidden") <-- !tab.valueIs("tab-2"),
+                  textArea("tab-2 text area", cls := "bg-blue-100 text-blue-500")
+                )
+              )
             )
-          )
-        ),
-        onMountCallback { ctx =>
-          val _ = runRoute(route, locationProvider)(ctx.owner)
-        }
+            /* <focus> */
+          },
+          /* </focus> */
+          (noneMatched & extractUnmatchedPath) { unmatched =>
+            div(
+              div(cls := "text-2xl", "Not Found"),
+              div(unmatched.mkString("/", "/", ""))
+            )
+          }
+        )
       )
     })

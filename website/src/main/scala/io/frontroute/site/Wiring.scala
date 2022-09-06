@@ -32,7 +32,7 @@ object Wiring {
       ssrContext = SsrContext(
         ssr = dom.window.navigator.userAgent == "frontroute/ssr"
       ),
-      routes = new Routes(LocationProvider.browser(windowEvents.onPopState))
+      routes = new Routes
     )
   }
 

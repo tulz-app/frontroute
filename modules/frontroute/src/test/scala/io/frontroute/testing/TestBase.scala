@@ -4,20 +4,30 @@ import com.raquo.airstream.core.Observer
 import com.raquo.airstream.core.Signal
 import com.raquo.airstream.ownership.Owner
 import com.raquo.airstream.state.Var
-import io.frontroute.Route
-import io.frontroute.runRoute
-import utest.TestSuite
+import com.raquo.domtestutils.scalatest.AsyncMountSpec
+import com.raquo.laminar.api.L._
+import com.raquo.laminar.utils.LaminarSpec
+import io.frontroute._
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.funsuite.AsyncFunSuite
+import org.scalatest.matchers.should.Matchers
+
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import scala.concurrent.Promise
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration._
 import scala.scalajs.js.timers.setTimeout
-import scala.concurrent.ExecutionContext.Implicits.global
 
-abstract class TestBase extends TestSuite {
+abstract class TestBase extends AsyncFunSuite with Matchers with LaminarSpec with AsyncMountSpec with BeforeAndAfterEach {
 
   implicit protected val testOwner: Owner = new Owner {}
+
+  override protected def afterEach(): Unit = {
+    if (root != null) {
+      unmount()
+    }
+  }
 
   case class Page(p: String)
 
@@ -33,25 +43,31 @@ abstract class TestBase extends TestSuite {
     def toList: Seq[A] = buffer.toList
   }
 
+  protected def testComplete(body: => Unit): Element = {
+    val _ = body
+    div()
+  }
+
   protected def routeTestF[T](
     route: Probe[String] => Route,
     wait: FiniteDuration = 10.millis,
     init: TestLocationProvider => Unit
   )(checks: Probe[String] => Future[T]): Future[T] = {
-    val locationProvider = new TestLocationProvider()
-    val probe            = new Probe[String]
+    val lp    = new TestLocationProvider()
+    val probe = new Probe[String]
 
-    val sub    = runRoute(route(probe), locationProvider)(testOwner)
+    mount(
+      div(
+        locationProvider(lp),
+        route(probe)
+      )
+    )
+
     val future = delayedFuture(wait).flatMap { _ =>
-      try {
-        checks(probe)
-      } finally {
-        sub.kill()
-      }
+      checks(probe)
     }
-    init(locationProvider)
+    init(lp)
     future
-
   }
 
   protected def routeTest[T](

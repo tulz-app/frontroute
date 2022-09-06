@@ -1,10 +1,10 @@
 package io.frontroute.testing
 
-import com.raquo.airstream.core.EventStream
-import com.raquo.airstream.eventbus.EventBus
+import com.raquo.laminar.api.L._
 import io.frontroute.LocationProvider
-import io.frontroute.RouteLocation
+import io.frontroute.Location
 import io.frontroute.internal.HistoryState
+
 import scala.scalajs.js
 
 class TestLocationProvider extends LocationProvider {
@@ -16,9 +16,10 @@ class TestLocationProvider extends LocationProvider {
   private var currentParams: Map[String, List[String]] = Map.empty
   private var currentState: js.UndefOr[HistoryState]   = js.undefined
 
-  private val bus = new EventBus[RouteLocation]
+  private val _current                  = Var(Option.empty[Location])
+  def current: Signal[Option[Location]] = _current.signal
 
-  val stream: EventStream[RouteLocation] = bus.events
+  def start()(implicit owner: Owner): Subscription = new Subscription(owner, () => {})
 
   def protocol(protocol: String): Unit = {
     currentProtocol = protocol
@@ -57,16 +58,20 @@ class TestLocationProvider extends LocationProvider {
   }
 
   def emit(): Unit = {
-    bus.writer.onNext(
-      RouteLocation(
-        hostname = currentHostname,
-        port = currentPort,
-        protocol = currentProtocol,
-        host = s"${currentHostname}:${currentPort}",
-        origin = Some(s"${currentProtocol}://${currentHostname}:${currentPort}"),
-        unmatchedPath = currentPath,
-        params = currentParams,
-        state = currentState
+    _current.set(
+      Some(
+        Location(
+          hostname = currentHostname,
+          port = currentPort,
+          protocol = currentProtocol,
+          host = s"${currentHostname}:${currentPort}",
+          origin = Some(s"${currentProtocol}://${currentHostname}:${currentPort}"),
+          path = currentPath,
+          fullPath = currentPath,
+          params = currentParams,
+          state = currentState,
+          otherMatched = false,
+        )
       )
     )
   }

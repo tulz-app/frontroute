@@ -1,26 +1,26 @@
 package io.frontroute
 
-import com.raquo.airstream.core.EventStream
-import io.frontroute.internal.DocumentTitle
+import com.raquo.laminar.api.L._
 import org.scalajs.dom
 
+import scala.scalajs.js
+
 class BrowserLocationProvider(
-  popStateEvents: EventStream[dom.PopStateEvent],
-  setTitleOnPopStateEvents: Boolean = true,
-  updateTitleElement: Boolean = true,
-  ignoreEmptyTitle: Boolean = false
+  popStateEvents: EventStream[dom.PopStateEvent]
 ) extends LocationProvider {
 
-  val stream: EventStream[RouteLocation] = popStateEvents.map { event =>
-    val routeLocation = RouteLocation(dom.window.location, event.state)
-    if (setTitleOnPopStateEvents) {
-      routeLocation.parsedState.foreach { state =>
-        state.internal.foreach { internal =>
-          DocumentTitle.updateTitle(title = internal.title, updateTitleElement = updateTitleElement, ignoreEmptyTitle = ignoreEmptyTitle)
-        }
+  private val currentVar                      = Var(Option(Location(dom.window.location, js.undefined)))
+  val current: StrictSignal[Option[Location]] = currentVar.signal
+
+  def start()(implicit owner: Owner): Subscription = {
+    EventStream
+      .merge(
+        popStateEvents.map(_.state),
+        EventStream.fromValue(js.undefined: js.Any)
+      )
+      .foreach { state =>
+        currentVar.set(Some(Location(dom.window.location, state)))
       }
-    }
-    routeLocation
   }
 
 }

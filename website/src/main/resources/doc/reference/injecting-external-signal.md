@@ -10,7 +10,7 @@ into the routing:
 ```scala
 val $currentUser: Signal[Option[User]] = ???
 
-def authenticatedUser(implicit maybeUser: Option[User]) =
+def authenticatedUser(implicit maybeUser: Option[User]): Directive[User] =
   maybeUser match {
     case Some(user) => provide(user)
     case _ => reject
@@ -18,7 +18,7 @@ def authenticatedUser(implicit maybeUser: Option[User]) =
 
 val route =
   signal($currentUser) { implicit maybeUser =>
-    concat(
+    firstMatch(
       pathPrefix("public") {
         ???
       },

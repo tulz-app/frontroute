@@ -16,7 +16,7 @@ See the [tuplez](https://github.com/tulz-app/tuplez/) library for more details.
 
 ```scala
 (path("page-1") & param("param-1") & param("param-2")) { (param2, param2) =>
-    complete { /*...*/ } 
+  ??? 
 }
 ```
 
@@ -26,7 +26,7 @@ Equivalent to "nesting":
 path("page-1") { 
   param("param-1") { param1 => 
     param("param-2") { param2 =>
-      complete { /*...*/ }
+      ???
     }
   }
 }

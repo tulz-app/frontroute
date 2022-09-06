@@ -1,28 +1,22 @@
 package io.frontroute
 
+import com.raquo.laminar.api.L._
 import com.raquo.airstream.core.EventStream
 import org.scalajs.dom
 
 trait LocationProvider {
 
-  def stream: EventStream[RouteLocation]
+  def current: Signal[Option[Location]]
+  def start()(implicit owner: Owner): Subscription
 
 }
 
 object LocationProvider {
 
-  @inline def browser(
-    popStateEvents: EventStream[dom.PopStateEvent],
-    setTitleOnPopStateEvents: Boolean = true,
-    updateTitleElement: Boolean = true,
-    ignoreEmptyTitle: Boolean = false
-  ): LocationProvider = new BrowserLocationProvider(
-    popStateEvents = popStateEvents,
-    setTitleOnPopStateEvents = setTitleOnPopStateEvents,
-    updateTitleElement = updateTitleElement,
-    ignoreEmptyTitle = ignoreEmptyTitle
-  )
+  lazy val windowLocationProvider: LocationProvider = browser(windowEvents.onPopState)
 
-  @inline def custom(locations: EventStream[String]) = new CustomLocationProvider(locations)
+  @inline def browser(popStateEvents: EventStream[dom.PopStateEvent]): LocationProvider = new BrowserLocationProvider(popStateEvents)
+
+  @inline def custom(locationStrings: Signal[String]) = new CustomLocationProvider(locationStrings)
 
 }

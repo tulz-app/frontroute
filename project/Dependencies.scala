@@ -10,15 +10,28 @@ object Dependencies {
     )
   }
 
+  val laminar: Def.Initialize[Seq[ModuleID]] = Def.setting {
+    Seq(
+      "com.raquo" %%% "laminar" % DependencyVersions.laminar
+    )
+  }
+
   val `tuplez-apply`: Def.Initialize[Seq[ModuleID]] = Def.setting {
     Seq(
       "app.tulz" %%% "tuplez-apply" % DependencyVersions.`tuplez-apply`
     )
   }
 
-  val utest: Def.Initialize[Seq[ModuleID]] = Def.setting {
+  val domtestutils: Def.Initialize[Seq[ModuleID]] = Def.setting {
     Seq(
-      "com.lihaoyi" %%% "utest" % DependencyVersions.utest % Test
+      "com.raquo" %%% "domtestutils" % DependencyVersions.domtestutils % Test
+    )
+  }
+
+  val scalatest: Def.Initialize[Seq[ModuleID]] = Def.setting {
+    Seq(
+      "org.scalatest" %%% "scalatest" % DependencyVersions.scalatest % Test,
+//      ("org.scala-js" %%% "scalajs-java-securerandom" % DependencyVersions.`scalajs-java-securerandom` % Test).cross(CrossVersion.for3Use2_13)
     )
   }
 
@@ -46,6 +59,12 @@ object Dependencies {
   val sourcecode: Def.Initialize[Seq[ModuleID]] = Def.setting {
     Seq(
       "com.lihaoyi" %%% "sourcecode" % DependencyVersions.sourcecode
+    )
+  }
+
+  val `scala-js-macrotask-executor`: Def.Initialize[Seq[ModuleID]] = Def.setting {
+    Seq(
+      "org.scala-js" %%% "scala-js-macrotask-executor" % DependencyVersions.`scala-js-macrotask-executor`
     )
   }
 

@@ -1,9 +1,6 @@
 package io.frontroute
 
-import com.raquo.airstream.core.EventStream
-import com.raquo.airstream.core.Signal
-import com.raquo.airstream.state.Var
-import io.frontroute.internal.Util
+import com.raquo.laminar.api.L._
 import io.frontroute.ops.DirectiveOfOptionOps
 
 class Directive[L](
@@ -27,23 +24,34 @@ class Directive[L](
       }
     }
 
+  def emap[R](f: L => Either[Any, R]): Directive[R] =
+    this.flatMap { value =>
+      f(value).fold(
+        _ => reject,
+        r => provide(r)
+      )
+    }
+
+  def opt: Directive[Option[L]] =
+    this.map(v => Option(v)) | provide(None)
+
   @inline def some: Directive[Option[L]] = map(Some(_))
 
   @inline def none[R]: Directive[Option[R]] = mapTo(Option.empty[R])
 
   @inline def mapTo[R](otherValue: => R): Directive[R] = map(_ => otherValue)
 
-  def &[R](magnet: ConjunctionMagnet[L]): magnet.Out = magnet(this)
+  def &(magnet: ConjunctionMagnet[L]): magnet.Out = magnet(this)
 
-  def |[U >: L](other: Directive[L]): Directive[L] = {
+  def |(other: Directive[L]): Directive[L] = {
     Directive[L] { inner => (location, previous, state) =>
       self
         .tapply { value => (location, previous, state) =>
           inner(value)(location, previous, state.leaveDisjunction)
         }(location, previous, state.enterDisjunction)
         .flatMap {
-          case complete: RouteResult.Complete => EventStream.fromValue(complete)
-          case RouteResult.Rejected           =>
+          case RouteResult.Matched(state, location, result) => Val(RouteResult.Matched(state, location, result))
+          case RouteResult.Rejected                         =>
             other.tapply { value => (location, previous, state) =>
               inner(value)(location, previous, state.leaveDisjunction)
             }(location, previous, state.enterDisjunction)
@@ -59,7 +67,7 @@ class Directive[L](
           val mapped = f(value)
           inner(mapped)(location, previous, state.enterAndSet(mapped))
         } else {
-          Util.rejected
+          rejected
         }
       }
     }
@@ -70,13 +78,13 @@ class Directive[L](
         if (predicate(value)) {
           inner(value)(location, previous, state.enter)
         } else {
-          Util.rejected
+          rejected
         }
       }
     }
 
-  def signal: Directive[Signal[L]] =
-    new Directive[Signal[L]]({ inner => (location, previous, state) =>
+  def signal: Directive[StrictSignal[L]] =
+    new Directive[StrictSignal[L]]({ inner => (location, previous, state) =>
       this.tapply {
         value => // TODO figure this out, when this is run, enter is not yet called
           (location, previous, state) =>

@@ -1,30 +1,23 @@
 package io.frontroute
 
+import com.raquo.laminar.api.L._
 import io.frontroute.internal.UrlString
 import org.scalajs.dom
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSGlobal
 
 object LinkHandler {
 
-  @js.native
-  @JSGlobal("window")
-  private object WindowWithRouteTo extends js.Object {
-    var routeTo: js.UndefOr[js.Function1[String, Unit]] = js.native
-  }
-
-  private def clickListener(defaultTitle: String): js.Function1[dom.Event, Unit] = event => {
+  private val clickListener: js.Function1[dom.Event, Unit] = event => {
     findParent("A", event.target.asInstanceOf[dom.Node]).foreach { aParent =>
       val anchor     = aParent.asInstanceOf[dom.HTMLAnchorElement]
       val rel        = anchor.rel
       val href       = anchor.href
-      val title      = anchor.dataset.get("title")
       val sameOrigin =
         href.startsWith("/") ||
           !href.startsWith("http://") && !href.startsWith("https://") ||
           dom.window.location.origin.exists(origin => href.startsWith(origin))
 
-      if (sameOrigin && (js.isUndefined(rel) || rel == null || rel == "")) {
+      if (sameOrigin && (js.isUndefined(rel) || rel == null || rel == "" || rel == "replace")) {
         event.preventDefault()
         val shouldPush = UrlString.unapply(anchor.href).fold(true) { location =>
           location.pathname != dom.window.location.pathname ||
@@ -32,7 +25,11 @@ object LinkHandler {
           location.hash != dom.window.location.hash
         }
         if (shouldPush) {
-          BrowserNavigation.pushState(url = anchor.href, title = title.getOrElse(defaultTitle))
+          if (rel == "replace") {
+            BrowserNavigation.replaceState(url = anchor.href)
+          } else {
+            BrowserNavigation.pushState(url = anchor.href)
+          }
         }
       } else if (rel == "external") {
         event.preventDefault()
@@ -41,23 +38,15 @@ object LinkHandler {
     }
   }
 
-  private val routeTo: js.Function1[String, Unit] = (path: String) => BrowserNavigation.pushState(url = path)
-
-  def install(
-    defaultTitle: String = ""
-  ): js.Function1[dom.Event, Unit] = {
-    WindowWithRouteTo.routeTo = routeTo
-    val listener = clickListener(defaultTitle)
-    dom.document.addEventListener("click", listener)
-    listener
-  }
-
-  def uninstall(
-    listener: js.Function1[dom.Event, Unit]
-  ): Unit = {
-    WindowWithRouteTo.routeTo = js.undefined
-    dom.document.removeEventListener("click", listener)
-  }
+  val bind: Modifier[Element] =
+    onMountUnmountCallback(
+      { ctx =>
+        ctx.thisNode.ref.addEventListener("click", clickListener)
+      },
+      { el =>
+        el.ref.removeEventListener("click", clickListener)
+      }
+    )
 
   @scala.annotation.tailrec
   private def findParent(nodeName: String, element: dom.Node): js.UndefOr[dom.Node] = {

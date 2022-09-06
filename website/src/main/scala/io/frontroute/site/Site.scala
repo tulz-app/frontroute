@@ -1,7 +1,5 @@
 package io.frontroute.site
 
-//import io.frontroute.site.examples.CodeExample
-//import io.frontroute.site.pages.CodeExamplePage
 import io.frontroute.site.pages.CodeExamplePage
 import io.frontroute.site.pages.DocumentationPage
 import com.yurique.embedded.FileAsString
@@ -9,80 +7,95 @@ import io.frontroute.site.examples.CodeExample
 
 object Site {
 
+  val frontrouteVersion: String = "0.16.x"
+
+  val thisVersionPrefix = s"/v/$frontrouteVersion/"
+
+  def thisVersionHref(href: String): String =
+    s"${thisVersionPrefix}${href.dropWhile(_ == '/')}"
+
   private def examplePage(
     example: CodeExample
-  ): Page = Page(example.id, example.title, CodeExamplePage(example))
+  ): Page = Page(example.id, example.id + "/live", example.title, CodeExamplePage(example))
 
   private def docPage(
     path: String,
     title: String,
     markdown: String
-  ): Page = Page(path, title, DocumentationPage(title, markdown))
+  ): Page = Page(path, path, title, DocumentationPage(title, markdown))
 
   val indexModule: SiteModule =
     SiteModule(
       path = "",
+      title = "frontroute",
       index = docPage("", "frontroute", FileAsString("/doc/index.md"))
+    )
+
+  val examples: Seq[CodeExample] =
+    Seq(
+      io.frontroute.site.examples.ex_basic.BasicRoutingExample,
+      io.frontroute.site.examples.ex_path_matching.PathMatchingExample,
+      io.frontroute.site.examples.ex_recursive_path_matching.RecursivePathMatchingExample,
+      io.frontroute.site.examples.ex_params.ParamsExample,
+      io.frontroute.site.examples.ex_advanced_params.AdvancedParamsExample,
+      io.frontroute.site.examples.ex_custom_directives.CustomDirectivesExample,
+      io.frontroute.site.examples.ex_signal.SignalExample,
+      io.frontroute.site.examples.ex_auth.AuthExample,
+      io.frontroute.site.examples.ex_tabs.TabsExample,
+      io.frontroute.site.examples.ex_nested.NestedExample
     )
 
   val modules: Seq[SiteModule] = Seq(
     indexModule,
     SiteModule(
-      path = "overview",
-      index = docPage("", "Overview", FileAsString("/doc/overview/index.md")),
-      "Concepts"           -> Seq(
-        docPage("route", "Route", FileAsString("/doc/overview/concepts/route.md")),
-        docPage("directive", "Directive", FileAsString("/doc/overview/concepts/directive.md")),
-        docPage("path-matcher", "Path-matching", FileAsString("/doc/overview/concepts/path-matcher.md")),
-        docPage("location-provider", "Location Provider", FileAsString("/doc/overview/concepts/location-provider.md"))
-      ),
-      "Navigation"         -> Seq(
-        docPage("navigation", "Browser navigation", FileAsString("/doc/overview/navigation.md")),
-        docPage("link-handler", "Link handler", FileAsString("/doc/overview/link-handler.md"))
-      ),
-      "Utilities"          -> Seq(
-        docPage("directive-utilities", "Directive Utilities", FileAsString("/doc/overview/directive-utilities.md")),
-        docPage("debugging", "Debugging", FileAsString("/doc/overview/debugging.md"))
-      ),
-      "Extending"          -> Seq(
-        docPage("custom-directives", "Custom Directives", FileAsString("/doc/overview/custom-directives.md"))
+      path = "getting-started",
+      title = "Getting started",
+      index = docPage("", "", FileAsString("/doc/getting-started/index.md")),
+      ""                   -> Seq(
+        docPage("laminar-basics", "Laminar basics", FileAsString("/doc/getting-started/laminar-basics.md")),
+        docPage("first-routes", "First routes", FileAsString("/doc/getting-started/first-routes.md")),
+        docPage("handling-not-found", "Handling 'Not Found'", FileAsString("/doc/getting-started/handling-not-found.md")),
+        docPage("links-and-navigation", "Links and Navigation", FileAsString("/doc/getting-started/links-and-navigation.md")),
+        docPage("building-routes", "Building routes", FileAsString("/doc/getting-started/building-routes.md")),
+        docPage("nested-routes", "Nested routes", FileAsString("/doc/getting-started/nested-routes.md")),
       )
     ),
     SiteModule(
       path = "reference",
+      title = "Reference",
       index = docPage("", "Reference", FileAsString("/doc/reference/index.md")),
-      "Alternative Routes" -> Seq(
-        docPage("concat", "concat", FileAsString("/doc/reference/concat.md"))
-      ),
       "Directives"         -> Seq(
         docPage("directives", "Built-in directives", FileAsString("/doc/reference/built-in-directives.md")),
         docPage("signal-directive", ".signal directive", FileAsString("/doc/reference/signal-directive.md")),
         docPage("injecting-external-signal", "Injecting external signal", FileAsString("/doc/reference/injecting-external-signal.md")),
         docPage("conjunction", "conjunction (&)", FileAsString("/doc/reference/conjunction.md")),
-        docPage("disjunction", "disjunction (|)", FileAsString("/doc/reference/disjunction.md"))
+        docPage("disjunction", "disjunction (|)", FileAsString("/doc/reference/disjunction.md")),
+        docPage("directive-combinators", "Directive combinators", FileAsString("/doc/reference/directive-combinators.md")),
       ),
       "Path Matchers"      -> Seq(
         docPage("path-matchers", "Built-in path matchers", FileAsString("/doc/reference/built-in-path-matchers.md")),
         docPage("path-matcher-combinators", "Path matcher combinators", FileAsString("/doc/reference/path-matcher-combinators.md"))
       ),
-      "Other Classes"      -> Seq(
-        docPage("route-result", "Route Result", FileAsString("/doc/reference/route-result.md"))
-      )
+      "Alternative Routes" -> Seq(
+        docPage("first-match", "firstMatch", FileAsString("/doc/reference/first-match.md"))
+      ),
+      "Utilities"          -> Seq(
+        docPage("navigation", "Browser navigation", FileAsString("/doc/reference/navigation.md")),
+      ),
+      "Extending"          -> Seq(
+        docPage("custom-directives", "Custom directives", FileAsString("/doc/reference/custom-directives.md"))
+      ),
+      "Under the hood"     -> Seq(
+        docPage("route", "Route", FileAsString("/doc/reference/under-the-hood/route.md")),
+        docPage("directive", "Directive", FileAsString("/doc/reference/under-the-hood/directive.md")),
+        docPage("path-matching", "Path-matching", FileAsString("/doc/reference/under-the-hood/path-matching.md")),
+      ),
     ),
     SiteModule(
       path = "examples",
+      title = "Examples",
       index = docPage("", "Examples", FileAsString("/doc/examples/index.md")),
-      ""                   -> Seq(
-        examplePage(io.frontroute.site.examples.ex_basic.BasicRoutingExample),
-        examplePage(io.frontroute.site.examples.ex_path_matching.PathMatchingExample),
-        examplePage(io.frontroute.site.examples.ex_recursive_path_matching.RecursivePathMatchingExample),
-        examplePage(io.frontroute.site.examples.ex_params.ParamsExample),
-        examplePage(io.frontroute.site.examples.ex_custom_directives.CustomDirectivesExample),
-        examplePage(io.frontroute.site.examples.ex_signal.SignalExample),
-        examplePage(io.frontroute.site.examples.ex_memoize.MemoizeExample),
-        examplePage(io.frontroute.site.examples.ex_auth.AuthExample),
-        examplePage(io.frontroute.site.examples.ex_tabs.TabsExample)
-      )
+      ""                   -> examples.map(ex => examplePage(ex))
     )
   )
 

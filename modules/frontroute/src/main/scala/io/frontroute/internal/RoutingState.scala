@@ -7,40 +7,27 @@ private[frontroute] object RoutingState {
 
   val empty: RoutingState = new RoutingState(
     path = RoutingPath.initial,
-    data = Map.empty,
-    persistent = Map.empty,
-    async = Map.empty
+    data = Map.empty
   )
 
-  def withPersistentData(
-    persistentData: Map[RoutingPath.Key, Any],
-    asyncData: Map[(RoutingPath.Key, Map[RoutingPath.Key, Any]), Any]
-  ): RoutingState = new RoutingState(
-    path = RoutingPath.empty,
-    data = Map.empty,
-    persistent = persistentData,
-    async = asyncData
-  )
+//  def withPersistentData(): RoutingState = new RoutingState(
+//    path = RoutingPath.empty,
+//    data = Map.empty
+//  )
 
 }
 
 final private[frontroute] class RoutingState private (
   val path: RoutingPath,
-  val data: Map[RoutingPath.Key, Any],
-  val persistent: Map[RoutingPath.Key, Any],
-  val async: Map[(RoutingPath.Key, Map[RoutingPath.Key, Any]), Any]
+  val data: Map[RoutingPath.Key, Any]
 ) {
 
   def copy(
     path: RoutingPath = path,
-    data: Map[RoutingPath.Key, Any] = data,
-    persistent: Map[RoutingPath.Key, Any] = persistent,
-    async: Map[(RoutingPath.Key, Map[RoutingPath.Key, Any]), Any] = async
+    data: Map[RoutingPath.Key, Any] = data
   ): RoutingState = new RoutingState(
     path = path,
-    data = data,
-    persistent = persistent,
-    async = async
+    data = data
   )
 
   def resetPath: RoutingState = this.copy(path = RoutingPath.empty)
@@ -98,21 +85,8 @@ final private[frontroute] class RoutingState private (
     this.copy(data = updateData(data, path.key, nv))
   }
 
-  def unsetValue[T](): RoutingState = {
+  def unsetValue(): RoutingState = {
     this.copy(data = data.removed(path.key))
-  }
-
-  def getPersistentValue[T](at: RoutingPath.Key): Option[T] = {
-    persistent.get(at).map(_.asInstanceOf[T])
-  }
-
-  def setPersistentValue[T](nv: T): RoutingState = {
-    updateData(persistent, path.key, nv)
-    this.copy(persistent = updateData(persistent, path.key, nv))
-  }
-
-  def unsetPersistentValue[T](): RoutingState = {
-    this.copy(persistent = persistent.removed(path.key))
   }
 
   override def toString: String = {
@@ -127,15 +101,12 @@ final private[frontroute] class RoutingState private (
   }
 
   override def equals(other: Any): Boolean = other match {
-    case that: RoutingState =>
-      path == that.path &&
-      data == that.data &&
-      persistent == that.persistent
+    case that: RoutingState => path == that.path && data == that.data
     case _                  => false
   }
 
   override def hashCode(): Int = {
-    val state = Seq(path, data, persistent)
+    val state = Seq(path, data)
     state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }
 

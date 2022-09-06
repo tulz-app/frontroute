@@ -1,5 +1,12 @@
 # Changelog
 
+### 0,.16.x
+
+* memoize is gone (event streams in routes interfere with `noneMatched`)
+* `when` --> `whenTrue` (conflict with laminext)
+* `mapOption` -> `optionMap`
+* `state` directive is gone
+
 ### 0.15.2
 
 Airstream `v0.14.2`.
