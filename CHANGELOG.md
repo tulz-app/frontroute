@@ -15,6 +15,7 @@ A non-exclusive list of breaking changes:
 * `state` directive is gone
 * `mapOption` -> `optionMap`
 * `when` --> `whenTrue` (conflict with laminext)
+* `BrowserNavigation.replaceTitle` is gone (to be replaced by another utility)
 
 ### 0.15.2
 
