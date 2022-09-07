@@ -68,7 +68,11 @@ class Routes {
           )
         ),
         noneMatched {
-          div("TODO: reload")
+          div(
+            onMountCallback { _ =>
+              dom.window.location.reload()
+            }
+          )
         }
       )
     )
