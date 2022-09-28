@@ -1,9 +1,7 @@
 package io.frontroute.site
 
 import com.raquo.laminar.api.L._
-import io.frontroute.DocumentMeta
-import io.frontroute.PageStatusCode
-import io.frontroute.internal.Document
+import io.frontroute._
 
 package object pages {
 
@@ -17,13 +15,11 @@ package object pages {
   ): Element =
     content.amend(
       onMountCallback { _ =>
-        Document.updateMeta(
-          DocumentMeta(
-            title = title,
-            description = description,
-            keywords = keywords,
-            status = status
-          )
+        DocumentMeta.set(
+          title = title,
+          description = description,
+          keywords = keywords,
+          status = status
         )
       }
     )

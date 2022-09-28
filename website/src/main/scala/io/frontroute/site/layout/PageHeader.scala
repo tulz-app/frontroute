@@ -57,8 +57,9 @@ object PageHeader {
       div(
         cls := "hidden lg:block relative inline-block text-left",
         div(
-          button.btn.sm.text.white(
+          button(
             `type`        := "button",
+            cls           := "btn-sm-text-white",
             Icons.highlighter(svg.cls := "h-4 text-gray-300"),
             aria.hasPopup := true,
             aria.expanded <-- styleDropDownOpen.signal,
@@ -114,32 +115,32 @@ object PageHeader {
       ),
       div(
         cls := "lg:hidden",
-        button.btn.md.outline
-          .white(
-            "Menu",
-            onClick.mapTo(
-              Some(
-                ModalContent(
+        button(
+          "Menu",
+          cls := "btn-md-outline-white",
+          onClick.mapTo(
+            Some(
+              ModalContent(
+                div(
                   div(
-                    div(
-                      cls := "flex justify-end py-4 px-8",
-                      button.btn.md.outline
-                        .white(
-                          "Close",
-                          onClick.mapTo(None) --> menuObserver
-                        )
-                    ),
-                    PageNavigation($page, mobile = true),
-                    div(
-                      cls := "flex flex-wrap justify-start items-center p-4",
-                      Site.modules.drop(1).map(moduleLink($page))
+                    cls := "flex justify-end py-4 px-8",
+                    button(
+                      "Close",
+                      cls := "btn-md-outline-white",
+                      onClick.mapTo(None) --> menuObserver
                     )
                   ),
-                  Some(menuObserver.contramap(_ => None))
-                )
+                  PageNavigation($page, mobile = true),
+                  div(
+                    cls := "flex flex-wrap justify-start items-center p-4",
+                    Site.modules.drop(1).map(moduleLink($page))
+                  )
+                ),
+                Some(menuObserver.contramap(_ => None))
               )
-            ) --> menuObserver
-          )
+            )
+          ) --> menuObserver
+        )
       ),
       div(
         cls := "hidden lg:block",

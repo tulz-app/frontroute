@@ -4,7 +4,6 @@ import com.raquo.laminar.api.L._
 import io.frontroute.BrowserNavigation
 import io.frontroute.internal.UrlString
 import io.laminext.syntax.core._
-import io.laminext.syntax.tailwind._
 import io.laminext.highlight.Highlight
 import io.frontroute.site.examples.CodeExample
 import io.frontroute.site.Site
@@ -121,8 +120,8 @@ object CodeExampleDisplay {
             div(
               cls := "flex space-x-4 items-center",
               when(hasContext) {
-                label.btn.sm.text.blue(
-                  cls := "flex-shrink-0 flex space-x-1 items-center cursor-pointer",
+                label(
+                  cls := "btn-sm-text-blue flex-shrink-0 flex space-x-1 items-center cursor-pointer",
                   input(
                     tpe := "checkbox",
                     checked <-- dimContext.signal,
