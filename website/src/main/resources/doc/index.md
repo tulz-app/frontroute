@@ -6,7 +6,7 @@ by [Akka HTTP](https://doc.akka.io/docs/akka-http/current/).
 
 ## Getting started
 
-`frontroute` is available for [Scala.js](http://www.scala-js.org/) `v1.7.1`+ (published for Scala 2.13 and 3.0.2).
+`frontroute` is available for [Scala.js](http://www.scala-js.org/) `v1.11.0`+ (published for Scala 2.13 and 3.2.0).
 
 ```scala
 libraryDependencies += "io.frontroute" %%% "frontroute" % "{{frontrouteVersion}}"
