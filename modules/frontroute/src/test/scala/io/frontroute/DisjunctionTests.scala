@@ -3,7 +3,7 @@ package io.frontroute
 import com.raquo.airstream.core.Signal
 import io.frontroute.testing._
 import utest._
-import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits.global
 import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.JSON

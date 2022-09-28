@@ -6,14 +6,15 @@ import com.raquo.airstream.ownership.Owner
 import com.raquo.airstream.state.Var
 import io.frontroute.Route
 import io.frontroute.runRoute
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits.global
 import utest.TestSuite
+
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import scala.concurrent.Promise
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration._
 import scala.scalajs.js.timers.setTimeout
-import scala.concurrent.ExecutionContext.Implicits.global
 
 abstract class TestBase extends TestSuite {
 

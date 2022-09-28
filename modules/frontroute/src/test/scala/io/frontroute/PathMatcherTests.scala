@@ -3,8 +3,6 @@ package io.frontroute
 import io.frontroute.internal.PathMatchResult
 import io.frontroute.testing._
 import utest._
-import scala.scalajs.js
-import scala.scalajs.js.JSON
 
 object PathMatcherTests extends TestBase {
 
@@ -114,11 +112,11 @@ object PathMatcherTests extends TestBase {
     }
 
     test("fixed segment/empty input/recover") {
-      segment("a").recover("default").apply(List.empty) ==> PathMatchResult.NoMatch
+      segment("a").mapTo("a").recover("default").apply(List.empty) ==> PathMatchResult.NoMatch
     }
 
     test("fixed segment/non-matching input/recover") {
-      segment("a").recover("default").apply(List("c", "b")) ==> PathMatchResult.Match(
+      segment("a").mapTo("a").recover("default").apply(List("c", "b")) ==> PathMatchResult.Match(
         "default",
         List("b")
       )
