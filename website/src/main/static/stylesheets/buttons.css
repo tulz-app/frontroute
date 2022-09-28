@@ -31,7 +31,6 @@
         @apply bg-transparent border;
     }
 
-
     .btn-outline-blue {
         @apply btn-outline
         text-blue-700
@@ -54,6 +53,20 @@
         border-blue-300
         hover:border-blue-100 hover:text-blue-100
         focus:ring-blue-500;
+    }
+
+    .btn-text-white {
+        @apply btn-text
+        text-gray-200
+        hover:text-white
+        focus:ring-gray-500
+    }
+
+    .btn-text-blue {
+        @apply btn-text
+        text-blue-700
+        hover:text-blue-600
+        focus:ring-blue-500
     }
 
     .btn-lg-text-white {
