@@ -1,7 +1,7 @@
 object DependencyVersions {
 
-  val airstream      = "0.14.2"
-  val `tuplez-apply` = "0.3.6"
+  val airstream      = "0.14.5"
+  val `tuplez-apply` = "0.3.7"
   val utest          = "0.7.11"
 
   // website
