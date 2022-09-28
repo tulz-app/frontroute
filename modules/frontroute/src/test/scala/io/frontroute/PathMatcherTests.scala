@@ -111,11 +111,11 @@ class PathMatcherTests extends TestBase {
   }
 
   test("fixed segment/empty input/recover") {
-    segment("a").recover("default").apply(List.empty) shouldBe PathMatchResult.NoMatch
+    segment("a").mapTo("a").recover("default").apply(List.empty) shouldBe PathMatchResult.NoMatch
   }
 
   test("fixed segment/non-matching input/recover") {
-    segment("a").recover("default").apply(List("c", "b")) shouldBe PathMatchResult.Match(
+    segment("a").mapTo("a").recover("default").apply(List("c", "b")) shouldBe PathMatchResult.Match(
       "default",
       List("b")
     )

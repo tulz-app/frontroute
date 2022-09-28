@@ -1,11 +1,10 @@
 object DependencyVersions {
 
-  val airstream                   = "0.14.2"
-  val laminar                     = "0.14.2"
-  val `tuplez-apply`              = "0.3.6"
+  val laminar                     = "0.14.5"
+  val `tuplez-apply`              = "0.3.7"
   val utest                       = "0.8.0"
-  val domtestutils                = "0.15.1"
-  val scalatest                   = "3.2.13"
+  val domtestutils                = "0.15.3"
+  val scalatest                   = "3.2.14"
   val jsdom                       = "16.4.0"
   val `scalajs-java-securerandom` = "1.0.0"
 

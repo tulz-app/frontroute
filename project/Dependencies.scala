@@ -4,12 +4,6 @@ import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 
 object Dependencies {
 
-  val airstream: Def.Initialize[Seq[ModuleID]] = Def.setting {
-    Seq(
-      "com.raquo" %%% "airstream" % DependencyVersions.airstream
-    )
-  }
-
   val laminar: Def.Initialize[Seq[ModuleID]] = Def.setting {
     Seq(
       "com.raquo" %%% "laminar" % DependencyVersions.laminar
