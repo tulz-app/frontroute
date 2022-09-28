@@ -26,7 +26,7 @@ See [getting started](/getting-started).
 
 ### Prerequisites
 
-* [Scala.js](https://www.scala-js.org/) `v1.10.1`+
+* [Scala.js](https://www.scala-js.org/) `v{{scalajsVersion}}`+
 * Scala 2.13 or {{scala3version}}+
 * [Laminar](https://laminar.dev/) {{laminarVersion}} (it will be added to your project's dependencies transitively)
 
@@ -58,8 +58,8 @@ import mill.scalajslib._
 import mill.scalajslib.api._
 
 object counter extends ScalaJSModule {
-    def scalaVersion   = "3.1.2"
-    def scalaJSVersion = "1.10.1"
+    def scalaVersion   = "{{scala3version}}"
+    def scalaJSVersion = "{{scalajsVersion}}"
     
     def ivyDeps = Agg(ivy"io.frontroute::frontroute::{{frontrouteVersion}}")
     
