@@ -6,7 +6,7 @@ object TemplateVars {
     "frontrouteVersion" -> "0.16.1",
     "laminarVersion"    -> "0.14.5",
     "scalajsVersion"    -> "1.11.0",
-    "scala3version"     -> "3.2.0",
+    "scala3version"     -> "3.2.1",
     "sitePrefix"        -> "/v/0.16.x"
   )
 
