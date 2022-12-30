@@ -9,7 +9,7 @@ object DependencyVersions {
   val `scalajs-java-securerandom` = "1.0.0"
 
   // tests
-  val `scala-js-macrotask-executor` = "1.1.0"
+  val `scala-js-macrotask-executor` = "1.1.1"
 
   // website
   val laminext               = "0.14.0"
