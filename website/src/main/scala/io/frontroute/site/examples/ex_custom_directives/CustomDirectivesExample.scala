@@ -41,7 +41,7 @@ object CustomDirectivesExample
             path("movie") &
               /* <focus> */
               longParam("id")
-            /* </focus> */
+              /* </focus> */
           ) { movieId =>
             div(div(cls := "text-2xl", "Movie page."), div(s"Movie ID (long): $movieId"))
           },

@@ -84,7 +84,7 @@ class Directive[L](
     }
 
   def signal: Directive[StrictSignal[L]] =
-    new Directive[StrictSignal[L]]({ inner => (location, previous, state) =>
+    new Directive[StrictSignal[L]] { inner => (location, previous, state) =>
       this.tapply {
         value => // TODO figure this out, when this is run, enter is not yet called
           (location, previous, state) =>
@@ -98,7 +98,7 @@ class Directive[L](
                 inner(existingVar.signal)(location, previous, next.setValue(existingVar))
             }
       }(location, previous, state)
-    })
+    }
 
 }
 
