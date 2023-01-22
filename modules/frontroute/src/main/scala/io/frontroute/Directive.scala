@@ -24,6 +24,14 @@ class Directive[L](
       }
     }
 
+  def tap(body: L => Unit): Directive[L] =
+    Directive[L] { inner =>
+      self.tapply { value => (location, previous, state) =>
+        body(value)
+        inner(value)(location, previous, state.enterAndSet(value))
+      }
+    }
+
   def emap[R](f: L => Either[Any, R]): Directive[R] =
     this.flatMap { value =>
       f(value).fold(
