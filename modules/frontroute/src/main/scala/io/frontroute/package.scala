@@ -76,7 +76,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
         location,
         () =>
           Val(
-            commandTag(onMountCallback { _ => effect() })
+            div(visibility.hidden, onMountCallback { _ => effect() })
           )
       )
     )
