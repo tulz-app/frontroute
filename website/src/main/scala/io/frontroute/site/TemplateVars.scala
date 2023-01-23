@@ -3,11 +3,11 @@ package io.frontroute.site
 object TemplateVars {
 
   private val vars = Seq(
-    "frontrouteVersion" -> "0.16.1",
-    "laminarVersion"    -> "0.14.5",
-    "scalajsVersion"    -> "1.11.0",
+    "frontrouteVersion" -> "0.17.0",
+    "laminarVersion"    -> "15.0.0-M4",
+    "scalajsVersion"    -> "1.12.0",
     "scala3version"     -> "3.2.0",
-    "sitePrefix"        -> "/v/0.16.x"
+    "sitePrefix"        -> "/v/0.17.x"
   )
 
   def apply(s: String): String =
