@@ -93,18 +93,16 @@ class Directive[L](
 
   def signal: Directive[StrictSignal[L]] =
     new Directive[StrictSignal[L]]({ inner => (location, previous, state) =>
-      this.tapply {
-        value => // TODO figure this out, when this is run, enter is not yet called
-          (location, previous, state) =>
-            val next = state.unsetValue().enter
-            previous.getValue[Var[L]](next.path.key) match {
-              case None              =>
-                val newVar = Var(value)
-                inner(newVar.signal)(location, previous, next.setValue(newVar))
-              case Some(existingVar) =>
-                existingVar.set(value)
-                inner(existingVar.signal)(location, previous, next.setValue(existingVar))
-            }
+      this.tapply { value => (location, previous, state) =>
+        val next = state.unsetValue().enter
+        previous.getValue[Var[L]](next.path.key) match {
+          case None              =>
+            val newVar = Var(value)
+            inner(newVar.signal)(location, previous, next.setValue(newVar))
+          case Some(existingVar) =>
+            existingVar.set(value)
+            inner(existingVar.signal)(location, previous, next.setValue(existingVar))
+        }
       }(location, previous, state)
     })
 

@@ -30,7 +30,7 @@ object AuthExample
       /* <focus> */
       val authenticatedUser: Signal[Option[User]] =
         /* </focus> */
-        authenticationEvents.events.foldLeft(Option.empty[User]) {
+        authenticationEvents.events.scanLeft(Option.empty[User]) {
           case (_, AuthenticationEvent.SignedOut)        => Option.empty
           case (_, AuthenticationEvent.SignedIn(userId)) => Some(User(userId))
         }

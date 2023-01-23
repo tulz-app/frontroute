@@ -33,7 +33,7 @@ object PageHeader {
           cls := "w-10 h-10"
         )
       ),
-      nav(
+      navTag(
         cls := "flex flex-1 md:flex-none space-x-4 items-center justify-start",
         span(
           Site.modules.take(1).map(moduleLink($page))
@@ -43,7 +43,7 @@ object PageHeader {
           Site.frontrouteVersion
         )
       ),
-      nav(
+      navTag(
         cls := "hidden md:flex flex-1 space-x-4",
         div(
           cls := "flex flex-wrap justify-start items-center space-x-2",
@@ -52,7 +52,7 @@ object PageHeader {
       ),
       div(
         cls := "hidden lg:block",
-        img(src := "https://img.shields.io/maven-central/v/io.frontroute/frontroute_sjs1_2.13.svg", alt := "latest version on maven central")
+        img(src := "https://img.shields.io/maven-central/v/io.frontroute/frontroute_sjs1_2.13.svg?versionPrefix=0.17", alt := "latest version on maven central")
       ),
       div(
         cls := "hidden lg:block relative inline-block text-left",

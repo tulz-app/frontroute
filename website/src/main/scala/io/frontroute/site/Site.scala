@@ -7,7 +7,7 @@ import io.frontroute.site.examples.CodeExample
 
 object Site {
 
-  val frontrouteVersion: String = "0.16.x"
+  val frontrouteVersion: String = "0.17.x"
 
   val thisVersionPrefix = s"/v/$frontrouteVersion/"
 

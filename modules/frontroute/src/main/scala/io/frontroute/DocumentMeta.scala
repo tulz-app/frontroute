@@ -1,6 +1,7 @@
 package io.frontroute
 
 import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L
 
 case class DocumentMeta(
   title: String,
@@ -35,8 +36,13 @@ object DocumentMeta {
     status: PageStatusCode = PageStatusCode.Ok
   ): Unit = {
     org.scalajs.dom.document.title = title
-    val titleElement = org.scalajs.dom.document.head.querySelector("title")
-    titleElement.textContent = title
+    var titleElement = org.scalajs.dom.document.head.querySelector("title")
+    if (titleElement == null) {
+      titleElement = titleTag(title).ref
+      org.scalajs.dom.document.head.appendChild(titleElement)
+    } else {
+      titleElement.textContent = title
+    }
 
     setMetaTag("description", description)
     setMetaTag("keywords", keywords)
@@ -54,7 +60,7 @@ object DocumentMeta {
     value match {
       case Some(value) =>
         if (metaElement == null) {
-          metaElement = meta(name := metaName).ref
+          metaElement = metaTag(name := metaName).ref
           org.scalajs.dom.document.head.appendChild(metaElement)
         }
         metaElement.setAttribute("content", value)

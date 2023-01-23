@@ -13,7 +13,7 @@ trait LocationProvider {
 
 object LocationProvider {
 
-  lazy val windowLocationProvider: LocationProvider = browser(windowEvents.onPopState)
+  lazy val windowLocationProvider: LocationProvider = browser(windowEvents(_.onPopState))
 
   @inline def browser(popStateEvents: EventStream[dom.PopStateEvent]): LocationProvider = new BrowserLocationProvider(popStateEvents)
 

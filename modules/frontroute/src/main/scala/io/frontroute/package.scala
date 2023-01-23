@@ -7,6 +7,7 @@ import com.raquo.airstream.core.Signal
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 import io.frontroute.internal.LocationState
 import io.frontroute.internal.UrlString
+import io.frontroute.ops.DirectiveOfOptionOps
 import org.scalajs.dom
 import org.scalajs.dom.HTMLAnchorElement
 
@@ -28,7 +29,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
       )
     }
 
-//  implicit def directiveOfOptionSyntax(underlying: Directive[Option[Element]]): DirectiveOfOptionOps = new DirectiveOfOptionOps(underlying)
+  implicit def directiveOfOptionSyntax[L](underlying: Directive[Option[L]]): DirectiveOfOptionOps[L] = new DirectiveOfOptionOps(underlying)
 
   private[frontroute] val rejected: Signal[RouteResult] = Val(RouteResult.Rejected)
 
@@ -67,6 +68,18 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
   }
 
   private def complete(result: => ToComplete): Route = (location, _, state) => Val(RouteResult.Matched(state, location, () => result.get))
+
+  def runEffect(effect: () => Unit): Route = (location, _, state) =>
+    Val(
+      RouteResult.Matched(
+        state,
+        location,
+        () =>
+          Val(
+            commandTag(onMountCallback { _ => effect() })
+          )
+      )
+    )
 
   implicit def elementToRoute(e: => Element): Route = complete(e)
 

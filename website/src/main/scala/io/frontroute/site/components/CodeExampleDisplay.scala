@@ -181,7 +181,7 @@ object CodeExampleDisplay {
     def pathAndSearch(url: Location): String =
       url.pathname + (if (url.search != null && url.search.nonEmpty) url.search else "")
 
-    val currentUrl = windowEvents.onPopState
+    val currentUrl = windowEvents(_.onPopState)
       .mapTo(window.location.toString).map { case UrlString(url) => pathAndSearch(url) }
       .startWith("/")
 

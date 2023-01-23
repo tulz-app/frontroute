@@ -1,6 +1,6 @@
 object DependencyVersions {
 
-  val laminar                     = "0.14.5"
+  val laminar                     = "15.0.0-M4"
   val `tuplez-apply`              = "0.3.8"
   val utest                       = "0.8.0"
   val domtestutils                = "0.15.3"
@@ -12,8 +12,8 @@ object DependencyVersions {
   val `scala-js-macrotask-executor` = "1.1.1"
 
   // website
-  val laminext               = "0.14.0"
-  val sourcecode             = "0.2.7"
+  val laminext               = "0.15.0-dev0"
+  val sourcecode             = "0.3.0"
   val `embedded-files-macro` = "0.2.4"
 
 }
