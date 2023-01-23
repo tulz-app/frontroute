@@ -17,7 +17,7 @@ class DisjunctionSignalTest extends TestBase {
             (path(segment) | pathEnd.map(_ => "default")).signal { s =>
               testComplete {
                 pathSignal = s
-                signals = nSignals(4, pathSignal)
+                signals = nSignals(5, pathSignal)
                 probe.append("prefix1/prefix2")
               }
             }
@@ -35,6 +35,7 @@ class DisjunctionSignalTest extends TestBase {
         .map { suffixes =>
           suffixes shouldBe List(
             "default",
+            "suffix-1",
             "suffix-1",
             "suffix-2",
             "suffix-3"
