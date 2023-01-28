@@ -51,15 +51,16 @@ class Directive[L](
 
   def &(magnet: ConjunctionMagnet[L]): magnet.Out = magnet(this)
 
-  def |(other: Directive[L]): Directive[L] = {
+  def |(other: Directive[L]): Directive[L] = { // TODO double-check consumed-s here
     Directive[L] { inner => (location, previous, state) =>
       self
         .tapply { value => (location, previous, state) =>
           inner(value)(location, previous, state.leaveDisjunction)
         }(location, previous, state.enterDisjunction)
         .flatMap {
-          case RouteResult.Matched(state, location, result) => Val(RouteResult.Matched(state, location, result))
-          case RouteResult.Rejected                         =>
+          case RouteResult.Matched(state, location, consumed, result) => Val(RouteResult.Matched(state, location, consumed, result))
+          case RouteResult.RunEffect(state, location, consumed, run)  => Val(RouteResult.RunEffect(state, location, consumed, run))
+          case RouteResult.Rejected                                   =>
             other.tapply { value => (location, previous, state) =>
               inner(value)(location, previous, state.leaveDisjunction)
             }(location, previous, state.enterDisjunction)

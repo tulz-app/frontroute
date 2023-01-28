@@ -12,7 +12,7 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
 
   import Route._
 
-  private val currentRender = Var(Option.empty[Element])
+  private val currentRender = Var(Option.empty[HtmlElement])
 
   private def bind: Binder[HtmlElement] = {
     Binder { el =>
@@ -28,36 +28,43 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
             SignalToStream(
               this.apply(
                 currentUnmatched.copy(otherMatched = locationState.siblingMatched()),
-                locationState.routerState.get(this).fold(RoutingState.empty)(_.resetPath),
+                locationState.routerState.get(this).fold(RoutingState.empty)(_.resetPath).withConsumed(locationState.consumed.now()),
                 RoutingState.empty
               )
             )
           }
           .flatMap {
-            case RouteResult.Matched(nextState, location, createResult) =>
+            case RouteResult.Matched(nextState, location, consumed, createResult) =>
               if (
                 !locationState.routerState.get(this).contains(nextState) ||
                 currentRender.now().isEmpty
               ) {
                 SignalToStream(
-                  createResult().map(RouteEvent.NextRender(nextState, location, _))
+                  createResult().map(RouteEvent.NextRender(nextState, location, consumed, _))
                 )
               } else {
-                EventStream.fromValue(RouteEvent.SameRender(nextState, location))
+                EventStream.fromValue(RouteEvent.SameRender(nextState, location, consumed))
+              }
+            case RouteResult.RunEffect(nextState, location, consumed, run)        =>
+              if (!locationState.routerState.get(this).contains(nextState)) {
+                run()
+                EventStream.fromValue(RouteEvent.SameRender(nextState, location, consumed))
+              } else {
+                EventStream.fromValue(RouteEvent.SameRender(nextState, location, consumed))
               }
 
             case RouteResult.Rejected =>
               EventStream.fromValue(RouteEvent.NoRender)
           }
           .foreach {
-            case RouteEvent.NextRender(nextState, remaining, render) =>
+            case RouteEvent.NextRender(nextState, remaining, consumed, render) =>
               locationState.routerState.set(this, nextState)
 
               locationState.setRemaining(Some(remaining))
               locationState.notifyMatched()
 
               if (render != null) {
-                LocationState.initIfMissing(
+                val childState = LocationState.initIfMissing(
                   render.ref,
                   () =>
                     new LocationState(
@@ -67,6 +74,7 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
                       childStateRef,
                     )
                 )
+                childState.setConsumed(consumed)
 
                 val amendedRender = render.amend(
                   onMountUnmountCallback(
@@ -74,15 +82,21 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
                     el => LocationState(el).foreach(_.kill())
                   ),
                 )
+                amendedRender.ref.dataset.addOne("frPath" -> consumed.mkString("/", "/", ""))
                 currentRender.set(Some(amendedRender))
               } else {
                 currentRender.set(None) // route matched but rendered a null
               }
 
-            case RouteEvent.SameRender(nextState, remaining) =>
+            case RouteEvent.SameRender(nextState, remaining, consumed) =>
               locationState.routerState.set(this, nextState)
 
               locationState.setRemaining(Some(remaining))
+              currentRender.now().foreach { render =>
+                LocationState.closestOrDefault(render.ref).setConsumed(consumed)
+                render.ref.dataset.addOne("frPath" -> consumed.mkString("/", "/", ""))
+              }
+
               locationState.notifyMatched()
 
             case RouteEvent.NoRender =>
@@ -113,12 +127,14 @@ object Route {
     case class NextRender(
       nextState: RoutingState,
       remaining: Location,
-      render: Element
+      nextConsumed: List[String],
+      render: HtmlElement
     ) extends RouteEvent
 
     case class SameRender(
       nextState: RoutingState,
-      remaining: Location
+      remaining: Location,
+      nextConsumed: List[String],
     ) extends RouteEvent
 
     case object NoRender extends RouteEvent

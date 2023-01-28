@@ -6,29 +6,30 @@ import scala.scalajs.js
 private[frontroute] object RoutingState {
 
   val empty: RoutingState = new RoutingState(
+    consumed = List.empty,
     path = RoutingPath.initial,
     data = Map.empty
   )
 
-//  def withPersistentData(): RoutingState = new RoutingState(
-//    path = RoutingPath.empty,
-//    data = Map.empty
-//  )
-
 }
 
 final private[frontroute] class RoutingState private (
+  val consumed: List[String],
   val path: RoutingPath,
   val data: Map[RoutingPath.Key, Any]
 ) {
 
   def copy(
+    consumed: List[String] = consumed,
     path: RoutingPath = path,
     data: Map[RoutingPath.Key, Any] = data
   ): RoutingState = new RoutingState(
+    consumed = consumed,
     path = path,
     data = data
   )
+
+  def withConsumed(consumed: List[String]): RoutingState = this.copy(consumed = consumed)
 
   def resetPath: RoutingState = this.copy(path = RoutingPath.empty)
 
@@ -90,14 +91,14 @@ final private[frontroute] class RoutingState private (
   }
 
   override def toString: String = {
-    s"""matched: $path\n${data
+    s"""state: consumed: '${consumed.mkString("/", "/", "")}' path: '$path', data: '${data
         .map {
           case (key, value: Var[_]) =>
             s"  $key -> $value (${value.signal.now()})"
           case (key, value)         =>
             s"  $key -> $value"
         }
-        .mkString("\n")}"""
+        .mkString("\n")}'"""
   }
 
   override def equals(other: Any): Boolean = other match {

@@ -70,11 +70,26 @@ private[frontroute] object LocationState {
     }
   }
 
-  def initIfMissing(node: dom.Node, init: () => LocationState): Unit = {
+  @tailrec
+  def closest(node: dom.Node): Option[LocationState] = {
+    val withState = node.asInstanceOf[ElementWithLocationState]
+    if (withState.____locationState.isEmpty) {
+      if (node.parentNode != null) {
+        closest(node.parentNode)
+      } else {
+        Option.empty
+      }
+    } else {
+      Some(withState.____locationState.get)
+    }
+  }
+
+  def initIfMissing(node: dom.Node, init: () => LocationState): LocationState = {
     val resultWithState = node.asInstanceOf[ElementWithLocationState]
     if (resultWithState.____locationState.isEmpty) {
       resultWithState.____locationState = init()
     }
+    resultWithState.____locationState.get
   }
 
 }
@@ -90,6 +105,13 @@ private[frontroute] class LocationState(
   val remaining: StrictSignal[Option[Location]] = remainingVar.signal
 
   def setRemaining(remaining: Option[Location]): Unit = remainingVar.set(remaining)
+
+  private val consumedVar                  = Var(List.empty[String])
+  val consumed: StrictSignal[List[String]] = consumedVar.signal
+
+  def setConsumed(consumed: List[String]): Unit = {
+    consumedVar.set(consumed)
+  }
 
   private var _childMatched       = false
   val onChildMatched: () => Unit  = () => { _childMatched = true }

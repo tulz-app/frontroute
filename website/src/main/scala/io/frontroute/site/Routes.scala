@@ -71,7 +71,7 @@ class Routes {
           )
         ),
         (noneMatched & anyVersionPrefix) {
-          runEffect { () => dom.window.location.reload() }
+          runEffect { dom.window.location.reload() }
         },
         noneMatched {
           div("Not Found")

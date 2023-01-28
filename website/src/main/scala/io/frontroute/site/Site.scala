@@ -42,7 +42,10 @@ object Site {
       io.frontroute.site.examples.ex_signal.SignalExample,
       io.frontroute.site.examples.ex_auth.AuthExample,
       io.frontroute.site.examples.ex_tabs.TabsExample,
-      io.frontroute.site.examples.ex_nested.NestedExample
+      io.frontroute.site.examples.ex_nested.NestedExample,
+      io.frontroute.site.examples.ex_effect.EffectExample,
+      io.frontroute.site.examples.ex_extract_consumed.ExtractConsumedExample,
+      io.frontroute.site.examples.ex_consumed_path.ConsumedPathExample,
     )
 
   val modules: Seq[SiteModule] = Seq(
