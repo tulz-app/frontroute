@@ -43,7 +43,7 @@ abstract class TestBase extends AsyncFunSuite with Matchers with LaminarSpec wit
     def toList: Seq[A] = buffer.toList
   }
 
-  protected def testComplete(body: => Unit): Element = {
+  protected def testComplete(body: => Unit): HtmlElement = {
     val _ = body
     div()
   }
