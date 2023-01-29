@@ -1,12 +1,12 @@
-package io.frontroute.site.examples.ex_extract_consumed
+package io.frontroute.site.examples.ex_matched_path
 
 import io.frontroute.site.examples.CodeExample
 import com.yurique.embedded.FileAsString
 
-object ExtractConsumedExample
+object MatchedPathExample
     extends CodeExample(
-      id = "extract-consumed",
-      title = "Extract Consumed Path",
+      id = "matched-path",
+      title = "Matched Path",
       description = FileAsString("description.md"),
       links = Seq(
         "/",
@@ -24,13 +24,13 @@ object ExtractConsumedExample
           span(
             cls := "bg-yellow-200 text-yellow-900 rounded-sm space-x-2 text-sm px-2 font-mono",
             span(label),
-            /* <focus> */
-            extractConsumed.signal { path =>
-              span(
+            span(
+              /* <focus> */
+              withMatchedPath { path =>
                 child.text <-- path.map(s => s"'${s.mkString("/", "/", "")}'")
-              )
-            }
-            /* </focus> */
+              }
+              /* </focus> */
+            )
           )
         )
 

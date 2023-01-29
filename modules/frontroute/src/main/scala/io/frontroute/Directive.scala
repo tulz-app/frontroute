@@ -51,7 +51,7 @@ class Directive[L](
 
   def &(magnet: ConjunctionMagnet[L]): magnet.Out = magnet(this)
 
-  def |(other: Directive[L]): Directive[L] = { // TODO double-check consumed-s here
+  def |(other: Directive[L]): Directive[L] =
     Directive[L] { inner => (location, previous, state) =>
       self
         .tapply { value => (location, previous, state) =>
@@ -66,8 +66,6 @@ class Directive[L](
             }(location, previous, state.enterDisjunction)
         }
     }
-
-  }
 
   def collect[R](f: PartialFunction[L, R]): Directive[R] =
     Directive[R] { inner =>

@@ -44,8 +44,8 @@ object Site {
       io.frontroute.site.examples.ex_tabs.TabsExample,
       io.frontroute.site.examples.ex_nested.NestedExample,
       io.frontroute.site.examples.ex_effect.EffectExample,
-      io.frontroute.site.examples.ex_extract_consumed.ExtractConsumedExample,
-      io.frontroute.site.examples.ex_consumed_path.ConsumedPathExample,
+      io.frontroute.site.examples.ex_extract_matched_path.ExtractMatchedPathExample,
+      io.frontroute.site.examples.ex_matched_path.MatchedPathExample,
     )
 
   val modules: Seq[SiteModule] = Seq(

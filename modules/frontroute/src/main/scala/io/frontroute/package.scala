@@ -114,7 +114,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
     }
   }
 
-  def withCurrentPath[Ref <: dom.html.Element](mod: StrictSignal[List[String]] => Mod[ReactiveHtmlElement[Ref]]): Mod[ReactiveHtmlElement[Ref]] = {
+  def withMatchedPath[Ref <: dom.html.Element](mod: StrictSignal[List[String]] => Mod[ReactiveHtmlElement[Ref]]): Mod[ReactiveHtmlElement[Ref]] = {
     withCurrentPathAndEl((_, consumed) => mod(consumed))
   }
 

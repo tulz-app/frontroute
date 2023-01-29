@@ -13,9 +13,6 @@ trait Directives {
   private[frontroute] def extract[T](f: Location => T): Directive[T] =
     extractContext.map(f)
 
-  def extractConsumed: Directive[List[String]] =
-    Directive[List[String]](inner => (location, previous, state) => inner(previous.consumed)(location, previous, state))
-
   def signal[T](signal: Signal[T]): Directive[T] =
     Directive[T] { inner => (location, previous, state) =>
       signal.flatMap { extracted =>
@@ -48,6 +45,9 @@ trait Directives {
       inner(maybeParamValue)(location, previous, state.enterAndSet(maybeParamValue))
     }
 
+  def extractMatchedPath: Directive[List[String]] =
+    Directive[List[String]](inner => (location, previous, state) => inner(state.consumed)(location, previous, state))
+
   val extractUnmatchedPath: Directive[List[String]] = extract(_.path)
 
   val extractHostname: Directive[String] = extract(_.hostname)
@@ -67,7 +67,7 @@ trait Directives {
 
   def pathPrefix[T](m: PathMatcher[T]): Directive[T] =
     Directive[T] { inner => (location, previous, state) =>
-      m(previous.consumed, location.path) match {
+      m(state.consumed, location.path) match {
         case PathMatchResult.Match(t, consumed, rest) =>
           inner(t)(location.withUnmatchedPath(rest), previous, state.enterAndSet(t).withConsumed(consumed))
         case _                                        => rejected
@@ -76,7 +76,7 @@ trait Directives {
 
   def testPathPrefix[T](m: PathMatcher[T]): Directive[T] =
     Directive[T] { inner => (location, previous, state) =>
-      m(previous.consumed, location.path) match {
+      m(state.consumed, location.path) match {
         case PathMatchResult.Match(t, _, _) => inner(t)(location, previous, state.enterAndSet(t))
         case _                              => rejected
       }
@@ -93,7 +93,7 @@ trait Directives {
 
   def path[T](m: PathMatcher[T]): Directive[T] =
     Directive[T] { inner => (location, previous, state) =>
-      m(previous.consumed, location.path) match {
+      m(state.consumed, location.path) match {
         case PathMatchResult.Match(t, consumed, Nil) =>
           inner(t)(location.withUnmatchedPath(List.empty), previous, state.enterAndSet(t).withConsumed(consumed))
         case _                                       => rejected
@@ -102,7 +102,7 @@ trait Directives {
 
   def testPath[T](m: PathMatcher[T]): Directive[T] =
     Directive[T] { inner => (location, previous, state) =>
-      m(previous.consumed, location.path) match {
+      m(state.consumed, location.path) match {
         case PathMatchResult.Match(t, _, Nil) => inner(t)(location, previous, state.enterAndSet(t))
         case _                                => rejected
       }

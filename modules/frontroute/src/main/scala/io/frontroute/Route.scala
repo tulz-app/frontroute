@@ -28,8 +28,8 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
             SignalToStream(
               this.apply(
                 currentUnmatched.copy(otherMatched = locationState.siblingMatched()),
-                locationState.routerState.get(this).fold(RoutingState.empty)(_.resetPath).withConsumed(locationState.consumed.now()),
-                RoutingState.empty
+                locationState.routerState.get(this).fold(RoutingState.empty)(_.resetPath),
+                RoutingState.empty.withConsumed(locationState.consumed.now())
               )
             )
           }
