@@ -83,7 +83,7 @@ object CodeExampleDisplay {
           cls := "font-display text-xl font-bold text-gray-900 tracking-wide",
           example.title
         ),
-        (path(Set("live", "source", "description")) | pathEnd.mapTo("live")).signal { tab =>
+        (path(Set("live", "source", "description")) | path(segment).mapTo("live") | pathEnd.mapTo("live")).signal { tab =>
           div(
             cls := "flex space-x-2",
             a(

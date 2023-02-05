@@ -72,7 +72,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
     directive.tapply(_ => subRoute)(location, previous, state)
   }
 
-  private def complete(result: => ToComplete): Route = (location, _, state) => Val(RouteResult.Matched(state, location, state.consumed, () => result.get))
+  private def complete(result: () => ToComplete): Route = (location, _, state) => Val(RouteResult.Matched(state, location, state.consumed, () => result().get))
 
   def runEffect(effect: => Unit): Route = (location, _, state) =>
     Val(
@@ -84,9 +84,9 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
       )
     )
 
-  implicit def elementToRoute(e: => HtmlElement): Route = complete(e)
+  implicit def elementToRoute(e: => HtmlElement): Route = complete(() => e)
 
-  implicit def signalOfElementToRoute(e: => Signal[HtmlElement]): Route = complete(e)
+  implicit def signalOfElementToRoute(e: => Signal[HtmlElement]): Route = complete(() => e)
 
   private[frontroute] def withMatchedPathAndEl[Ref <: dom.html.Element](
     mod: (ReactiveHtmlElement[Ref], StrictSignal[List[String]]) => Mod[ReactiveHtmlElement[Ref]]
@@ -127,16 +127,31 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
   def navMod(
     mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
   ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
+    inContext { el =>
+      val active = LocationState.closestOrDefault(el.ref).location.map { location =>
+        val UrlString(url) = el.ref.href
+        location.exists { location =>
+          location.fullPath.mkString("/", "/", "").startsWith(url.pathname)
+        }
+      }
+      mod(active)
+    }
+
+  def matchedMod(
+    mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
+  ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
     withMatchedPathAndEl { (el, matched) =>
       val active =
         matched.map { l =>
           val UrlString(url) = el.ref.href
-          url.pathname.startsWith(l.mkString("/", "/", ""))
+          println(s"nav mod url.pathname: ${url.pathname}")
+          println(s"nav mod matched: $l")
+          l.mkString("/", "/", "").startsWith(url.pathname)
         }
       mod(active)
     }
 
-  def navModStrict(
+  def matchedModStrict(
     mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
   ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
     withMatchedPathAndEl { (el, consumed) =>

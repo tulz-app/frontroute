@@ -10,6 +10,9 @@ import io.frontroute.internal.SignalToStream
 
 trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResult]) with Mod[HtmlElement] {
 
+  val id = Route.counter
+  Route.counter = Route.counter + 1
+
   import Route._
 
   private val currentRender = Var(Option.empty[HtmlElement])
@@ -22,12 +25,12 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
 
         // the returned subscription will be managed by the ctx.owner
         val _ = SignalToStream(locationState.location)
-          .delay(0)
           .collect { case Some(currentUnmatched) => currentUnmatched }
           .flatMap { currentUnmatched =>
+            println(s"--------------- route: ${this.id}: $currentUnmatched: ${locationState.isSiblingMatched()}")
             SignalToStream(
               this.apply(
-                currentUnmatched.copy(otherMatched = locationState.siblingMatched()),
+                currentUnmatched.copy(otherMatched = locationState.isSiblingMatched()),
                 locationState.routerState.get(this).fold(RoutingState.empty)(_.resetPath),
                 RoutingState.empty.withConsumed(locationState.consumed.now())
               )
@@ -35,17 +38,21 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
           }
           .flatMap {
             case RouteResult.Matched(nextState, location, consumed, createResult) =>
+              println(s"RouteResult.Matched: ${this.id}: ${locationState.isSiblingMatched()}")
+              locationState.resetChildMatched()
+              println("locationState.notifySiblingMatched()")
+              locationState.notifySiblingMatched()
               if (
                 !locationState.routerState.get(this).contains(nextState) ||
                 currentRender.now().isEmpty
               ) {
-                SignalToStream(
-                  createResult().map(RouteEvent.NextRender(nextState, location, consumed, _))
-                )
+                SignalToStream(createResult()).map(RouteEvent.NextRender(nextState, location, consumed, _))
               } else {
                 EventStream.fromValue(RouteEvent.SameRender(nextState, location, consumed))
               }
             case RouteResult.RunEffect(nextState, location, consumed, run)        =>
+              println(s"RouteResult.RunEffect: ${locationState.isSiblingMatched()}")
+
               if (!locationState.routerState.get(this).contains(nextState)) {
                 run()
                 EventStream.fromValue(RouteEvent.SameRender(nextState, location, consumed))
@@ -54,6 +61,8 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
               }
 
             case RouteResult.Rejected =>
+              println(s"RouteResult.Rejected: ${locationState.isSiblingMatched()}")
+
               EventStream.fromValue(RouteEvent.NoRender)
           }
           .foreach {
@@ -61,25 +70,24 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
               locationState.routerState.set(this, nextState)
 
               locationState.setRemaining(Some(remaining))
-              locationState.notifyMatched()
-
               if (render != null) {
                 val childState = LocationState.initIfMissing(
                   render.ref,
                   () =>
                     new LocationState(
-                      locationState.remaining,
-                      locationState.childMatched,
-                      locationState.onChildMatched,
-                      childStateRef,
+                      location = locationState.remaining,
+                      isSiblingMatched = locationState.isChildMatched,
+                      resetSiblingMatched = locationState.resetChildMatched,
+                      notifySiblingMatched = locationState.notifyChildMatched,
+                      routerState = childStateRef,
                     )
                 )
                 childState.setConsumed(consumed)
 
                 val amendedRender = render.amend(
                   onMountUnmountCallback(
-                    ctx => LocationState(ctx.thisNode).foreach(_.start()(ctx.owner)),
-                    el => LocationState(el).foreach(_.kill())
+                    ctx => childState.start()(ctx.owner),
+                    _ => childState.kill()
                   ),
                 )
                 amendedRender.ref.dataset.addOne("frPath" -> consumed.mkString("/", "/", ""))
@@ -90,14 +98,12 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
 
             case RouteEvent.SameRender(nextState, remaining, consumed) =>
               locationState.routerState.set(this, nextState)
-
-              locationState.setRemaining(Some(remaining))
               currentRender.now().foreach { render =>
                 LocationState.closestOrDefault(render.ref).setConsumed(consumed)
                 render.ref.dataset.addOne("frPath" -> consumed.mkString("/", "/", ""))
               }
 
-              locationState.notifyMatched()
+              locationState.setRemaining(Some(remaining))
 
             case RouteEvent.NoRender =>
               locationState.routerState.unset(this)
@@ -117,6 +123,8 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
 }
 
 object Route {
+
+  var counter = 1
 
   implicit def toDirective[L](route: Route): Directive[L] = Directive[L](_ => route)
 

@@ -22,35 +22,39 @@ object TabsExample
       import io.laminext.syntax.core._
       import com.raquo.laminar.api.L._
 
+      val tabs = Seq(
+        "tab-1" -> "Tab 1",
+        "tab-2" -> "Tab 2",
+      )
+
       div(
         div(
           cls := "p-4 min-h-[300px]",
-          /* <focus> */
-          (pathEnd.mapTo("tab-1") | path(Set("tab-1", "tab-2"))).signal { tab =>
-            /* </focus> */
+          div(
+            cls := "space-y-2",
             div(
-              cls := "space-y-2",
-              div(
-                cls := "flex space-x-2",
+              cls := "flex space-x-2",
+              tabs.map { case (path, tabLabel) =>
                 a(
-                  href := "/tab-1",
+                  href := s"/$path",
                   cls  := "text-xl px-4 py-1 rounded border-b-2",
                   /* <focus> */
-                  cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- tab.map(_ == "tab-1"),
-                  cls.toggle("border-transparent text-blue-700") <-- tab.map(_ != "tab-1"),
+                  navMod { active =>
+                    Seq(
+                      cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- active,
+                      cls.toggle("border-transparent text-blue-700") <-- !active,
+                    )
+                  },
                   /* </focus> */
-                  "Tab 1"
-                ),
-                a(
-                  href := "/tab-2",
-                  cls  := "text-xl px-4 py-1 rounded border-b-2",
-                  /* <focus> */
-                  cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- tab.map(_ == "tab-2"),
-                  cls.toggle("border-transparent text-blue-700") <-- tab.map(_ != "tab-2"),
-                  /* </focus> */
-                  "Tab 2"
+                  tabLabel
                 )
-              ),
+              }
+            ),
+            /* <focus> */
+            path(Set("tab-1", "tab-2")).signal { tab =>
+              /* </focus> */
+              println(s"!!! tabs matched")
+
               div(
                 div(
                   cls.toggle("hidden") <-- !tab.valueIs("tab-1"),
@@ -61,16 +65,24 @@ object TabsExample
                   textArea("tab-2 text area", cls := "bg-blue-100 text-blue-500")
                 )
               )
-            )
-            /* <focus> */
-          },
-          /* </focus> */
-          (noneMatched & extractUnmatchedPath) { unmatched =>
-            div(
-              div(cls := "text-2xl", "Not Found"),
-              div(unmatched.mkString("/", "/", ""))
-            )
-          }
+
+              /* <focus> */
+            },
+            /* </focus> */
+
+            debug("before noneMatched") {
+
+              (noneMatched & extractUnmatchedPath) { unmatched =>
+
+                println(s"!!! not found matched: $unmatched")
+
+                div(
+                  div(cls := "text-2xl", "Not Found"),
+                  div(unmatched.mkString("/", "/", ""))
+                )
+              }
+            }
+          )
         )
       )
     })

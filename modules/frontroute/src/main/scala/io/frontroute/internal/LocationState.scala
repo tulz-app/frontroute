@@ -39,12 +39,25 @@ private[frontroute] object LocationState {
 
   def withLocationProvider(lp: LocationProvider)(implicit owner: Owner): LocationState = {
     var siblingMatched = false
-    lp.current.foreach { _ => siblingMatched = false }
+    lp.current.foreach { c =>
+      println(s"=============== location provider change: ${c}, resetSiblingMatched")
+      siblingMatched = false
+    }
 
     val state = new LocationState(
       location = lp.current,
-      siblingMatched = () => siblingMatched,
-      notifyMatched = () => { siblingMatched = true },
+      isSiblingMatched = () => {
+        println(s"isSiblingMatched: $siblingMatched")
+        siblingMatched
+      },
+      resetSiblingMatched = () => {
+        println("resetSiblingMatched")
+        siblingMatched = false
+      },
+      notifySiblingMatched = () => {
+        println("notifySiblingMatched")
+        siblingMatched = true
+      },
       routerState = new RouterStateRef,
     )
     lp.start()
@@ -96,8 +109,9 @@ private[frontroute] object LocationState {
 
 private[frontroute] class LocationState(
   val location: Signal[Option[Location]],
-  val siblingMatched: () => Boolean,
-  val notifyMatched: () => Unit,
+  val isSiblingMatched: () => Boolean,
+  val resetSiblingMatched: () => Unit,
+  val notifySiblingMatched: () => Unit,
   val routerState: RouterStateRef,
 ) {
 
@@ -113,9 +127,10 @@ private[frontroute] class LocationState(
     consumedVar.set(consumed)
   }
 
-  private var _childMatched       = false
-  val onChildMatched: () => Unit  = () => { _childMatched = true }
-  val childMatched: () => Boolean = () => _childMatched
+  private var _childMatched          = false
+  val notifyChildMatched: () => Unit = () => { _childMatched = true }
+  val resetChildMatched: () => Unit  = () => { _childMatched = false }
+  val isChildMatched: () => Boolean  = () => _childMatched
 
   private var locationSubscription: Subscription = _
 

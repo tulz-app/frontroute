@@ -22,11 +22,11 @@ final case class Location(
   private[frontroute] val parsedState = HistoryState.tryParse(state)
 
   override def toString: String =
-    s"${path.mkString("/")}${if (params.nonEmpty) "?" else ""}${params
+    s"path: '${path.mkString("/")}${if (params.nonEmpty) "?" else ""}${params
         .flatMap { case (name, values) =>
           values.map(value => s"$name=$value")
         }
-        .mkString("&")}"
+        .mkString("&")}'"
 
 }
 
