@@ -88,7 +88,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
 
   implicit def signalOfElementToRoute(e: => Signal[HtmlElement]): Route = complete(e)
 
-  private[frontroute] def withCurrentPathAndEl[Ref <: dom.html.Element](
+  private[frontroute] def withMatchedPathAndEl[Ref <: dom.html.Element](
     mod: (ReactiveHtmlElement[Ref], StrictSignal[List[String]]) => Mod[ReactiveHtmlElement[Ref]]
   ): Mod[ReactiveHtmlElement[Ref]] = {
     inContext { el =>
@@ -116,7 +116,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
   }
 
   def withMatchedPath[Ref <: dom.html.Element](mod: StrictSignal[List[String]] => Mod[ReactiveHtmlElement[Ref]]): Mod[ReactiveHtmlElement[Ref]] = {
-    withCurrentPathAndEl((_, consumed) => mod(consumed))
+    withMatchedPathAndEl((_, consumed) => mod(consumed))
   }
 
   def relativeHref(path: String): Mod[ReactiveHtmlElement[html.Anchor]] =
@@ -127,11 +127,11 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
   def navMod(
     mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
   ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
-    withCurrentPathAndEl { (el, consumed) =>
+    withMatchedPathAndEl { (el, matched) =>
       val active =
-        consumed.map { l =>
+        matched.map { l =>
           val UrlString(url) = el.ref.href
-          l.mkString("/", "/", "").startsWith(url.pathname)
+          url.pathname.startsWith(l.mkString("/", "/", ""))
         }
       mod(active)
     }
@@ -139,7 +139,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
   def navModStrict(
     mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
   ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
-    withCurrentPathAndEl { (el, consumed) =>
+    withMatchedPathAndEl { (el, consumed) =>
       val active =
         consumed.map { l =>
           val UrlString(url) = el.ref.href
