@@ -11,6 +11,7 @@ import io.frontroute.internal.UrlString
 import io.frontroute.ops.DirectiveOfOptionOps
 import org.scalajs.dom
 import org.scalajs.dom.HTMLAnchorElement
+import org.scalajs.dom.html
 
 import scala.scalajs.js
 
@@ -117,6 +118,11 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
   def withMatchedPath[Ref <: dom.html.Element](mod: StrictSignal[List[String]] => Mod[ReactiveHtmlElement[Ref]]): Mod[ReactiveHtmlElement[Ref]] = {
     withCurrentPathAndEl((_, consumed) => mod(consumed))
   }
+
+  def relativeHref(path: String): Mod[ReactiveHtmlElement[html.Anchor]] =
+    withMatchedPath { matched =>
+      href <-- matched.map(_.mkString("/", "/", s"/$path"))
+    }
 
   def navMod(
     mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
