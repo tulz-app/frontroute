@@ -1,7 +1,8 @@
 # Changelog
 
-### ...
+### 0.17.x
 
+* Laminar 15
 * `signal` directive is gone
 * `relativeHref`
 * `withMatchedPath`
@@ -9,6 +10,7 @@
 * `navModExact`
 * `matchedMod` ?
 * `matchedModExact` ?
+* `provideOption`
 
 ### 0.16.x
 

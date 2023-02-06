@@ -72,7 +72,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
     directive.tapply(_ => subRoute)(location, previous, state)
   }
 
-  private def complete(result: () => ToComplete): Route = (location, _, state) => RouteResult.Matched(state, location, state.consumed, () => result().get)
+  private def complete(result: () => HtmlElement): Route = (location, _, state) => RouteResult.Matched(state, location, state.consumed, result)
 
   def runEffect(effect: => Unit): Route = (location, _, state) =>
     RouteResult.RunEffect(
@@ -83,8 +83,6 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
     )
 
   implicit def elementToRoute(e: => HtmlElement): Route = complete(() => e)
-
-  implicit def signalOfElementToRoute(e: => Signal[HtmlElement]): Route = complete(() => e)
 
   private[frontroute] def withMatchedPathAndEl[Ref <: dom.html.Element](
     mod: (ReactiveHtmlElement[Ref], StrictSignal[List[String]]) => Mod[ReactiveHtmlElement[Ref]]
