@@ -13,6 +13,7 @@ import org.scalajs.dom
 import org.scalajs.dom.HTMLAnchorElement
 import org.scalajs.dom.html
 
+import scala.annotation.tailrec
 import scala.scalajs.js
 
 package object frontroute extends PathMatchers with Directives with ApplyConverters[Route] {
@@ -49,6 +50,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
 
   def firstMatch(routes: Route*): Route = (location, previous, state) => {
 
+    @tailrec
     def findFirst(rs: List[(Route, Int)]): RouteResult =
       rs match {
         case Nil                    => rejected
@@ -81,6 +83,17 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
       List.empty,
       () => effect
     )
+
+  def navigate(
+    to: String,
+    replace: Boolean = false,
+  ): Route = runEffect {
+    if (replace) {
+      BrowserNavigation.replaceState(url = to)
+    } else {
+      BrowserNavigation.pushState(url = to)
+    }
+  }
 
   implicit def elementToRoute(e: => HtmlElement): Route = complete(() => e)
 

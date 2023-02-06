@@ -4,6 +4,8 @@
 
 * Laminar 15
 * `signal` directive is gone
+* `runEffect`
+* `navigate`
 * `relativeHref`
 * `withMatchedPath`
 * `navMod`
