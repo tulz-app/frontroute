@@ -39,7 +39,6 @@ object Site {
       io.frontroute.site.examples.ex_params.ParamsExample,
       io.frontroute.site.examples.ex_advanced_params.AdvancedParamsExample,
       io.frontroute.site.examples.ex_custom_directives.CustomDirectivesExample,
-      io.frontroute.site.examples.ex_signal.SignalExample,
       io.frontroute.site.examples.ex_auth.AuthExample,
       io.frontroute.site.examples.ex_tabs.TabsExample,
       io.frontroute.site.examples.ex_nested.NestedExample,
@@ -70,7 +69,6 @@ object Site {
       "Directives"         -> Seq(
         docPage("directives", "Built-in directives", FileAsString("/doc/reference/built-in-directives.md")),
         docPage("signal-directive", ".signal directive", FileAsString("/doc/reference/signal-directive.md")),
-        docPage("injecting-external-signal", "Injecting external signal", FileAsString("/doc/reference/injecting-external-signal.md")),
         docPage("conjunction", "conjunction (&)", FileAsString("/doc/reference/conjunction.md")),
         docPage("disjunction", "disjunction (|)", FileAsString("/doc/reference/disjunction.md")),
         docPage("directive-combinators", "Directive combinators", FileAsString("/doc/reference/directive-combinators.md")),

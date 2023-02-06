@@ -35,7 +35,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
 
   implicit def directiveOfOptionSyntax[L](underlying: Directive[Option[L]]): DirectiveOfOptionOps[L] = new DirectiveOfOptionOps(underlying)
 
-  private[frontroute] val rejected: Signal[RouteResult] = Val(RouteResult.Rejected)
+  private[frontroute] val rejected: RouteResult = RouteResult.Rejected
 
   val reject: Route = (_, _, _) => rejected
 
@@ -49,13 +49,13 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
 
   def firstMatch(routes: Route*): Route = (location, previous, state) => {
 
-    def findFirst(rs: List[(Route, Int)]): Signal[RouteResult] =
+    def findFirst(rs: List[(Route, Int)]): RouteResult =
       rs match {
         case Nil                    => rejected
         case (route, index) :: tail =>
-          route(location, previous, state.enterConcat(index)).flatMap {
-            case RouteResult.Matched(state, location, consumed, result) => Val(RouteResult.Matched(state, location, consumed, result))
-            case RouteResult.RunEffect(state, location, consumed, run)  => Val(RouteResult.RunEffect(state, location, consumed, run))
+          route(location, previous, state.enterConcat(index)) match {
+            case RouteResult.Matched(state, location, consumed, result) => RouteResult.Matched(state, location, consumed, result)
+            case RouteResult.RunEffect(state, location, consumed, run)  => RouteResult.RunEffect(state, location, consumed, run)
             case RouteResult.Rejected                                   => findFirst(tail)
           }
       }
@@ -72,16 +72,14 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
     directive.tapply(_ => subRoute)(location, previous, state)
   }
 
-  private def complete(result: () => ToComplete): Route = (location, _, state) => Val(RouteResult.Matched(state, location, state.consumed, () => result().get))
+  private def complete(result: () => ToComplete): Route = (location, _, state) => RouteResult.Matched(state, location, state.consumed, () => result().get)
 
   def runEffect(effect: => Unit): Route = (location, _, state) =>
-    Val(
-      RouteResult.RunEffect(
-        state,
-        location,
-        List.empty,
-        () => effect
-      )
+    RouteResult.RunEffect(
+      state,
+      location,
+      List.empty,
+      () => effect
     )
 
   implicit def elementToRoute(e: => HtmlElement): Route = complete(() => e)
@@ -137,6 +135,19 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
       mod(active)
     }
 
+  def navModExact(
+    mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
+  ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
+    inContext { el =>
+      val active = LocationState.closestOrDefault(el.ref).location.map { location =>
+        val UrlString(url) = el.ref.href
+        location.exists { location =>
+          location.fullPath.mkString("/", "/", "") == url.pathname
+        }
+      }
+      mod(active)
+    }
+
   def matchedMod(
     mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
   ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
@@ -151,7 +162,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
       mod(active)
     }
 
-  def matchedModStrict(
+  def matchedModExact(
     mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
   ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
     withMatchedPathAndEl { (el, consumed) =>

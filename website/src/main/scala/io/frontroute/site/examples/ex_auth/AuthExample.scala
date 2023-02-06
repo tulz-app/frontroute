@@ -35,44 +35,42 @@ object AuthExample
           case (_, AuthenticationEvent.SignedIn(userId)) => Some(User(userId))
         }
 
-      /* <focus> */
-      val requireAuthentication: Directive[User] =
-        signal(authenticatedUser.signal).collect { case Some(user) => user }
-      /* </focus> */
-
-      val route =
-        /* <focus> */
-        signal(authenticatedUser.signal) { implicit maybeUser =>
-          /* </focus> */
-          firstMatch(
-            pathEnd {
-              div(
-                div(cls := "text-2xl", "Index page."),
-                div(s"Maybe user: $maybeUser")
-              )
-            },
-            pathPrefix("private") {
-              /* <focus> */
-              requireAuthentication { user =>
-                /* </focus> */
-                path("profile") {
+      val route = {
+        div(
+          child <-- authenticatedUser.signal.map { implicit maybeUser =>
+            div(
+              firstMatch(
+                pathEnd {
                   div(
-                    div(cls := "text-2xl", "Profile page."),
-                    div(s"User: $user")
+                    div(cls := "text-2xl", "Index page."),
+                    div(s"Maybe user: $maybeUser")
+                  )
+                },
+                /* <focus> */
+                provideOption(maybeUser) { user =>
+                  /* </focus> */
+                  pathPrefix("private") {
+                    path("profile") {
+                      div(
+                        div(cls := "text-2xl", "Profile page."),
+                        div(s"User: $user")
+                      )
+                    }
+                  }
+                  /* <focus> */
+                },
+                /* </focus> */
+                extractUnmatchedPath { unmatched =>
+                  div(
+                    div(cls := "text-2xl", "Not Found"),
+                    div(unmatched.mkString("/", "/", ""))
                   )
                 }
-                /* <focus> */
-              }
-              /* </focus> */
-            },
-            extractUnmatchedPath { unmatched =>
-              div(
-                div(cls := "text-2xl", "Not Found"),
-                div(unmatched.mkString("/", "/", ""))
               )
-            }
-          )
-        }
+            )
+          }
+        )
+      }
 
       div(
         div(

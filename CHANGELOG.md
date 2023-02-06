@@ -1,5 +1,15 @@
 # Changelog
 
+### ...
+
+* `signal` directive is gone
+* `relativeHref`
+* `withMatchedPath`
+* `navMod`
+* `navModExact`
+* `matchedMod` ?
+* `matchedModExact` ?
+
 ### 0.16.x
 
 frontroute now depends on Laminar and is only usable with Laminar (previously, frontroute 

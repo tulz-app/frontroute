@@ -1,6 +1,5 @@
 package io.frontroute
 
-import com.raquo.laminar.api.L._
 import io.frontroute.internal.PathMatchResult
 
 import scala.scalajs.js
@@ -12,13 +11,6 @@ trait Directives {
 
   private[frontroute] def extract[T](f: Location => T): Directive[T] =
     extractContext.map(f)
-
-  def signal[T](signal: Signal[T]): Directive[T] =
-    Directive[T] { inner => (location, previous, state) =>
-      signal.flatMap { extracted =>
-        inner(extracted)(location, previous, state.enterAndSet(extracted))
-      }
-    }
 
   def param(name: String): Directive[String] =
     Directive[String] { inner => (location, previous, state) =>
@@ -63,6 +55,14 @@ trait Directives {
   def provide[L](value: L): Directive[L] =
     Directive { inner => (location, previous, state) =>
       inner(value)(location, previous, state.enterAndSet(value))
+    }
+
+  def provideOption[L](value: Option[L]): Directive[L] =
+    Directive { inner => (location, previous, state) =>
+      value match {
+        case None        => rejected
+        case Some(value) => inner(value)(location, previous, state.enterAndSet(value))
+      }
     }
 
   def pathPrefix[T](m: PathMatcher[T]): Directive[T] =

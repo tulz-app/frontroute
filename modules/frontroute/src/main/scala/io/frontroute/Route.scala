@@ -8,7 +8,7 @@ import io.frontroute.internal.RoutingState
 import io.frontroute.internal.RouterStateRef
 import io.frontroute.internal.SignalToStream
 
-trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResult]) with Mod[HtmlElement] {
+trait Route extends ((Location, RoutingState, RoutingState) => RouteResult) with Mod[HtmlElement] {
 
   val id = Route.counter
   Route.counter = Route.counter + 1
@@ -34,16 +34,14 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
                 EventStream.fromValue(currentUnmatched)
             }
           }
-          .flatMap { currentUnmatched =>
+          .map { currentUnmatched =>
             println(s"--------------- route: ${this.id}: $currentUnmatched -- ${locationState.isSiblingMatched()}")
             locationState.childStarted()
 
-            SignalToStream(
-              this.apply(
-                currentUnmatched.copy(otherMatched = locationState.isSiblingMatched()),
-                locationState.routerState.get(this).fold(RoutingState.empty)(_.resetPath),
-                RoutingState.empty.withConsumed(locationState.consumed.now())
-              )
+            this.apply(
+              currentUnmatched.copy(otherMatched = locationState.isSiblingMatched()),
+              locationState.routerState.get(this).fold(RoutingState.empty)(_.resetPath),
+              RoutingState.empty.withConsumed(locationState.consumed.now())
             )
           }
           .flatMap {

@@ -56,15 +56,14 @@ class Directive[L](
       self
         .tapply { value => (location, previous, state) =>
           inner(value)(location, previous, state.leaveDisjunction)
-        }(location, previous, state.enterDisjunction)
-        .flatMap {
-          case RouteResult.Matched(state, location, consumed, result) => Val(RouteResult.Matched(state, location, consumed, result))
-          case RouteResult.RunEffect(state, location, consumed, run)  => Val(RouteResult.RunEffect(state, location, consumed, run))
-          case RouteResult.Rejected                                   =>
-            other.tapply { value => (location, previous, state) =>
-              inner(value)(location, previous, state.leaveDisjunction)
-            }(location, previous, state.enterDisjunction)
-        }
+        }(location, previous, state.enterDisjunction) match {
+        case RouteResult.Matched(state, location, consumed, result) => RouteResult.Matched(state, location, consumed, result)
+        case RouteResult.RunEffect(state, location, consumed, run)  => RouteResult.RunEffect(state, location, consumed, run)
+        case RouteResult.Rejected                                   =>
+          other.tapply { value => (location, previous, state) =>
+            inner(value)(location, previous, state.leaveDisjunction)
+          }(location, previous, state.enterDisjunction)
+      }
     }
 
   def collect[R](f: PartialFunction[L, R]): Directive[R] =
