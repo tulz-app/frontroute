@@ -27,7 +27,17 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
         val _ = SignalToStream(locationState.location)
           .collect { case Some(currentUnmatched) => currentUnmatched }
           .flatMap { currentUnmatched =>
-            println(s"--------------- route: ${this.id}: $currentUnmatched: ${locationState.isSiblingMatched()}")
+            locationState.previousSiblingInProgress match {
+              case Some(previousSiblingInProgress) =>
+                previousSiblingInProgress.take(1).mapToStrict(currentUnmatched)
+              case None                            =>
+                EventStream.fromValue(currentUnmatched)
+            }
+          }
+          .flatMap { currentUnmatched =>
+            println(s"--------------- route: ${this.id}: $currentUnmatched -- ${locationState.isSiblingMatched()}")
+            locationState.childStarted()
+
             SignalToStream(
               this.apply(
                 currentUnmatched.copy(otherMatched = locationState.isSiblingMatched()),
@@ -42,6 +52,7 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
               locationState.resetChildMatched()
               println("locationState.notifySiblingMatched()")
               locationState.notifySiblingMatched()
+              locationState.childFinished()
               if (
                 !locationState.routerState.get(this).contains(nextState) ||
                 currentRender.now().isEmpty
@@ -52,7 +63,8 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
               }
             case RouteResult.RunEffect(nextState, location, consumed, run)        =>
               println(s"RouteResult.RunEffect: ${locationState.isSiblingMatched()}")
-
+              locationState.notifySiblingMatched()
+              locationState.childFinished()
               if (!locationState.routerState.get(this).contains(nextState)) {
                 run()
                 EventStream.fromValue(RouteEvent.SameRender(nextState, location, consumed))
@@ -62,8 +74,9 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
 
             case RouteResult.Rejected =>
               println(s"RouteResult.Rejected: ${locationState.isSiblingMatched()}")
-
+              locationState.childFinished()
               EventStream.fromValue(RouteEvent.NoRender)
+
           }
           .foreach {
             case RouteEvent.NextRender(nextState, remaining, consumed, render) =>
@@ -95,8 +108,7 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
               } else {
                 currentRender.set(None) // route matched but rendered a null
               }
-
-            case RouteEvent.SameRender(nextState, remaining, consumed) =>
+            case RouteEvent.SameRender(nextState, remaining, consumed)         =>
               locationState.routerState.set(this, nextState)
               currentRender.now().foreach { render =>
                 LocationState.closestOrDefault(render.ref).setConsumed(consumed)
@@ -104,10 +116,10 @@ trait Route extends ((Location, RoutingState, RoutingState) => Signal[RouteResul
               }
 
               locationState.setRemaining(Some(remaining))
-
-            case RouteEvent.NoRender =>
+            case RouteEvent.NoRender                                           =>
               locationState.routerState.unset(this)
               currentRender.set(None)
+
           }(ctx.owner)
       }
     }

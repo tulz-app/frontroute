@@ -16,39 +16,35 @@ object NestedExample
       )
     )(() => {
       import io.frontroute._
-
+      import io.laminext.syntax.core._
       import com.raquo.laminar.api.L._
+
+      val tabs = Seq(
+        "tab-1" -> "Tab 1",
+        "tab-2" -> "Tab 2",
+      )
 
       def MyComponent(): HtmlElement =
         div(
           cls := "space-y-2",
-          /* <focus> */
-          path(segment).signal { tab =>
-            /* </focus> */
-            div(
-              cls := "flex space-x-2",
+          div(
+            cls := "flex space-x-2",
+            tabs.map { case (path, tabLabel) =>
               a(
-                href := "tab-1",
+                href := path,
                 cls  := "text-xl px-4 py-1 rounded border-b-2",
                 /* <focus> */
-                cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- tab.map(_ == "tab-1"),
-                cls.toggle("border-transparent text-blue-700") <-- tab.map(_ != "tab-1"),
+                navMod { active =>
+                  Seq(
+                    cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- active,
+                    cls.toggle("border-transparent text-blue-700") <-- !active,
+                  )
+                },
                 /* </focus> */
-                "Tab 1"
-              ),
-              a(
-                href := "tab-2",
-                cls  := "text-xl px-4 py-1 rounded border-b-2",
-                /* <focus> */
-                cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- tab.map(_ == "tab-2"),
-                cls.toggle("border-transparent text-blue-700") <-- tab.map(_ != "tab-2"),
-                /* </focus> */
-                "Tab 2"
+                tabLabel
               )
-            )
-            /* <focus> */
-          },
-          /* </focus> */
+            }
+          ),
           div(
             /* <focus> */
             path("tab-1") {

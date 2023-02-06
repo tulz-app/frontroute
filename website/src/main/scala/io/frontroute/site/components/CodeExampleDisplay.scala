@@ -75,6 +75,11 @@ object CodeExampleDisplay {
       )
     }
 
+    val tabs = Seq(
+      "live"   -> "Live Demo",
+      "source" -> "Source Code",
+    ) ++ Seq("description" -> "Description").filter(_ => example.description.trim.nonEmpty)
+
     div(
       cls := "flex-1 flex flex-col space-y-4",
       div(
@@ -83,33 +88,22 @@ object CodeExampleDisplay {
           cls := "font-display text-xl font-bold text-gray-900 tracking-wide",
           example.title
         ),
-        (path(Set("live", "source", "description")) | path(segment).mapTo("live") | pathEnd.mapTo("live")).signal { tab =>
-          div(
-            cls := "flex space-x-2",
+        div(
+          cls := "flex space-x-2",
+          tabs.map { case (path, tabLabel) =>
             a(
-              href := "live",
+              href := path,
               cls  := "px-2 rounded",
-              cls.toggle("bg-gray-500 text-gray-100 font-semibold") <-- tab.map(_ == "live"),
-              cls.toggle("text-gray-700 font-semibold") <-- tab.map(_ != "live"),
-              "Live Demo"
-            ),
-            a(
-              href := "source",
-              cls  := "px-2 rounded",
-              cls.toggle("bg-gray-500 text-gray-100 font-semibold") <-- tab.map(_ == "source"),
-              cls.toggle("text-gray-700 font-semibold") <-- tab.map(_ != "source"),
-              "Source Code"
-            ),
-            a(
-              href := "description",
-              cls  := "px-2 text-lg font-semibold rounded",
-              cls.toggle("bg-gray-500 text-gray-200") <-- tab.map(_ == "description"),
-              cls.toggle("text-gray-800") <-- tab.map(_ != "description"),
-              cls  := (if (example.description.trim.isEmpty) "hidden" else ""),
-              "Description"
+              navMod { active =>
+                Seq(
+                  cls.toggle("bg-gray-500 text-gray-100 font-semibold") <-- active,
+                  cls.toggle("text-gray-700 font-semibold") <-- !active,
+                )
+              },
+              tabLabel
             )
-          )
-        }
+          }
+        )
       ),
       (path(Set("live", "source", "description")) | pathEnd.mapTo("live")).signal { tab =>
         div(

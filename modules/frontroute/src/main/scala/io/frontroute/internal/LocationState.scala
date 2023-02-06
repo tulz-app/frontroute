@@ -60,6 +60,12 @@ private[frontroute] object LocationState {
       },
       routerState = new RouterStateRef,
     )
+
+    lp.current.foreach { c =>
+      println(s"=============== location provider change: ${c}, resetSiblingMatched")
+      state.childFinished()
+    }
+
     lp.start()
     state.start()
     state
@@ -131,6 +137,27 @@ private[frontroute] class LocationState(
   val notifyChildMatched: () => Unit = () => { _childMatched = true }
   val resetChildMatched: () => Unit  = () => { _childMatched = false }
   val isChildMatched: () => Boolean  = () => _childMatched
+
+  private var _previousSiblingInProgressCB: Option[Unit => Unit]    = None
+  private var _previousSiblingInProgress: Option[EventStream[Unit]] = None
+
+  def previousSiblingInProgress: Option[EventStream[Unit]] = _previousSiblingInProgress
+
+  def childStarted(): Unit = {
+    if (previousSiblingInProgress.isDefined) {
+      throw new IllegalStateException("previousSiblingInProgress.isDefined == true")
+    }
+
+    val (stream, cb) = EventStream.fromCallback[Unit]
+    _previousSiblingInProgress = Some(stream)
+    _previousSiblingInProgressCB = Some(cb)
+  }
+
+  def childFinished(): Unit = {
+    _previousSiblingInProgressCB = None
+    _previousSiblingInProgress = None
+    _previousSiblingInProgressCB.foreach(_((): Unit))
+  }
 
   private var locationSubscription: Subscription = _
 
