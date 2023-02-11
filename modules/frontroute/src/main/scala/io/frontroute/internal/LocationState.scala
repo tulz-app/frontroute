@@ -39,8 +39,7 @@ private[frontroute] object LocationState {
 
   def withLocationProvider(lp: LocationProvider)(implicit owner: Owner): LocationState = {
     var siblingMatched = false
-    lp.current.foreach { c =>
-      println(s"=============== location provider change: ${c}, resetSiblingMatched")
+    lp.current.foreach { _ =>
       siblingMatched = false
     }
 
@@ -72,7 +71,7 @@ private[frontroute] object LocationState {
       if (node.parentNode != null) {
         closestOrDefault(node.parentNode)
       } else {
-        withState.____locationState = default
+//        withState.____locationState = default
         default
       }
     } else {

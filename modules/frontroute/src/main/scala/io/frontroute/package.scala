@@ -11,6 +11,9 @@ import io.frontroute.internal.UrlString
 import io.frontroute.ops.DirectiveOfOptionOps
 import org.scalajs.dom
 import org.scalajs.dom.HTMLAnchorElement
+import org.scalajs.dom.MutationObserver
+import org.scalajs.dom.MutationObserverInit
+import org.scalajs.dom.MutationRecord
 import org.scalajs.dom.html
 
 import scala.annotation.tailrec
@@ -97,35 +100,31 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
 
   implicit def elementToRoute(e: => HtmlElement): Route = complete(() => e)
 
-  private[frontroute] def withMatchedPathAndEl[Ref <: dom.html.Element](
-    mod: (ReactiveHtmlElement[Ref], StrictSignal[List[String]]) => Mod[ReactiveHtmlElement[Ref]]
-  ): Mod[ReactiveHtmlElement[Ref]] = {
-    inContext { el =>
-      val consumedVar                          = Var(List.empty[String])
-      var sub: js.UndefOr[DynamicSubscription] = js.undefined
-
-      LocationState.closest(el.ref) match {
-        case None                =>
-          sub = ReactiveElement.bindFn(el, LocationState.default.consumed) { next =>
-            LocationState.closest(el.ref) match {
-              case None                => consumedVar.set(next)
-              case Some(locationState) =>
-                sub.foreach(_.kill())
-                sub = js.undefined
-                // managed subscription
-                val _ = ReactiveElement.bindObserver(el, locationState.consumed)(consumedVar.writer)
-            }
-          }
-        case Some(locationState) =>
-          // managed subscription
-          val _ = ReactiveElement.bindObserver(el, locationState.consumed)(consumedVar.writer)
-      }
-      mod(el, consumedVar.signal)
-    }
-  }
-
   def withMatchedPath[Ref <: dom.html.Element](mod: StrictSignal[List[String]] => Mod[ReactiveHtmlElement[Ref]]): Mod[ReactiveHtmlElement[Ref]] = {
-    withMatchedPathAndEl((_, consumed) => mod(consumed))
+    val consumedVar                          = Var(List.empty[String])
+    var sub: js.UndefOr[DynamicSubscription] = js.undefined
+
+    Seq(
+      onMountCallback { (ctx: MountContext[ReactiveHtmlElement[Ref]]) =>
+        LocationState.closest(ctx.thisNode.ref) match {
+          case None                =>
+            sub = ReactiveElement.bindFn(ctx.thisNode, LocationState.default.consumed) { next =>
+              LocationState.closest(ctx.thisNode.ref) match {
+                case None                => consumedVar.set(next)
+                case Some(locationState) =>
+                  sub.foreach(_.kill())
+                  sub = js.undefined
+                  // managed subscription
+                  val _ = ReactiveElement.bindObserver(ctx.thisNode, locationState.consumed)(consumedVar.writer)
+              }
+            }
+          case Some(locationState) =>
+            // managed subscription
+            val _ = ReactiveElement.bindObserver(ctx.thisNode, locationState.consumed)(consumedVar.writer)
+        }
+      },
+      mod(consumedVar.signal)
+    )
   }
 
   def relativeHref(path: String): Mod[ReactiveHtmlElement[html.Anchor]] =
@@ -133,56 +132,91 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
       href <-- matched.map(_.mkString("/", "/", s"/$path"))
     }
 
+  def navModFn(
+    mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]],
+    compare: (Location, org.scalajs.dom.Location) => Boolean
+  ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] = {
+    val activeVar = Var(false)
+    val mutations = EventBus[Seq[MutationRecord]]()
+
+    val mutationObserver = new MutationObserver(
+      callback = (entries, _) => {
+        if (entries.nonEmpty) {
+          mutations.emit(entries.toSeq)
+        }
+      }
+    )
+
+    Seq(
+      onMountUnmountCallback(
+        mount = { (ctx: MountContext[ReactiveHtmlElement[HTMLAnchorElement]]) =>
+          val locationState = LocationState.closestOrDefault(ctx.thisNode.ref)
+
+          // managed subscription
+          val _ = EventStream
+            .merge(
+              EventStream.fromValue(()),
+              mutations.events.mapToUnit,
+              locationState.location.changes.mapToUnit
+            )
+            .sample(locationState.location)
+            .foreach { location =>
+              val UrlString(url) = ctx.thisNode.ref.href
+              activeVar.set {
+                location.exists { location =>
+                  compare(location, url)
+                }
+              }
+            }(ctx.owner)
+          mutationObserver.observe(
+            ctx.thisNode.ref,
+            new MutationObserverInit {
+              attributes = true
+            }
+          )
+        },
+        unmount = { (_: ReactiveHtmlElement[HTMLAnchorElement]) =>
+          mutationObserver.disconnect()
+        }
+      ),
+      mod(activeVar.signal)
+    )
+  }
+
   def navMod(
     mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
   ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
-    inContext { el =>
-      val active = LocationState.closestOrDefault(el.ref).location.map { location =>
-        val UrlString(url) = el.ref.href
-        location.exists { location =>
-          location.fullPath.mkString("/", "/", "").startsWith(url.pathname)
-        }
-      }
-      mod(active)
-    }
+    navModFn(mod, (location, url) => location.fullPath.mkString("/", "/", "").startsWith(url.pathname))
 
   def navModExact(
     mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
   ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
-    inContext { el =>
-      val active = LocationState.closestOrDefault(el.ref).location.map { location =>
-        val UrlString(url) = el.ref.href
-        location.exists { location =>
-          location.fullPath.mkString("/", "/", "") == url.pathname
-        }
-      }
-      mod(active)
-    }
+    navModFn(mod, (location, url) => location.fullPath.mkString("/", "/", "") == url.pathname)
 
-  def matchedMod(
-    mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
-  ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
-    withMatchedPathAndEl { (el, matched) =>
-      val active =
-        matched.map { l =>
-          val UrlString(url) = el.ref.href
-          println(s"nav mod url.pathname: ${url.pathname}")
-          println(s"nav mod matched: $l")
-          l.mkString("/", "/", "").startsWith(url.pathname)
-        }
-      mod(active)
-    }
-
-  def matchedModExact(
-    mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
-  ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
-    withMatchedPathAndEl { (el, consumed) =>
-      val active =
-        consumed.map { l =>
-          val UrlString(url) = el.ref.href
-          l.mkString("/", "/", "") == url.pathname
-        }
-      mod(active)
-    }
+//  def matchedMod(
+//    mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
+//  ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
+//    withMatchedPathAndEl { (el, matched) =>
+//      val active =
+//        matched.map { l =>
+//          val UrlString(url) = el.ref.href
+//          println(s"nav mod url.pathname: ${url.pathname}")
+//          println(s"nav mod matched: $l")
+//          l.mkString("/", "/", "").startsWith(url.pathname)
+//        }
+//      mod(active)
+//    }
+//
+//  def matchedModExact(
+//    mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
+//  ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
+//    withMatchedPathAndEl { (el, consumed) =>
+//      val active =
+//        consumed.map { l =>
+//          val UrlString(url) = el.ref.href
+//          l.mkString("/", "/", "") == url.pathname
+//        }
+//      mod(active)
+//    }
 
 }

@@ -110,7 +110,6 @@ trait Directives {
 
   val noneMatched: Directive0 =
     Directive[Unit] { inner => (location, previous, state) =>
-      println(s"location.otherMatched: ${location.otherMatched} ($location) (${state})")
       if (location.otherMatched) {
         rejected
       } else {

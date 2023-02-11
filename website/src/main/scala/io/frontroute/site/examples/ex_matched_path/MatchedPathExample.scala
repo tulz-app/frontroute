@@ -12,10 +12,12 @@ object MatchedPathExample
         "/",
         "/tabs/tab-1",
         "/tabs/tab-2",
+        "/tabs/tab-3",
         "/some-page"
       )
     )(() => {
       import io.frontroute._
+      import io.laminext.syntax.core._
 
       import com.raquo.laminar.api.L._
 
@@ -34,28 +36,45 @@ object MatchedPathExample
           )
         )
 
+      val tabs = Seq(
+        "tab-1" -> "Tab 1",
+        "tab-2" -> "Tab 2",
+      )
+
       def MyComponent(): Element =
         div(
           cls := "space-y-2",
-          path(segment).signal { tab =>
-            div(
-              cls := "flex space-x-2",
+          div(
+            cls := "flex space-x-2",
+            tabs.map { case (path, tabLabel) =>
               a(
-                href := "tab-1",
-                cls  := "text-xl px-4 py-1 rounded border-b-2",
-                cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- tab.map(_ == "tab-1"),
-                cls.toggle("border-transparent text-blue-700") <-- tab.map(_ != "tab-1"),
-                "Tab 1",
-              ),
-              a(
-                href := "tab-2",
-                cls  := "text-xl px-4 py-1 rounded border-b-2",
-                cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- tab.map(_ == "tab-2"),
-                cls.toggle("border-transparent text-blue-700") <-- tab.map(_ != "tab-2"),
-                "Tab 2",
+                /* <focus> */
+                relativeHref(path),
+                /* </focus> */
+                cls := "text-xl px-4 py-1 rounded border-b-2",
+                /* <focus> */
+                navMod { active =>
+                  Seq(
+                    cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- active,
+                    cls.toggle("border-transparent text-blue-700") <-- !active,
+                  )
+                },
+                /* </focus> */
+                tabLabel,
               )
+            },
+            a(
+              relativeHref("tab-3"),
+              cls := "text-xl px-4 py-1 rounded border-b-2",
+              navMod { active =>
+                Seq(
+                  cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- active,
+                  cls.toggle("border-transparent text-blue-700") <-- !active,
+                )
+              },
+              "Tab 3",
             )
-          },
+          ),
           div(
             ShowCurrentPath("Inside component:"),
             path("tab-1") {
@@ -70,6 +89,13 @@ object MatchedPathExample
                 cls := "bg-blue-100 text-blue-600 p-4",
                 div("Content two"),
                 ShowCurrentPath("Inside tab-2:"),
+              )
+            },
+            path("tab-3") {
+              div(
+                cls := "bg-blue-100 text-blue-600 p-4",
+                div("Content three"),
+                ShowCurrentPath("Inside tab-3:"),
               )
             },
           )
