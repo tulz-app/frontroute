@@ -172,6 +172,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
             ctx.thisNode.ref,
             new MutationObserverInit {
               attributes = true
+              attributeFilter = js.Array("href")
             }
           )
         },
