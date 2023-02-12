@@ -108,7 +108,6 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
   ): Route =
     extractMatchedPath { matched =>
       runEffect {
-        println(s"navigate: $matched + $to ---> ${makeRelative(matched, to)}")
         if (replace) {
           BrowserNavigation.replaceState(url = makeRelative(matched, to))
         } else {
