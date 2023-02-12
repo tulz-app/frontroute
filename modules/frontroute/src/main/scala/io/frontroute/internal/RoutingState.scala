@@ -94,11 +94,11 @@ final private[frontroute] class RoutingState private (
     s"""state: consumed: '${consumed.mkString("/", "/", "")}' path: '$path', data: '${data
         .map {
           case (key, value: Var[_]) =>
-            s"  $key -> $value (${value.signal.now()})"
+            s"$key -> $value (${value.signal.now()})"
           case (key, value)         =>
-            s"  $key -> $value"
+            s"$key -> $value"
         }
-        .mkString("\n")}'"""
+        .mkString("; ")}'"""
   }
 
   override def equals(other: Any): Boolean = other match {

@@ -112,7 +112,7 @@ path("blog").apply {
 
 Directives have a type parameter which describes the value that the directive will extract.
 
-The directives we've seen so far happen to not extract anything and have type `Directive[Unit]` (aliased
+The directives we've seen so far happen to not extract anything and are of the type `Directive[Unit]` (aliased
 as `Directive0`). The syntax for such directives might have looked like the following:
 
 ```scala
@@ -127,7 +127,7 @@ the examples above):
 
 ```scala
 path("blog") {
-  div("Path is /") // passed by-name, will not be evaluated until it's needed  
+  div("Path is /blog") // passed by-name, will not be evaluated until it's needed  
 }
 ```
 
@@ -159,9 +159,8 @@ This is because the output the `path` directive is defined by the "path matcher"
   ```scala
   path(segment("blog"))
   ```
-* `segment` (without parameters) is built-in path matcher with type `PathMatcher[String]`, which checks if the
-  current `path` contains a single segment
-  (without checking its value), and extracts that segment as the output.
+* `segment` (without parameters) is a built-in path matcher of type `PathMatcher[String]`, which checks if the
+  current `path` contains a single segment   (without checking its value), and extracts that segment as the output.
 
 Thus, `path("blog")` is a `Directive[Unit]`, and `path(segment)` is a `Directive[String]`.
 
@@ -173,9 +172,8 @@ The description above is not 100% accurate, though.
 
 We do not pass an `Element` directly to the `.apply` method of a directive: we pass a `Route`.
 
-`Element`-s are implicitly converted into `Routes` to enable the simplified syntax (we don't have to use – or have –
-the `complete`
-function, like in Akka HTTP or in earlier versions of `frontroute`).
+`Element`-s are implicitly converted into `Routes` to enable the simplified syntax (we don't have to use the 
+`complete` function like in Akka HTTP or in earlier versions of `frontroute`).
 
 This enables us to "nest" the directives:
 

@@ -36,8 +36,10 @@ object TabsExample
               cls := "flex space-x-2",
               tabs.map { case (path, tabLabel) =>
                 a(
-                  href := s"/$path",
-                  cls  := "text-xl px-4 py-1 rounded border-b-2",
+                  /* <focus> */
+                  relativeHref(path),
+                  /* </focus> */
+                  cls := "text-xl px-4 py-1 rounded border-b-2",
                   /* <focus> */
                   navMod { active =>
                     Seq(
@@ -50,11 +52,12 @@ object TabsExample
                 )
               }
             ),
+            pathEnd {
+              navigate("tab-1", replace = true)
+            },
             /* <focus> */
             path(Set("tab-1", "tab-2")).signal { tab =>
               /* </focus> */
-              println(s"!!! tabs matched")
-
               div(
                 div(
                   cls.toggle("hidden") <-- !tab.valueIs("tab-1"),
@@ -65,22 +68,14 @@ object TabsExample
                   textArea("tab-2 text area", cls := "bg-blue-100 text-blue-500")
                 )
               )
-
               /* <focus> */
             },
             /* </focus> */
-
-            debug("before noneMatched") {
-
-              (noneMatched & extractUnmatchedPath) { unmatched =>
-
-                println(s"!!! not found matched: $unmatched")
-
-                div(
-                  div(cls := "text-2xl", "Not Found"),
-                  div(unmatched.mkString("/", "/", ""))
-                )
-              }
+            (noneMatched & extractUnmatchedPath) { unmatched =>
+              div(
+                div(cls := "text-2xl", "Not Found"),
+                div(unmatched.mkString("/", "/", ""))
+              )
             }
           )
         )

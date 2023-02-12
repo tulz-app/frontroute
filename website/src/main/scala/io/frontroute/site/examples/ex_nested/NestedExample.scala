@@ -31,8 +31,10 @@ object NestedExample
             cls := "flex space-x-2",
             tabs.map { case (path, tabLabel) =>
               a(
-                href := path,
-                cls  := "text-xl px-4 py-1 rounded border-b-2",
+                /* <focus> */
+                relativeHref(path),
+                /* </focus> */
+                cls := "text-xl px-4 py-1 rounded border-b-2",
                 /* <focus> */
                 navMod { active =>
                   Seq(
@@ -46,6 +48,11 @@ object NestedExample
             }
           ),
           div(
+            pathEnd {
+              div(
+                div(cls := "text-2xl", "Index page"),
+              )
+            },
             /* <focus> */
             path("tab-1") {
               /* </focus> */

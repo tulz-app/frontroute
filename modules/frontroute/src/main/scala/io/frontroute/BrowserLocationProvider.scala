@@ -15,8 +15,8 @@ class BrowserLocationProvider(
   def start()(implicit owner: Owner): Subscription = {
     EventStream
       .merge(
+        EventStream.fromValue(js.undefined: js.Any),
         popStateEvents.map(_.state),
-        EventStream.fromValue(js.undefined: js.Any)
       )
       .map(state => Location(dom.window.location, state))
       .foreach { l =>

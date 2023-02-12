@@ -45,6 +45,8 @@ object Site {
       io.frontroute.site.examples.ex_effect.EffectExample,
       io.frontroute.site.examples.ex_extract_matched_path.ExtractMatchedPathExample,
       io.frontroute.site.examples.ex_matched_path.MatchedPathExample,
+      io.frontroute.site.examples.ex_navigate.NavigateExample,
+      io.frontroute.site.examples.ex_navmod.NavModExample,
     )
 
   val modules: Seq[SiteModule] = Seq(

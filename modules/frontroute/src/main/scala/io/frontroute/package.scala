@@ -87,16 +87,35 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
       () => effect
     )
 
+  private def makeRelative(matched: List[String], path: String): String =
+    if (matched.nonEmpty) {
+      if (path.nonEmpty) {
+        matched.mkString("/", "/", s"/$path")
+      } else {
+        matched.mkString("/", "/", "")
+      }
+    } else {
+      if (path.nonEmpty) {
+        s"/$path"
+      } else {
+        "/"
+      }
+    }
+
   def navigate(
     to: String,
     replace: Boolean = false,
-  ): Route = runEffect {
-    if (replace) {
-      BrowserNavigation.replaceState(url = to)
-    } else {
-      BrowserNavigation.pushState(url = to)
+  ): Route =
+    extractMatchedPath { matched =>
+      runEffect {
+        println(s"navigate: $matched + $to ---> ${makeRelative(matched, to)}")
+        if (replace) {
+          BrowserNavigation.replaceState(url = makeRelative(matched, to))
+        } else {
+          BrowserNavigation.pushState(url = makeRelative(matched, to))
+        }
+      }
     }
-  }
 
   implicit def elementToRoute(e: => HtmlElement): Route = complete(() => e)
 
@@ -129,12 +148,13 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
 
   def relativeHref(path: String): Mod[ReactiveHtmlElement[html.Anchor]] =
     withMatchedPath { matched =>
-      href <-- matched.map(_.mkString("/", "/", s"/$path"))
+      href <-- matched.map { matched =>
+        makeRelative(matched, path)
+      }
     }
 
-  def navModFn(
-    mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]],
-    compare: (Location, org.scalajs.dom.Location) => Boolean
+  def navModFn(compare: (Location, org.scalajs.dom.Location) => Boolean)(
+    mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
   ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] = {
     val activeVar = Var(false)
     val mutations = EventBus[Seq[MutationRecord]]()
@@ -155,11 +175,10 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
           // managed subscription
           val _ = EventStream
             .merge(
-              EventStream.fromValue(()),
-              mutations.events.mapToUnit,
-              locationState.location.changes.mapToUnit
+              EventStream.fromValue(()).sample(locationState.location),
+              mutations.events.sample(locationState.location),
+              locationState.location.changes
             )
-            .sample(locationState.location)
             .foreach { location =>
               val UrlString(url) = ctx.thisNode.ref.href
               activeVar.set {
@@ -187,37 +206,11 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
   def navMod(
     mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
   ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
-    navModFn(mod, (location, url) => location.fullPath.mkString("/", "/", "").startsWith(url.pathname))
+    navModFn((location, url) => location.fullPath.mkString("/", "/", "").startsWith(url.pathname))(mod)
 
   def navModExact(
     mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
   ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
-    navModFn(mod, (location, url) => location.fullPath.mkString("/", "/", "") == url.pathname)
-
-//  def matchedMod(
-//    mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
-//  ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
-//    withMatchedPathAndEl { (el, matched) =>
-//      val active =
-//        matched.map { l =>
-//          val UrlString(url) = el.ref.href
-//          println(s"nav mod url.pathname: ${url.pathname}")
-//          println(s"nav mod matched: $l")
-//          l.mkString("/", "/", "").startsWith(url.pathname)
-//        }
-//      mod(active)
-//    }
-//
-//  def matchedModExact(
-//    mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
-//  ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
-//    withMatchedPathAndEl { (el, consumed) =>
-//      val active =
-//        consumed.map { l =>
-//          val UrlString(url) = el.ref.href
-//          l.mkString("/", "/", "") == url.pathname
-//        }
-//      mod(active)
-//    }
+    navModFn((location, url) => location.fullPath.mkString("/", "/", "") == url.pathname)(mod)
 
 }
