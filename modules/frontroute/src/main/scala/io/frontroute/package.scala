@@ -69,12 +69,41 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
   }
 
   implicit def addDirectiveApply[L](directive: Directive[L])(implicit hac: ApplyConverter[L, Route]): hac.In => Route = { subRoute => (location, previous, state) =>
-    val result = directive.tapply(hac(subRoute))(location, previous, state)
-    result
+    directive.tapply(hac(subRoute))(location, previous, state)
+  }
+
+//  implicit def addDirectiveExecute[L](directive: Directive[L])(implicit hac: ApplyConverter[L, Unit]): DirectiveExecute[hac.In] = new DirectiveExecute[hac.In] {
+//    def execute(run: hac.In): Route = {
+//      directive.tapply { l =>
+//        runEffect {
+//          hac(run)(l)
+//        }
+//      }
+//    }
+//  }
+
+  implicit def addDirectiveExecute[L](directive: Directive[L]): DirectiveExecute[L => Unit] = new DirectiveExecute[L => Unit] {
+    def execute(run: L => Unit): Route = {
+      directive.tapply { l =>
+        runEffect {
+          run(l)
+        }
+      }
+    }
   }
 
   implicit def addNullaryDirectiveApply(directive: Directive0): Route => Route = { subRoute => (location, previous, state) =>
     directive.tapply(_ => subRoute)(location, previous, state)
+  }
+
+  implicit def addNullaryDirectiveExecute(directive: Directive0): DirectiveUnitExecute = new DirectiveUnitExecute {
+    def execute(run: => Unit): Route = {
+      directive.tapply { _ =>
+        runEffect {
+          run
+        }
+      }
+    }
   }
 
   private def complete(result: () => HtmlElement): Route = (location, _, state) => RouteResult.Matched(state, location, state.consumed, result)

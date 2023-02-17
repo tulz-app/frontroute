@@ -60,7 +60,7 @@ object DocumentMeta {
     value match {
       case Some(value) =>
         if (metaElement == null) {
-          metaElement = metaTag(name := metaName).ref
+          metaElement = metaTag(nameAttr := metaName).ref
           org.scalajs.dom.document.head.appendChild(metaElement)
         }
         metaElement.setAttribute("content", value)

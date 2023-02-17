@@ -43,6 +43,7 @@ object Site {
       io.frontroute.site.examples.ex_tabs.TabsExample,
       io.frontroute.site.examples.ex_nested.NestedExample,
       io.frontroute.site.examples.ex_effect.EffectExample,
+      io.frontroute.site.examples.ex_execute.ExecuteExample,
       io.frontroute.site.examples.ex_extract_matched_path.ExtractMatchedPathExample,
       io.frontroute.site.examples.ex_matched_path.MatchedPathExample,
       io.frontroute.site.examples.ex_navigate.NavigateExample,
