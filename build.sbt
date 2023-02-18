@@ -81,23 +81,6 @@ inThisBuild(
         cond = Some("matrix.ci == 'ciJSDOMNodeJS'")
       ),
     ),
-    githubWorkflowGeneratedUploadSteps ~= { steps =>
-      if (disableWebsiteOnCI) {
-        steps.map {
-          case run: WorkflowStep.Run =>
-            run.copy(commands = run.commands.map { command =>
-              if (command.startsWith("tar cf targets.tar")) {
-                command.replace("website/target", "")
-              } else {
-                command
-              }
-            })
-          case other                 => other
-        }
-      } else {
-        steps
-      }
-    },
     githubWorkflowBuildMatrixAdditions += "ci" -> ciVariants,
     Test / jsEnv                               := {
       import JSEnv._
