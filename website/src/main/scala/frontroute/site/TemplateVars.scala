@@ -3,7 +3,7 @@ package frontroute.site
 object TemplateVars {
 
   private val vars = Seq(
-    "frontrouteVersion" -> "0.17.0-M9",
+    "frontrouteVersion" -> "0.17.0-M10",
     "laminarVersion"    -> "15.0.0-M6",
     "scalajsVersion"    -> "1.13.0",
     "scala3version"     -> "3.2.1",
