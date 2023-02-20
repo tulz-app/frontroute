@@ -35,8 +35,6 @@ private[frontroute] class RouterStateRef {
 
 private[frontroute] object LocationState {
 
-  lazy val default: LocationState = withLocationProvider(LocationProvider.windowLocationProvider)(unsafeWindowOwner)
-
   def withLocationProvider(lp: LocationProvider)(implicit owner: Owner): LocationState = {
     var siblingMatched = false
     lp.current.foreach { _ =>
@@ -61,18 +59,14 @@ private[frontroute] object LocationState {
     state
   }
 
-  def apply(el: Element): UndefOr[LocationState] =
-    el.ref.asInstanceOf[ElementWithLocationState].____locationState
-
   @tailrec
-  def closestOrDefault(node: dom.Node): LocationState = {
+  def closestOrFail(node: dom.Node): LocationState = {
     val withState = node.asInstanceOf[ElementWithLocationState]
     if (withState.____locationState.isEmpty) {
       if (node.parentNode != null) {
-        closestOrDefault(node.parentNode)
+        closestOrFail(node.parentNode)
       } else {
-//        withState.____locationState = default
-        default
+        throw new RuntimeException("location provider not configured")
       }
     } else {
       withState.____locationState.get
@@ -93,12 +87,13 @@ private[frontroute] object LocationState {
     }
   }
 
-  def initIfMissing(node: dom.Node, init: () => LocationState): LocationState = {
+  def init(node: dom.Node, init: LocationState): Unit = {
     val resultWithState = node.asInstanceOf[ElementWithLocationState]
     if (resultWithState.____locationState.isEmpty) {
-      resultWithState.____locationState = init()
+      resultWithState.____locationState = init
+    } else {
+      throw new RuntimeException("location state already initialized")
     }
-    resultWithState.____locationState.get
   }
 
 }

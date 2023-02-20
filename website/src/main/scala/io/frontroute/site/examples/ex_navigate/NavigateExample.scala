@@ -25,40 +25,42 @@ object NavigateExample
 
       import com.raquo.laminar.api.L._
 
-      div(
-        cls := "p-4 min-h-[300px]",
-        pathEnd {
-          div(
-            cls := "text-2xl",
-            div(
-              "Index page."
-            ),
-          )
-        },
-        pathPrefix("cars" / segment) { carId =>
-          div(
+      routes(
+        div(
+          cls := "p-4 min-h-[300px]",
+          pathEnd {
             div(
               cls := "text-2xl",
-              s"Car $carId"
-            ),
-            /* <focus> */
-            (pathEnd | testPath("legacy-summary")) {
-              navigate("summary", replace = true)
-            },
-            /* </focus> */
-            path("summary") {
-              div("car summary ...")
-            },
-            path("details") {
-              div("car details ...")
-            }
-          )
-        },
-        (noneMatched & extractUnmatchedPath) { unmatched =>
-          div(
-            div(cls := "text-2xl", "Not Found"),
-            div(unmatched.mkString("/", "/", ""))
-          )
-        }
+              div(
+                "Index page."
+              ),
+            )
+          },
+          pathPrefix("cars" / segment) { carId =>
+            div(
+              div(
+                cls := "text-2xl",
+                s"Car $carId"
+              ),
+              /* <focus> */
+              (pathEnd | testPath("legacy-summary")) {
+                navigate("summary", replace = true)
+              },
+              /* </focus> */
+              path("summary") {
+                div("car summary ...")
+              },
+              path("details") {
+                div("car details ...")
+              }
+            )
+          },
+          (noneMatched & extractUnmatchedPath) { unmatched =>
+            div(
+              div(cls := "text-2xl", "Not Found"),
+              div(unmatched.mkString("/", "/", ""))
+            )
+          }
+        )
       )
     })

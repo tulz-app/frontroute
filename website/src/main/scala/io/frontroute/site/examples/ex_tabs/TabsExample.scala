@@ -27,7 +27,7 @@ object TabsExample
         "tab-2" -> "Tab 2",
       )
 
-      div(
+      routes(
         div(
           cls := "p-4 min-h-[300px]",
           div(

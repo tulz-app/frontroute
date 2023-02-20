@@ -11,12 +11,13 @@ trait Route extends ((Location, RoutingState, RoutingState) => RouteResult) with
 
   import Route._
 
-  private val currentRender = Var(Option.empty[HtmlElement])
+  private val currentRender      = Var(Option.empty[HtmlElement])
+  private val currentRenderState = Var(Option.empty[LocationState])
 
   private def bind: Binder[HtmlElement] = {
     Binder { el =>
       ReactiveElement.bindCallback(el) { ctx =>
-        val locationState = LocationState.closestOrDefault(el.ref)
+        val locationState = LocationState.closestOrFail(el.ref)
         val childStateRef = new RouterStateRef
 
         // the returned subscription will be managed by the ctx.owner
@@ -56,29 +57,25 @@ trait Route extends ((Location, RoutingState, RoutingState) => RouteResult) with
                   locationState.routerState.set(this, nextState)
 
                   locationState.setRemaining(Some(remaining))
-                  if (render != null) {
-                    val childState = LocationState.initIfMissing(
-                      render.ref,
-                      () =>
-                        new LocationState(
-                          location = locationState.remaining,
-                          isSiblingMatched = locationState.isChildMatched,
-                          resetSiblingMatched = locationState.resetChildMatched,
-                          notifySiblingMatched = locationState.notifyChildMatched,
-                          routerState = childStateRef,
-                        )
-                    )
-                    childState.setConsumed(consumed)
+                  val childState = new LocationState(
+                    location = locationState.remaining,
+                    isSiblingMatched = locationState.isChildMatched,
+                    resetSiblingMatched = locationState.resetChildMatched,
+                    notifySiblingMatched = locationState.notifyChildMatched,
+                    routerState = childStateRef,
+                  )
+                  LocationState.init(render.ref, childState)
+                  childState.setConsumed(consumed)
 
-                    render.ref.dataset.addOne("frPath" -> consumed.mkString("/", "/", ""))
-                    currentRender.set(Some(render))
-                  } else {
-                    currentRender.set(None) // route matched but rendered a null
-                  }
+                  render.ref.dataset.addOne("frPath" -> consumed.mkString("/", "/", ""))
+                  currentRender.set(Some(render))
+                  currentRenderState.set(Some(childState))
                 case RouteEvent.SameRender(nextState, remaining, consumed)         =>
                   locationState.routerState.set(this, nextState)
+                  currentRenderState.now().foreach { childState =>
+                    childState.setConsumed(consumed)
+                  }
                   currentRender.now().foreach { render =>
-                    LocationState.closestOrDefault(render.ref).setConsumed(consumed)
                     render.ref.dataset.addOne("frPath" -> consumed.mkString("/", "/", ""))
                   }
 
@@ -86,6 +83,7 @@ trait Route extends ((Location, RoutingState, RoutingState) => RouteResult) with
                 case RouteEvent.NoRender                                           =>
                   locationState.routerState.unset(this)
                   currentRender.set(None)
+                  currentRenderState.set(None)
               }
             case None                   =>
 //              locationState.routerState.unset(this)

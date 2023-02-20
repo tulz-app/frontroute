@@ -22,7 +22,7 @@ object ParamsExample
       import com.raquo.laminar.api.L._
       import io.frontroute._
 
-      div(
+      routes(
         div(
           cls := "p-4 min-h-[300px]",
           pathEnd {

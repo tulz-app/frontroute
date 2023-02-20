@@ -23,7 +23,7 @@ object BasicRoutingExample
       import io.frontroute._
       /* </focus> */
 
-      div(
+      routes(
         div(
           cls := "p-4 min-h-[300px]",
           /* <focus> */

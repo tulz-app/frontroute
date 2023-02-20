@@ -10,10 +10,10 @@ object NavModExample
       description = FileAsString("description.md"),
       links = Seq(
         "/",
-        "/page-1",
-        "/page-2",
-        "/page-3",
-        "/some-page"
+        "/pages/page-1",
+        "/pages/page-2",
+        "/pages/page-3",
+        "/pages/some-page"
       )
     )(() => {
       import io.frontroute._
@@ -27,63 +27,77 @@ object NavModExample
         "page-3" -> "Page 3",
       )
 
-      div(
-        cls := "p-4 min-h-[300px]",
+      routes(
         div(
-          cls := "flex space-x-4",
-          links.map { case (path, pageTitle) =>
-            a(
-              relativeHref(path),
-              cls := "text-xl px-4 py-1 rounded border-b-2",
-              /* <focus> */
-              navMod { active =>
-                Seq(
-                  cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- active,
-                  cls.toggle("border-transparent text-blue-700") <-- !active,
+          cls := "p-4 min-h-[300px]",
+          pathEnd {
+            div(
+              cls := "text-2xl",
+              div(
+                "Index page."
+              ),
+            )
+          },
+          pathPrefix("pages") {
+            div(
+              div(
+                cls := "flex space-x-4",
+                links.map { case (path, pageTitle) =>
+                  a(
+                    relativeHref(path),
+                    cls := "text-xl px-4 py-1 rounded border-b-2",
+                    /* <focus> */
+                    navMod { active =>
+                      Seq(
+                        cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- active,
+                        cls.toggle("border-transparent text-blue-700") <-- !active,
+                      )
+                    },
+                    /* </focus> */
+                    pageTitle
+                  )
+                }
+              ),
+              path("page-1") {
+                div(
+                  cls := "text-2xl",
+                  div(
+                    "Page 1."
+                  ),
                 )
               },
-              /* </focus> */
-              pageTitle
+              path("page-2") {
+                div(
+                  cls := "text-2xl",
+                  div(
+                    "Page 2."
+                  ),
+                )
+              },
+              path("page-3") {
+                div(
+                  cls := "text-2xl",
+                  div(
+                    "Page 3."
+                  ),
+                )
+              },
+              noneMatched {
+                div(
+                  cls := "text-2xl",
+                  div(
+                    "Unknown page."
+                  ),
+                )
+              },
+            )
+          },
+          (noneMatched & extractUnmatchedPath) { unmatched =>
+            div(
+              div(cls := "text-2xl", "Not Found"),
+              div(unmatched.mkString("/", "/", ""))
             )
           }
-        ),
-        pathEnd {
-          div(
-            cls := "text-2xl",
-            div(
-              "Index page."
-            ),
-          )
-        },
-        path("page-1") {
-          div(
-            cls := "text-2xl",
-            div(
-              "Page 1."
-            ),
-          )
-        },
-        path("page-2") {
-          div(
-            cls := "text-2xl",
-            div(
-              "Page 2."
-            ),
-          )
-        },
-        path("page-3") {
-          div(
-            cls := "text-2xl",
-            div(
-              "Page 3."
-            ),
-          )
-        },
-        (noneMatched & extractUnmatchedPath) { unmatched =>
-          div(
-            div(cls := "text-2xl", "Not Found"),
-            div(unmatched.mkString("/", "/", ""))
-          )
-        }
+        )
       )
     })

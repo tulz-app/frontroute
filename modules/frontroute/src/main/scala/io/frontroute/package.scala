@@ -11,6 +11,7 @@ import io.frontroute.internal.UrlString
 import io.frontroute.ops.DirectiveOfOptionOps
 import org.scalajs.dom
 import org.scalajs.dom.HTMLAnchorElement
+import org.scalajs.dom.HTMLDivElement
 import org.scalajs.dom.MutationObserver
 import org.scalajs.dom.MutationObserverInit
 import org.scalajs.dom.MutationRecord
@@ -25,18 +26,6 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
 
   type Directive0 = Directive[Unit]
 
-  def locationProvider(lp: LocationProvider): Modifier[Element] =
-    onMountCallback { ctx =>
-      val currentState = LocationState(ctx.thisNode)
-      if (currentState.isDefined) {
-        throw new IllegalStateException("initializing location provider: location state is already defined")
-      }
-      val _            = LocationState.initIfMissing(
-        ctx.thisNode.ref,
-        () => LocationState.withLocationProvider(lp)(ctx.owner)
-      )
-    }
-
   implicit def directiveOfOptionSyntax[L](underlying: Directive[Option[L]]): DirectiveOfOptionOps[L] = new DirectiveOfOptionOps(underlying)
 
   private[frontroute] val rejected: RouteResult = RouteResult.Rejected
@@ -50,6 +39,25 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
 
   @deprecated("use firstMatch instead", "0.16.0")
   def concat(routes: Route*): Route = firstMatch(routes: _*)
+
+  def initRouting: Modifier[Element] = {
+    initRouting(LocationProvider.windowLocationProvider)
+  }
+
+  def initRouting(lp: LocationProvider): Modifier[Element] =
+    onMountCallback { ctx =>
+      LocationState.init(
+        ctx.thisNode.ref,
+        LocationState.withLocationProvider(lp)(ctx.owner)
+      )
+    }
+
+  def routes[M](mods: Modifier[Element]*): ReactiveHtmlElement[HTMLDivElement] =
+    div(
+      styleAttr := "display: contents",
+      initRouting,
+      mods
+    )
 
   def firstMatch(routes: Route*): Route = (location, previous, state) => {
 
@@ -148,27 +156,34 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
   implicit def elementToRoute(e: => HtmlElement): Route = complete(() => e)
 
   def withMatchedPath[Ref <: dom.html.Element](mod: StrictSignal[List[String]] => Mod[ReactiveHtmlElement[Ref]]): Mod[ReactiveHtmlElement[Ref]] = {
-    val consumedVar                          = Var(List.empty[String])
-    var sub: js.UndefOr[DynamicSubscription] = js.undefined
+    val consumedVar = Var(List.empty[String])
+//    var sub: js.UndefOr[DynamicSubscription] = js.undefined
 
     Seq(
       onMountCallback { (ctx: MountContext[ReactiveHtmlElement[Ref]]) =>
-        LocationState.closest(ctx.thisNode.ref) match {
-          case None                =>
-            sub = ReactiveElement.bindFn(ctx.thisNode, LocationState.default.consumed) { next =>
-              LocationState.closest(ctx.thisNode.ref) match {
-                case None                => consumedVar.set(next)
-                case Some(locationState) =>
-                  sub.foreach(_.kill())
-                  sub = js.undefined
-                  // managed subscription
-                  val _ = ReactiveElement.bindObserver(ctx.thisNode, locationState.consumed)(consumedVar.writer)
-              }
-            }
-          case Some(locationState) =>
-            // managed subscription
-            val _ = ReactiveElement.bindObserver(ctx.thisNode, locationState.consumed)(consumedVar.writer)
-        }
+        val locationState = LocationState.closestOrFail(ctx.thisNode.ref)
+        val consumed      =
+          EventStream.fromValue(()).delay(0).flatMap { _ =>
+            locationState.consumed
+          }
+
+        val _ = ReactiveElement.bindObserver(ctx.thisNode, consumed)(consumedVar.writer)
+//        LocationState.closest(ctx.thisNode.ref) match {
+//          case None                =>
+//            sub = ReactiveElement.bindFn(ctx.thisNode, LocationState.closestOrFail(ctx.thisNode.ref).consumed) { next =>
+//              LocationState.closest(ctx.thisNode.ref) match {
+//                case None                => consumedVar.set(next)
+//                case Some(locationState) =>
+//                  sub.foreach(_.kill())
+//                  sub = js.undefined
+//                   managed subscription
+//                  val _ = ReactiveElement.bindObserver(ctx.thisNode, locationState.consumed)(consumedVar.writer)
+//              }
+//            }
+//          case Some(locationState) =>
+      // managed subscription
+//            val _ = ReactiveElement.bindObserver(ctx.thisNode, locationState.consumed)(consumedVar.writer)
+//        }
       },
       mod(consumedVar.signal)
     )
@@ -198,7 +213,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
     Seq(
       onMountUnmountCallback(
         mount = { (ctx: MountContext[ReactiveHtmlElement[HTMLAnchorElement]]) =>
-          val locationState = LocationState.closestOrDefault(ctx.thisNode.ref)
+          val locationState = LocationState.closestOrFail(ctx.thisNode.ref)
 
           // managed subscription
           val _ = EventStream

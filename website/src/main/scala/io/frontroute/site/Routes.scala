@@ -55,30 +55,29 @@ class Routes {
     appContainer.innerHTML = ""
     com.raquo.laminar.api.L.render(
       appContainer,
-      div(
-        cls := "contents",
-        LinkHandler.bind,
-        thisVersionPrefix(
-          firstMatch(
-            (
-              pathEnd.mapTo(Some((Site.indexModule, Site.indexModule.index))) |
-                (modulePrefix & pathEnd).map(m => Some((m, m.index))) |
-                moduleAndPagePrefix.map(moduleAndPage => Some(moduleAndPage))
-            ).signal { moduleAndPage =>
-              PageWrap(moduleAndPage, mobileMenuContent.writer)
-            },
+      routes(
+        div(
+          cls := "contents",
+          LinkHandler.bind,
+          thisVersionPrefix(
+            firstMatch(
+              (
+                pathEnd.mapTo(Some((Site.indexModule, Site.indexModule.index))) |
+                  (modulePrefix & pathEnd).map(m => Some((m, m.index))) |
+                  moduleAndPagePrefix.map(moduleAndPage => Some(moduleAndPage))
+              ).signal { moduleAndPage =>
+                PageWrap(moduleAndPage, mobileMenuContent.writer)
+              },
+              div("Not Found")
+            )
+          ),
+          (noneMatched & anyVersionPrefix) {
+            div("Not Found - wrong version")
+          },
+          noneMatched {
             div("Not Found")
-          )
-        ),
-        (noneMatched & anyVersionPrefix) {
-          runEffect {
-            dom.console.log("reload")
-//            dom.window.location.reload()
           }
-        },
-        noneMatched {
-          div("Not Found")
-        }
+        )
       )
     )
     val _ = com.raquo.laminar.api.L.render(menuContainer, TW.modal(mobileMenuContent.signal, mobileMenuModal))

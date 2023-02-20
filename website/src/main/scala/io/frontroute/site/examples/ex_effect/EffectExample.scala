@@ -21,7 +21,7 @@ object EffectExample
       import com.raquo.laminar.api.L._
       import org.scalajs.dom
 
-      div(
+      routes(
         div(
           cls := "p-4 min-h-[300px]",
           /* <focus> */

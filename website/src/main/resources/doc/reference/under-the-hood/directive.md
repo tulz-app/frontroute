@@ -115,10 +115,3 @@ someDirective {
   }
 }
 ```
-
-Additionally, a `Signal[Element]` can be implicitly converted into a `Route` as well:
-
-```scala
-implicit def signalOfElementToRoute(e: => Signal[Element]): Route
-```
-
