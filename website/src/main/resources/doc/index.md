@@ -2,7 +2,7 @@
 
 ```scala
 import com.raquo.laminar.api.L.*
-import io.frontroute.*
+import frontroute.*
 
 div(
   pathEnd {

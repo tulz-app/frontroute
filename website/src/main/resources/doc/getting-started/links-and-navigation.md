@@ -39,7 +39,7 @@ In order to activate the link handler, you need to bind it at the top of your vi
 
 ```scala
 import com.raquo.laminar.api.L._
-import io.frontroute._
+import frontroute._
 
 object Main {
 
@@ -78,7 +78,7 @@ The `onClick` handler will do the following:
 
 ```scala
   import com.raquo.laminar.api.L._
-  import io.frontroute._
+  import frontroute._
 
   div(
     button(

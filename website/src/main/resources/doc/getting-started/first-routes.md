@@ -9,7 +9,7 @@ Say we want the following:
 
 ```scala
 import com.raquo.laminar.api.L.*
-import io.frontroute.*
+import frontroute.*
 
 val myApp = div(
 

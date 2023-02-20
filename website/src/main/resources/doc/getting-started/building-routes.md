@@ -79,7 +79,7 @@ Use case:
 ```
 
 ```scala
-import io.frontroute._
+import frontroute._
 
 import scala.util.Try
 
