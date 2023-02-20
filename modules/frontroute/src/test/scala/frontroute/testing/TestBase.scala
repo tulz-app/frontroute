@@ -58,7 +58,7 @@ abstract class TestBase extends AsyncFunSuite with Matchers with LaminarSpec wit
 
     mount(
       div(
-        locationProvider(lp),
+        initRouting(lp),
         route(probe)
       )
     )

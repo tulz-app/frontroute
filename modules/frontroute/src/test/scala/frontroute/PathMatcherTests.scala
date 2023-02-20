@@ -38,11 +38,11 @@ class PathMatcherTests extends TestBase {
   }
 
   test("regex/empty input") {
-    io.frontroute.regex("[a-z]".r).apply(List.empty, List.empty) shouldBe PathMatchResult.NoMatch
+    frontroute.regex("[a-z]".r).apply(List.empty, List.empty) shouldBe PathMatchResult.NoMatch
   }
 
   test("regex/matching prefix") {
-    io.frontroute.regex("[a-z]".r).apply(List("before"), List("a", "b")) match {
+    frontroute.regex("[a-z]".r).apply(List("before"), List("a", "b")) match {
       case PathMatchResult.Match(m, consumed, tail) =>
         m.group(0) shouldBe "a"
         consumed shouldBe List("before", "a")
@@ -53,7 +53,7 @@ class PathMatcherTests extends TestBase {
   }
 
   test("regex/non-matching input") {
-    io.frontroute.regex("[a-z]".r).apply(List.empty, List("1", "2")) shouldBe PathMatchResult.Rejected(
+    frontroute.regex("[a-z]".r).apply(List.empty, List("1", "2")) shouldBe PathMatchResult.Rejected(
       List("2")
     )
   }
