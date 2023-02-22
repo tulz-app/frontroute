@@ -29,17 +29,15 @@ object Dependencies {
     )
   }
 
-  // wesite
+  // website
 
   val laminext: Def.Initialize[Seq[ModuleID]] = Def.setting {
     Seq(
       "io.laminext" %%% "core"                   % DependencyVersions.laminext,
       "io.laminext" %%% "highlight"              % DependencyVersions.laminext,
-      "io.laminext" %%% "markdown"               % DependencyVersions.laminext,
       "io.laminext" %%% "ui"                     % DependencyVersions.laminext,
       "io.laminext" %%% "tailwind"               % DependencyVersions.laminext,
       "io.laminext" %%% "util"                   % DependencyVersions.laminext,
-      "io.laminext" %%% "fetch"                  % DependencyVersions.laminext,
       "io.laminext" %%% "tailwind-default-theme" % DependencyVersions.laminext
     )
   }

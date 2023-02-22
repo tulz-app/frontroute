@@ -3,11 +3,12 @@ package frontroute.site
 import frontroute.site.pages.CodeExamplePage
 import frontroute.site.pages.DocumentationPage
 import com.yurique.embedded.FileAsString
+import frontroute.BuildInfo
 import frontroute.site.examples.CodeExample
 
 object Site {
 
-  val frontrouteVersion: String = "0.17.x"
+  val frontrouteVersion: String = BuildInfo.frontrouteSiteVersion
 
   val thisVersionPrefix = s"/v/$frontrouteVersion/"
 

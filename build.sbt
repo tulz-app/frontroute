@@ -13,6 +13,9 @@ import org.scalajs.jsenv.selenium.SeleniumJSEnv
 
 import java.util.concurrent.TimeUnit
 
+import org.commonmark.parser.Parser
+import org.commonmark.renderer.html.HtmlRenderer
+
 val disableWebsiteOnCI = false
 
 val ciVariants = List("ciFirefox", "ciChrome", "ciJSDOMNodeJS")
@@ -150,16 +153,43 @@ lazy val frontroute =
       }
     )
 
+lazy val parser   = Parser.builder.build
+lazy val renderer = HtmlRenderer.builder.build
+
+lazy val frontrouteSiteVersion: String = IO.read(file("website/.frontroute-version")).trim
+lazy val thisVersionSitePrefix         = s"/v/$frontrouteSiteVersion/"
+
+lazy val vars = Seq(
+  "frontrouteVersion" -> "0.17.0-M10",
+  "laminarVersion"    -> "15.0.0-M6",
+  "scalajsVersion"    -> "1.13.0",
+  "scala3version"     -> "3.2.1",
+  "sitePrefix"        -> "/v/0.17.x"
+)
+
+def templateVars(s: String): String =
+  vars.foldLeft(s) { case (acc, (varName, varValue)) =>
+    acc.replace(s"{{${varName}}}", varValue)
+  }
+
 lazy val website = project
   .in(file("website"))
-  .enablePlugins(ScalaJSPlugin)
-  .enablePlugins(EmbeddedFilesPlugin)
+  .enablePlugins(ScalaJSPlugin, EmbeddedFilesPlugin, BuildInfoPlugin)
   .settings(ScalaOptions.fixOptions)
   .settings(noPublish)
   .settings(
     githubWorkflowTargetTags        := Seq.empty,
     publish / skip                  := true,
-    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
+    buildInfoKeys                   := Seq[BuildInfoKey](
+      version,
+      scalaVersion,
+      BuildInfoKey(
+        "frontrouteSiteVersion" -> frontrouteSiteVersion
+      )
+    ),
+    buildInfoPackage                := "frontroute",
+    Compile / fastLinkJS / scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) },
+    Compile / fullLinkJS / scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
     scalaJSLinkerConfig ~= { _.withESFeatures(_.withESVersion(ESVersion.ES5_1)) },
     Compile / scalaJSLinkerConfig ~= { _.withSourceMap(false) },
     scalaJSUseMainModuleInitializer := true,
@@ -171,6 +201,18 @@ lazy val website = project
     ),
     embedTextGlobs                  := Seq("**/*.md"),
     embedDirectories ++= (Compile / unmanagedSourceDirectories).value,
+    embedTransform                  := Seq(
+      TransformConfig(
+        when = _.getFileName.toString.endsWith(".md"),
+        transform = { s =>
+          templateVars(renderer.render(parser.parse(s)))
+            .replace(
+              """<a href="/""",
+              s"""<a href="${thisVersionSitePrefix}"""
+            )
+        }
+      )
+    ),
     (Compile / sourceGenerators) += embedFiles
   )
   .dependsOn(

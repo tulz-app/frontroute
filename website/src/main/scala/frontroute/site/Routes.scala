@@ -49,7 +49,7 @@ class Routes {
     versionPrefix.mapTo(())
 
   def start(): Unit = {
-    val appContainer  = dom.document.querySelector("#app")
+    val appContainer  = dom.document.querySelector("#app-container")
     val menuContainer = dom.document.querySelector("#menu-modal")
 
     appContainer.innerHTML = ""

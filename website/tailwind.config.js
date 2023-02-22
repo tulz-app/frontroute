@@ -1,14 +1,20 @@
 const scalaVersion = require('./scala-version')
 
 module.exports = (api) => {
-  const scalajsMode = api.mode === 'production' ? 'opt' : 'fastopt'
+  const scalajsMode = api.env === 'production' ? 'opt' : 'fastopt'
   return {
     content: [
       `./target/scala-${scalaVersion}/website-${scalajsMode}/*.js`,
-      './src/main/static/html/*',
+      './index.html',
     ],
     theme: {
       extend: {
+        spacing: {
+          '96': '24rem',
+          '112': '28rem',
+          '128': '32rem',
+          '144': '36rem',
+        },
         fontFamily: {
           display: ['Oxanium', 'ui-serif', 'Georgia', 'Cambria', '"Times New Roman"', 'Times', 'serif'],
           serif: ['Inter', 'ui-serif', 'Georgia', 'Cambria', '"Times New Roman"', 'Times', 'serif'],
