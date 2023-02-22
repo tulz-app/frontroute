@@ -3,6 +3,7 @@ import {createHtmlPlugin} from 'vite-plugin-html'
 import commonjs from '@rollup/plugin-commonjs';
 import viteCompression from 'vite-plugin-compression';
 import fs from 'fs'
+
 import scalaVersion from './scala-version'
 
 const frontrouteVersion = fs.readFileSync('.frontroute-version')
