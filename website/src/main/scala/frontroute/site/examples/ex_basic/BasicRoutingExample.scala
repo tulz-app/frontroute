@@ -23,7 +23,9 @@ object BasicRoutingExample
       import frontroute._
       /* </focus> */
 
+      /* <focus> */
       routes(
+        /* </focus> */
         div(
           cls := "p-4 min-h-[300px]",
           /* <focus> */
@@ -79,5 +81,7 @@ object BasicRoutingExample
           }
           /* </focus> */
         )
+        /* <focus> */
       )
+      /* </focus> */
     })
