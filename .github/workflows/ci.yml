@@ -72,10 +72,6 @@ jobs:
 
       - run: sbt ++${{ matrix.scala }} '${{ matrix.ci }}'
 
-      - name: build website
-        if: matrix.ci == 'ciJSDOMNodeJS'
-        run: sbt ++${{ matrix.scala }} website/fastLinkJS
-
   publish:
     name: Publish Artifacts
     needs: [build]
