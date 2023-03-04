@@ -12,7 +12,7 @@ object DependencyVersions {
   val `scala-js-macrotask-executor` = "1.1.1"
 
   // website
-  val laminext               = "0.15.0-M5+3-b029c190+20230302-0013-SNAPSHOT"
+  val laminext               = "0.15.0-M7"
   val sourcecode             = "0.3.0"
   val `embedded-files-macro` = "0.2.4"
 
