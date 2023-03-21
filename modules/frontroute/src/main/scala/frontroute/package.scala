@@ -156,8 +156,6 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
 
   def withMatchedPath[Ref <: dom.html.Element](mod: StrictSignal[List[String]] => Mod[ReactiveHtmlElement[Ref]]): Mod[ReactiveHtmlElement[Ref]] = {
     val consumedVar = Var(List.empty[String])
-//    var sub: js.UndefOr[DynamicSubscription] = js.undefined
-
     Seq(
       onMountCallback { (ctx: MountContext[ReactiveHtmlElement[Ref]]) =>
         val locationState = LocationState.closestOrFail(ctx.thisNode.ref)
@@ -167,22 +165,6 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
           }
 
         val _ = ReactiveElement.bindObserver(ctx.thisNode, consumed)(consumedVar.writer)
-//        LocationState.closest(ctx.thisNode.ref) match {
-//          case None                =>
-//            sub = ReactiveElement.bindFn(ctx.thisNode, LocationState.closestOrFail(ctx.thisNode.ref).consumed) { next =>
-//              LocationState.closest(ctx.thisNode.ref) match {
-//                case None                => consumedVar.set(next)
-//                case Some(locationState) =>
-//                  sub.foreach(_.kill())
-//                  sub = js.undefined
-//                   managed subscription
-//                  val _ = ReactiveElement.bindObserver(ctx.thisNode, locationState.consumed)(consumedVar.writer)
-//              }
-//            }
-//          case Some(locationState) =>
-      // managed subscription
-//            val _ = ReactiveElement.bindObserver(ctx.thisNode, locationState.consumed)(consumedVar.writer)
-//        }
       },
       mod(consumedVar.signal)
     )
