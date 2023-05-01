@@ -230,7 +230,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
   def navMod(
     mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
   ): Mod[ReactiveHtmlElement[HTMLAnchorElement]] =
-    navModFn((location, url) => location.fullPath.mkString("/", "/", "").startsWith(url.pathname))(mod)
+    navModFn((location, url) => location.fullPath.mkString("/", "/", "/").startsWith(url.pathname + "/"))(mod)
 
   def navModExact(
     mod: Signal[Boolean] => Mod[ReactiveHtmlElement[HTMLAnchorElement]]
