@@ -1,3 +1,38 @@
+## Initializing 
+
+First thing we need to do is to initialize the routing in our app. To do that, we need to wrap our app (or parts of it 
+that will contain the routing) in a `routes` element:
+
+```scala
+import com.raquo.laminar.api.L.*
+import frontroute.*
+
+val myApp = routes(
+  div("my app with routing")
+)
+```
+
+This will create a `div` element with `style = 'display: contents'` with the routing initialized for it and everything
+nested inside it.
+
+If we don't want to have this extra `div`, another way to do it is using the `initRouting` modifier: 
+
+```scala
+import com.raquo.laminar.api.L.*
+import frontroute.*
+
+val myApp = div(
+  initRouting,
+  div("my app with routing")
+)
+```
+
+If we forget to do this, there will be an exception thrown with the following message:
+
+```
+location provider not configured: make sure your app is wrapped in `routes` or you have the `initRouting` modifier
+```
+
 ## First routes
 
 First, let's make a simple app with a couple of routes to see what routing with `frontroute` looks like.
@@ -11,7 +46,7 @@ Say we want the following:
 import com.raquo.laminar.api.L.*
 import frontroute.*
 
-val myApp = div(
+val myApp = routes(
 
   path("blog") {
     div("Blog")

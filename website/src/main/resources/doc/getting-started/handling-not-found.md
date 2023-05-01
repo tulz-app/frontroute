@@ -22,6 +22,24 @@ There are two ways to do it in `frontroute`:
 * using `firstMatch` with the "not found" element as the last alternative, or 
 * using `noneMatched` directive.
 
+### Important note
+
+Do NOT use `firstMatch` and `noneMatched` together: this will not work. For example, in the following example,
+the not-found route will *never* match:
+
+```scala
+div(
+  firstMatch(
+    path("blog") {
+      div("Blog")
+    },
+    noneMatched(
+      div("Not found")
+    )
+  )
+)
+```
+
 ### `noneMatched` directive
 
 `noneMatched` is a special directive in `frontroute`: it doesn't check the current URL – rather, it checks

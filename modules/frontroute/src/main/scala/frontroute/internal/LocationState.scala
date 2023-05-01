@@ -66,7 +66,7 @@ private[frontroute] object LocationState {
       if (node.parentNode != null) {
         closestOrFail(node.parentNode)
       } else {
-        throw new RuntimeException("location provider not configured")
+        throw new RuntimeException("location provider not configured: make sure your app is wrapped in `routes` or you have the `initRouting` modifier")
       }
     } else {
       withState.____locationState.get
