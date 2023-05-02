@@ -25,7 +25,6 @@ object Dependencies {
   val scalatest: Def.Initialize[Seq[ModuleID]] = Def.setting {
     Seq(
       "org.scalatest" %%% "scalatest" % DependencyVersions.scalatest % Test,
-//      ("org.scala-js" %%% "scalajs-java-securerandom" % DependencyVersions.`scalajs-java-securerandom` % Test).cross(CrossVersion.for3Use2_13)
     )
   }
 
