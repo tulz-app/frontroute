@@ -1,6 +1,6 @@
 # frontroute
 
-![Maven Central](https://img.shields.io/maven-central/v/io.frontroute/frontroute_sjs1_2.13.svg) ![Scala.js](https://img.shields.io/static/v1?label=built+with&message=Scala.js&color=green)
+![Maven Central](https://img.shields.io/maven-central/v/io.frontroute/frontroute_sjs1_2.13.svg?versionPrefix=0.18) ![Scala.js](https://img.shields.io/static/v1?label=built+with&message=Scala.js&color=green)
 
 `frontroute` is a front-end router library for single-page applications (SPA) built with [Scala.js](http://www.scala-js.org/) and [raquo/Laminar](https://github.com/raquo/Laminar), 
 with an API inspired by [Akka HTTP](https://doc.akka.io/docs/akka-http/current/).
