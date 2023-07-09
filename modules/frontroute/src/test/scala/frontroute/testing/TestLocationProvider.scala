@@ -65,7 +65,7 @@ class TestLocationProvider extends LocationProvider {
           port = currentPort,
           protocol = currentProtocol,
           host = s"${currentHostname}:${currentPort}",
-          origin = Some(s"${currentProtocol}://${currentHostname}:${currentPort}"),
+          origin = s"${currentProtocol}://${currentHostname}:${currentPort}",
           path = currentPath,
           fullPath = currentPath,
           params = currentParams,

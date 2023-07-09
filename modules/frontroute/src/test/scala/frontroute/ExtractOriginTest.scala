@@ -12,7 +12,7 @@ class ExtractOriginTest extends TestBase {
       route = probe =>
         extractOrigin { origin =>
           testComplete {
-            probe.append(origin.getOrElse("---"))
+            probe.append(origin)
           }
         },
       init = locationProvider => {
