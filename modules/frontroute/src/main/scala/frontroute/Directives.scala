@@ -50,7 +50,7 @@ trait Directives {
 
   val extractProtocol: Directive[String] = extract(_.protocol)
 
-  val extractOrigin: Directive[Option[String]] = extract(_.origin)
+  val extractOrigin: Directive[String] = extract(_.origin)
 
   def provide[L](value: L): Directive[L] =
     Directive { inner => (location, previous, state) =>

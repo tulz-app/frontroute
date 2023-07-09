@@ -14,8 +14,7 @@ object LinkHandler {
       val href       = anchor.href
       val sameOrigin =
         href.startsWith("/") ||
-          !href.startsWith("http://") && !href.startsWith("https://") ||
-          dom.window.location.origin.exists(origin => href.startsWith(origin))
+          !href.startsWith("http://") && !href.startsWith("https://") || href.startsWith(dom.window.location.origin)
 
       if (sameOrigin && (js.isUndefined(rel) || rel == null || rel == "" || rel == "replace")) {
         event.preventDefault()
