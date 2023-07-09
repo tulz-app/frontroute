@@ -27,8 +27,8 @@ See [getting started](/getting-started).
 ### Prerequisites
 
 * [Scala.js](https://www.scala-js.org/) `v{{scalajsVersion}}`+
-* Scala 2.13 or {{scala3version}}+
-* [Laminar](https://laminar.dev/) {{laminarVersion}} (it will be added to your project's dependencies transitively)
+* Scala `2.13` or `{{scala3version}}`+
+* [Laminar](https://laminar.dev/) `{{laminarVersion}}`
 
 ### sbt
 
@@ -69,9 +69,9 @@ object counter extends ScalaJSModule {
 
 ### Previous versions
 
-#### frontroute `v0.15.x`
-
-See [documentation](https://frontroute.dev/v/0.15.x/).
+* [frontroute `v0.17.x`](https://frontroute.dev/v/0.17.x/) (Laminar 15.x)
+* [frontroute `v0.16.x`](https://frontroute.dev/v/0.16.x/)
+* [frontroute `v0.15.x`](https://frontroute.dev/v/0.15.x/)
 
 ---
 

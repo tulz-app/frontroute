@@ -42,7 +42,7 @@ object RecursivePathMatchingExample
             pathPrefix("recursive") &
               /* <focus> */
               recursivePathMatch
-            /* </focus> */
+              /* </focus> */
           ) { segments =>
             div(div(cls := "text-2xl", "Recursive page."), div(s"Segments: ${segments.mkString(", ")}"))
           },
