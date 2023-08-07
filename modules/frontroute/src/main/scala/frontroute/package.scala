@@ -159,10 +159,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
     Seq(
       onMountCallback { (ctx: MountContext[ReactiveHtmlElement[Ref]]) =>
         val locationState = LocationState.closestOrFail(ctx.thisNode.ref)
-        val consumed      =
-          EventStream.fromValue(()).delay(0).flatMap { _ =>
-            locationState.consumed
-          }
+        val consumed      = EventStream.fromValue(()).delay(0).sample(locationState.consumed)
 
         val _ = ReactiveElement.bindObserver(ctx.thisNode, consumed)(consumedVar.writer)
       },

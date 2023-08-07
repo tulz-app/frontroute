@@ -106,8 +106,8 @@ private[frontroute] class LocationState(
   val routerState: RouterStateRef,
 ) {
 
-  private val remainingVar                      = Var(Option.empty[Location])
-  val remaining: StrictSignal[Option[Location]] = remainingVar.signal
+  private val remainingVar                = Var(Option.empty[Location])
+  val remaining: Signal[Option[Location]] = remainingVar.signal.distinct
 
   def setRemaining(remaining: Option[Location]): Unit = remainingVar.set(remaining)
 

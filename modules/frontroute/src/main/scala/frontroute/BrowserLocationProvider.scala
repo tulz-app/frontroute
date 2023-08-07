@@ -10,7 +10,7 @@ class BrowserLocationProvider(
 ) extends LocationProvider {
 
   private val currentVar                = Var(Option.empty[Location])
-  val current: Signal[Option[Location]] = currentVar.signal
+  val current: Signal[Option[Location]] = currentVar.signal.distinct
 
   def start()(implicit owner: Owner): Subscription = {
     EventStream
