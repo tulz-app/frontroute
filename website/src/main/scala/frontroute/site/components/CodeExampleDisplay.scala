@@ -95,8 +95,8 @@ object CodeExampleDisplay {
               cls  := "px-2 rounded",
               navMod { active =>
                 Seq(
-                  cls.toggle("bg-gray-500 text-gray-100 font-semibold") <-- active,
-                  cls.toggle("text-gray-700 font-semibold") <-- !active,
+                  cls("bg-gray-500 text-gray-100 font-semibold") <-- active,
+                  cls("text-gray-700 font-semibold") <-- !active,
                 )
               },
               tabLabel
@@ -109,7 +109,7 @@ object CodeExampleDisplay {
           cls := "flex-1 flex flex-col space-y-2",
           div(
             cls             := "flex-1 flex flex-col space-y-2",
-            cls.toggle("hidden") <-- tab.map(_ != "source"),
+            cls("hidden") <-- tab.map(_ != "source"),
             div(
               cls := "flex space-x-4 items-center",
               when(hasContext) {
@@ -139,7 +139,7 @@ object CodeExampleDisplay {
           ),
           div(
             cls             := "flex-1 flex flex-col",
-            cls.toggle("hidden") <-- tab.map(_ != "live"),
+            cls("hidden") <-- tab.map(_ != "live"),
             iframe(
               cls := "flex-1",
               onLoad --> { e =>
@@ -151,7 +151,7 @@ object CodeExampleDisplay {
           ),
           div(
             cls             := "flex-1 flex flex-col prose max-w-none",
-            cls.toggle("hidden") <-- tab.map(_ != "description"),
+            cls("hidden") <-- tab.map(_ != "description"),
             unsafeInnerHtml := example.description,
             onMountCallback { ctx =>
               ctx.thisNode.ref.querySelectorAll("pre > code").foreach { codeElement =>

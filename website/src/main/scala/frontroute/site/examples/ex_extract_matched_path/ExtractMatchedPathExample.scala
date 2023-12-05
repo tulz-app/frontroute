@@ -43,15 +43,15 @@ object ExtractMatchedPathExample
               a(
                 href := "tab-1",
                 cls  := "text-xl px-4 py-1 rounded border-b-2",
-                cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- tab.map(_ == "tab-1"),
-                cls.toggle("border-transparent text-blue-700") <-- tab.map(_ != "tab-1"),
+                cls("border-blue-800 bg-blue-200 text-blue-800") <-- tab.map(_ == "tab-1"),
+                cls("border-transparent text-blue-700") <-- tab.map(_ != "tab-1"),
                 "Tab 1",
               ),
               a(
                 href := "tab-2",
                 cls  := "text-xl px-4 py-1 rounded border-b-2",
-                cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- tab.map(_ == "tab-2"),
-                cls.toggle("border-transparent text-blue-700") <-- tab.map(_ != "tab-2"),
+                cls("border-blue-800 bg-blue-200 text-blue-800") <-- tab.map(_ == "tab-2"),
+                cls("border-transparent text-blue-700") <-- tab.map(_ != "tab-2"),
                 "Tab 2",
               )
             )

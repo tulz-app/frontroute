@@ -55,8 +55,8 @@ object MatchedPathExample
                 /* <focus> */
                 navMod { active =>
                   Seq(
-                    cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- active,
-                    cls.toggle("border-transparent text-blue-700") <-- !active,
+                    cls("border-blue-800 bg-blue-200 text-blue-800") <-- active,
+                    cls("border-transparent text-blue-700") <-- !active,
                   )
                 },
                 /* </focus> */
@@ -68,8 +68,8 @@ object MatchedPathExample
               cls := "text-xl px-4 py-1 rounded border-b-2",
               navMod { active =>
                 Seq(
-                  cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- active,
-                  cls.toggle("border-transparent text-blue-700") <-- !active,
+                  cls("border-blue-800 bg-blue-200 text-blue-800") <-- active,
+                  cls("border-transparent text-blue-700") <-- !active,
                 )
               },
               "Tab 3",

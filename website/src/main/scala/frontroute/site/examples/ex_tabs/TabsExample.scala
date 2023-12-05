@@ -43,8 +43,8 @@ object TabsExample
                   /* <focus> */
                   navMod { active =>
                     Seq(
-                      cls.toggle("border-blue-800 bg-blue-200 text-blue-800") <-- active,
-                      cls.toggle("border-transparent text-blue-700") <-- !active,
+                      cls("border-blue-800 bg-blue-200 text-blue-800") <-- active,
+                      cls("border-transparent text-blue-700") <-- !active,
                     )
                   },
                   /* </focus> */
@@ -60,11 +60,11 @@ object TabsExample
               /* </focus> */
               div(
                 div(
-                  cls.toggle("hidden") <-- !tab.valueIs("tab-1"),
+                  cls("hidden") <-- !tab.valueIs("tab-1"),
                   textArea("tab-1 text area", cls := "bg-blue-100 text-blue-500")
                 ),
                 div(
-                  cls.toggle("hidden") <-- !tab.valueIs("tab-2"),
+                  cls("hidden") <-- !tab.valueIs("tab-2"),
                   textArea("tab-2 text area", cls := "bg-blue-100 text-blue-500")
                 )
               )
