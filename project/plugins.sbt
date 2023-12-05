@@ -19,7 +19,7 @@ addSbtPlugin("com.github.sbt" % "sbt-github-actions" % "0.19.0")
 
 addSbtPlugin("com.github.sbt" % "sbt-ci-release" % "1.5.12")
 
-addSbtPlugin("ch.epfl.scala" % "sbt-version-policy" % "3.0.0")
+addSbtPlugin("ch.epfl.scala" % "sbt-version-policy" % "3.1.0")
 
 addSbtPlugin("com.yurique" % "sbt-embedded-files" % "0.4.0")
 
