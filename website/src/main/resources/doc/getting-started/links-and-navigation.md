@@ -81,12 +81,12 @@ The `onClick` handler will do the following:
   import frontroute._
 
   div(
-    button(
+    a(
       href := "/news", 
       onClick.preventDefault --> { _ => BrowserNavigation.pushState(url = "/blog") } ),
       "Blog"
     ,
-    button(
+    a(
       href := "/blog",
       onClick.preventDefault --> { _ => BrowserNavigation.pushState(url = "/news") },
       "News"
