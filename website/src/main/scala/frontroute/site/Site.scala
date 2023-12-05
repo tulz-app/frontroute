@@ -38,6 +38,7 @@ object Site {
       frontroute.site.examples.ex_path_matching.PathMatchingExample,
       frontroute.site.examples.ex_recursive_path_matching.RecursivePathMatchingExample,
       frontroute.site.examples.ex_params.ParamsExample,
+      frontroute.site.examples.ex_multiparams.MultiParamsExample,
       frontroute.site.examples.ex_advanced_params.AdvancedParamsExample,
       frontroute.site.examples.ex_custom_directives.CustomDirectivesExample,
       frontroute.site.examples.ex_auth.AuthExample,

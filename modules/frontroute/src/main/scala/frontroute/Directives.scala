@@ -6,11 +6,11 @@ import scala.scalajs.js
 
 trait Directives {
 
-  private[frontroute] def extractContext: Directive[Location] =
+  private[frontroute] def extractLocation: Directive[Location] =
     Directive[Location](inner => (location, previous, state) => inner(location)(location, previous, state))
 
   private[frontroute] def extract[T](f: Location => T): Directive[T] =
-    extractContext.map(f)
+    extractLocation.map(f)
 
   def param(name: String): Directive[String] =
     Directive[String] { inner => (location, previous, state) =>
@@ -20,11 +20,17 @@ trait Directives {
       }
     }
 
+  def multiParam(name: String): Directive[Seq[String]] =
+    Directive[Seq[String]] { inner => (location, previous, state) =>
+      val values = location.params.getOrElse(name, Seq.empty)
+      inner(values)(location, previous, state.enterAndSet(values))
+    }
+
   def historyState: Directive[Option[js.Any]] =
-    extractContext.map(_.parsedState.flatMap(_.user.toOption))
+    extractLocation.map(_.parsedState.flatMap(_.user.toOption))
 
   def historyScroll: Directive[Option[ScrollPosition]] =
-    extractContext.map(_.parsedState.flatMap(_.internal.toOption).flatMap(_.scroll.toOption).map { scroll =>
+    extractLocation.map(_.parsedState.flatMap(_.internal.toOption).flatMap(_.scroll.toOption).map { scroll =>
       ScrollPosition(
         scrollX = scroll.scrollX.toOption.map(_.round.toInt),
         scrollY = scroll.scrollY.toOption.map(_.round.toInt)

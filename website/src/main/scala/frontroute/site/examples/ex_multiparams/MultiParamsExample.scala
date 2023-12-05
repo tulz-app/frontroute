@@ -1,22 +1,18 @@
-package frontroute.site
-package examples
-package ex_params
+package frontroute.site.examples.ex_multiparams
 
 import com.yurique.embedded.FileAsString
 import frontroute.site.examples.CodeExample
 
-object ParamsExample
+object MultiParamsExample
     extends CodeExample(
-      id = "query-parameters",
-      title = "Query parameters",
+      id = "multi-parameters",
+      title = "Query multi-parameters",
       description = FileAsString("description.md"),
       links = Seq(
         "/",
-        "/movie?id=2356777",
-        "/movie?id=0306414",
-        "/movies/search?director=cameron&year=1991",
-        "/movies/search?director=cameron",
-        "/movies/search?year=1991"
+        "/movies/search?director=cameron&director=spielberg&year=1991&year=1992&year=1993",
+        "/movies/search?director=cameron&director=quentin",
+        "/movies/search?year=1991&year=1992&year=1994&year=1995"
       )
     )(() => {
       import com.raquo.laminar.api.L._
@@ -29,17 +25,10 @@ object ParamsExample
             div(cls := "text-2xl", "Index page.")
           },
           /* <focus> */
-          (path("movie") & param("id")) { movieId =>
-            /* </focus> */
-            div(div(cls := "text-2xl", "Movie page."), div(s"Movie ID: $movieId"))
-            /* <focus> */
-          },
-          /* </focus> */
-          /* <focus> */
           (
             path("movies" / "search") &
-              maybeParam("director") &
-              maybeParam("year")
+              multiParam("director") &
+              multiParam("year")
           ) { (maybeDirector, maybeYear) =>
             /* </focus> */
             div(div(cls := "text-2xl", "Movie search page."), div(s"Director: $maybeDirector"), div(s"Year: $maybeYear"))

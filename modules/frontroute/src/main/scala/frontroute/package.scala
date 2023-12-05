@@ -123,34 +123,78 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
       () => effect
     )
 
-  private def makeRelative(matched: List[String], path: String): String =
-    if (matched.nonEmpty) {
-      if (path.nonEmpty) {
-        matched.mkString("/", "/", s"/$path")
-      } else {
-        matched.mkString("/", "/", "")
-      }
-    } else {
-      if (path.nonEmpty) {
-        s"/$path"
-      } else {
-        "/"
-      }
-    }
-
-  def navigate(
-    to: String,
-    replace: Boolean = false,
-  ): Route =
-    extractMatchedPath { matched =>
-      runEffect {
-        if (replace) {
-          BrowserNavigation.replaceState(url = makeRelative(matched, to))
+  private def makeRelative(matched: List[String], path: String, query: Seq[(String, Seq[String])]): String = {
+    val relative = {
+      if (path.startsWith("/")) {
+        path
+      } else if (matched.nonEmpty) {
+        if (path.nonEmpty) {
+          matched.mkString("/", "/", s"/$path")
         } else {
-          BrowserNavigation.pushState(url = makeRelative(matched, to))
+          matched.mkString("/", "/", "")
+        }
+      } else {
+        if (path.nonEmpty) {
+          s"/$path"
+        } else {
+          "/"
         }
       }
     }
+    val queryStr = LocationUtils.encodeLocationParams(query)
+    if (queryStr.nonEmpty) {
+      s"$relative$queryStr"
+    } else {
+      relative
+    }
+  }
+
+  @inline def navigate(
+    to: String,
+  ): Route =
+    navigate(to, Seq.empty, replace = false)
+
+  @inline def navigate(
+    to: String,
+    replace: Boolean,
+  ): Route =
+    navigate(to, Seq.empty, replace)
+
+  @inline def navigate(
+    to: String,
+    query: Map[String, Seq[String]],
+  ): Route =
+    navigate(to, query.toSeq, replace = false)
+
+  @inline def navigate(
+    to: String,
+    query: Map[String, Seq[String]],
+    replace: Boolean,
+  ): Route =
+    navigate(to, query.toSeq, replace)
+
+  @inline def navigate(
+    to: String,
+    query: Seq[(String, Seq[String])],
+  ): Route =
+    navigate(to, query, replace = false)
+
+  def navigate(
+    to: String,
+    query: Seq[(String, Seq[String])],
+    replace: Boolean,
+  ): Route = {
+    extractMatchedPath { matched =>
+      val relative = makeRelative(matched, to, query)
+      runEffect {
+        if (replace) {
+          BrowserNavigation.replaceState(url = relative)
+        } else {
+          BrowserNavigation.pushState(url = relative)
+        }
+      }
+    }
+  }
 
   implicit def elementToRoute(e: => HtmlElement): Route = complete(() => e)
 
@@ -167,10 +211,13 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
     )
   }
 
-  def relativeHref(path: String): Mod[ReactiveHtmlElement[html.Anchor]] =
+  @inline def relativeHref(path: String): Mod[ReactiveHtmlElement[html.Anchor]] =
+    relativeHref(path, Seq.empty)
+
+  def relativeHref(path: String, query: Seq[(String, Seq[String])]): Mod[ReactiveHtmlElement[html.Anchor]] =
     withMatchedPath { matched =>
       href <-- matched.map { matched =>
-        makeRelative(matched, path)
+        makeRelative(matched, path, query)
       }
     }
 

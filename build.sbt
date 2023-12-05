@@ -1,5 +1,6 @@
+import com.typesafe.tools.mima.core.DirectMissingMethodProblem
+import com.typesafe.tools.mima.core.ProblemFilters
 import org.scalajs.linker.interface.ESVersion
-
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
@@ -7,12 +8,10 @@ import org.openqa.selenium.firefox.FirefoxOptions
 import org.openqa.selenium.firefox.FirefoxProfile
 import org.openqa.selenium.remote.server.DriverFactory
 import org.openqa.selenium.remote.server.DriverProvider
-
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
 
 import java.util.concurrent.TimeUnit
-
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 
@@ -119,7 +118,12 @@ inThisBuild(
           }
           new SeleniumJSEnv(options, SeleniumJSEnv.Config().withDriverFactory(factory))
       }
-    }
+    },
+    mimaBinaryIssueFilters ++= Seq(
+      ProblemFilters.exclude[DirectMissingMethodProblem]("frontroute.package.navigate$default$2"),
+      ProblemFilters.exclude[DirectMissingMethodProblem]("frontroute.package.extractContext"),
+      ProblemFilters.exclude[DirectMissingMethodProblem]("frontroute.package.navigate$default$2"),
+    )
   )
 )
 

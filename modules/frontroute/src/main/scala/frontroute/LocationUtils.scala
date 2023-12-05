@@ -21,7 +21,10 @@ object LocationUtils {
     result.toMap
   }
 
-  def encodeLocationParams(params: Map[String, Seq[String]]): String =
+  @inline def encodeLocationParams(params: Map[String, Seq[String]]): String =
+    encodeLocationParams(params.toSeq)
+
+  def encodeLocationParams(params: Seq[(String, Seq[String])]): String =
     if (params.isEmpty) {
       ""
     } else {

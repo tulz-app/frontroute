@@ -17,6 +17,7 @@ object NavigateExample
         "/cars/2/legacy-summary",
         "/cars/2/summary",
         "/cars/2/details",
+        "/special-deal",
         "/some-page"
       )
     )(() => {
@@ -51,9 +52,32 @@ object NavigateExample
                 div("car summary ...")
               },
               path("details") {
-                div("car details ...")
+                (maybeParam("deal-id") & multiParam("some-id")) { (dealId, someIds) =>
+                  div(
+                    div(
+                      "car details ..."
+                    ),
+                    div(
+                      s"Deal ID: ${dealId}"
+                    ),
+                    div(
+                      s"Some IDs: ${someIds}"
+                    )
+                  )
+                }
               }
             )
+          },
+          path("special-deal") {
+            /* <focus> */
+            navigate(
+              "/cars/2/details",
+              Map(
+                "deal-id" -> Seq("annual-new-year"),
+                "some-id" -> Seq("456", "997"),
+              )
+            )
+            /* </focus> */
           },
           (noneMatched & extractUnmatchedPath) { unmatched =>
             div(
