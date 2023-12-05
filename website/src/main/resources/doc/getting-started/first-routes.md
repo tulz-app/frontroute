@@ -187,7 +187,7 @@ We have seen the `path` directive already, in the first example: `path("blog")` 
 
 There, it was a `Directive[Unit]`, while in this case, `path(segment)` is a `Directive[String]`.
 
-This is because the output the `path` directive is defined by the "path matcher" that we use:
+This is because the output of the `path` directive is defined by the "path matcher" that we use:
 
 * a string `"blog"` is implicitly converted into a `PathMatcher[Unit]`, which checks if the current `path` contains a
   single segment equal to `"blog"`, and does not extract anything; this can be done explicitly:
