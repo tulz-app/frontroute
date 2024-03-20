@@ -1,6 +1,6 @@
 object DependencyVersions {
 
-  val laminar        = "17.0.0-M8"
+  val laminar        = "17.0.0-RC1"
   val `tuplez-apply` = "0.4.0"
   val domtestutils   = "18.0.1"
   val scalatest      = "3.2.18"
