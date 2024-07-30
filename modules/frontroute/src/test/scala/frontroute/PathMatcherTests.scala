@@ -206,17 +206,17 @@ class PathMatcherTests extends TestBase {
   }
 
   test("not fixed segment/empty input") {
-    (!segment("a")).apply(List.empty, List.empty) shouldBe PathMatchResult.NoMatch
+    !segment("a").apply(List.empty, List.empty) shouldBe PathMatchResult.NoMatch
   }
 
   test("not fixed segment/non-matching prefix") {
-    (!segment("a")).apply(List.empty, List("a", "b")) shouldBe PathMatchResult.Rejected(
+    !segment("a").apply(List.empty, List("a", "b")) shouldBe PathMatchResult.Rejected(
       List("b")
     )
   }
 
   test("not fixed segment/matching prefix") {
-    (!segment("a")).apply(List("before"), List("c", "b")) shouldBe PathMatchResult.Match(
+    !segment("a").apply(List("before"), List("c", "b")) shouldBe PathMatchResult.Match(
       (),
       List("before"),
       List("b")
