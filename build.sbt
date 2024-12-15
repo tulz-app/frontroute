@@ -18,6 +18,8 @@ import org.commonmark.renderer.html.HtmlRenderer
 import org.typelevel.scalacoptions.ScalaVersion.V3_0_0
 import org.typelevel.scalacoptions.ScalacOptions
 
+import xerial.sbt.Sonatype.sonatypeCentralHost
+
 val disableWebsiteOnCI = true
 
 val ciVariants = List("ciFirefox", "ciChrome", "ciJSDOMNodeJS")
@@ -52,8 +54,8 @@ inThisBuild(
     versionPolicyIntention                     := Compatibility.BinaryCompatible,
     githubWorkflowJavaVersions                 := Seq(JavaSpec.temurin("17")),
 //    githubWorkflowBuild += WorkflowStep.Sbt(List("versionPolicyCheck")),
-    sonatypeCredentialHost                     := "s01.oss.sonatype.org",
-    sonatypeRepository                         := "https://s01.oss.sonatype.org/service/local",
+    sonatypeCredentialHost                     := sonatypeCentralHost,
+//    sonatypeRepository                         := "https://s01.oss.sonatype.org/service/local",
     githubWorkflowTargetTags ++= Seq("v*"),
     githubWorkflowArtifactUpload               := false,
     githubWorkflowPublishTargetBranches        := Seq(RefPredicate.StartsWith(Ref.Tag("v"))),
