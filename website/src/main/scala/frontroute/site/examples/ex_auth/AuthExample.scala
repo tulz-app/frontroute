@@ -15,8 +15,8 @@ object AuthExample
         "/private/profile"
       )
     )(() => {
-      import frontroute._
-      import com.raquo.laminar.api.L._
+      import frontroute.*
+      import com.raquo.laminar.api.L.*
 
       case class User(id: String)
 

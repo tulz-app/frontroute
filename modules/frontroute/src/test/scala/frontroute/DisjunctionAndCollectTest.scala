@@ -1,6 +1,6 @@
 package frontroute
 
-import frontroute.testing._
+import frontroute.testing.*
 
 class DisjunctionAndCollectTest extends TestBase {
 

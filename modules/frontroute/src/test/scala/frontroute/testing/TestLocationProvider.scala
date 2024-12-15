@@ -1,6 +1,6 @@
 package frontroute.testing
 
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import frontroute.LocationProvider
 import frontroute.Location
 import frontroute.internal.HistoryState

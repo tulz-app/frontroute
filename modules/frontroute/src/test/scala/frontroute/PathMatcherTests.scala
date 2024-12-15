@@ -1,7 +1,7 @@
 package frontroute
 
 import frontroute.internal.PathMatchResult
-import frontroute.testing._
+import frontroute.testing.*
 import scala.scalajs.js
 import scala.scalajs.js.JSON
 

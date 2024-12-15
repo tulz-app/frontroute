@@ -18,9 +18,9 @@ object BasicRoutingExample
         "/some-section/another-page"
       )
     )(() => {
-      import com.raquo.laminar.api.L._
+      import com.raquo.laminar.api.L.*
       /* <focus> */
-      import frontroute._
+      import frontroute.*
       /* </focus> */
 
       /* <focus> */

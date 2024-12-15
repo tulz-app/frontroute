@@ -1,7 +1,7 @@
 package frontroute.site
 
-import com.raquo.laminar.api.L._
-import frontroute._
+import com.raquo.laminar.api.L.*
+import frontroute.*
 
 package object pages {
 

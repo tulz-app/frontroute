@@ -5,9 +5,9 @@ import com.raquo.airstream.core.Signal
 import com.raquo.airstream.ownership.Owner
 import com.raquo.airstream.state.Var
 import com.raquo.domtestutils.scalatest.AsyncMountSpec
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import com.raquo.laminar.utils.LaminarSpec
-import frontroute._
+import frontroute.*
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.funsuite.AsyncFunSuite
 import org.scalatest.matchers.should.Matchers
@@ -16,7 +16,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import scala.concurrent.Promise
 import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.scalajs.js.timers.setTimeout
 
 abstract class TestBase extends AsyncFunSuite with Matchers with LaminarSpec with AsyncMountSpec with BeforeAndAfterEach {

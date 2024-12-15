@@ -1,6 +1,6 @@
 package frontroute.internal
 
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import frontroute.Location
 import frontroute.LocationProvider
 import frontroute.Route
@@ -8,7 +8,6 @@ import org.scalajs.dom
 
 import scala.annotation.tailrec
 import scala.scalajs.js
-import scala.scalajs.js.UndefOr
 
 @js.native
 private[internal] trait ElementWithLocationState extends js.Any {
@@ -37,7 +36,8 @@ private[frontroute] object LocationState {
 
   def withLocationProvider(lp: LocationProvider)(implicit owner: Owner): LocationState = {
     var siblingMatched = false
-    lp.current.foreach { _ =>
+
+    val _ = lp.current.foreach { _ =>
       siblingMatched = false
     }
 
@@ -55,7 +55,7 @@ private[frontroute] object LocationState {
       routerState = new RouterStateRef,
     )
 
-    lp.start()
+    val _ = lp.start()
     state
   }
 

@@ -1,6 +1,6 @@
 package frontroute
 
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import com.raquo.laminar.modifiers.Binder
 import com.raquo.laminar.nodes.ReactiveElement
 import frontroute.internal.LocationState
@@ -9,7 +9,7 @@ import frontroute.internal.RouterStateRef
 
 trait Route extends ((Location, RoutingState, RoutingState) => RouteResult) with Mod[HtmlElement] {
 
-  import Route._
+  import Route.*
 
   private val currentRender      = Var(Option.empty[HtmlElement])
   private val currentRenderState = Var(Option.empty[LocationState])
@@ -67,7 +67,7 @@ trait Route extends ((Location, RoutingState, RoutingState) => RouteResult) with
                   LocationState.init(render.ref, childState)
                   childState.setConsumed(consumed)
 
-                  render.ref.dataset.addOne("frPath" -> consumed.mkString("/", "/", ""))
+                  val _ = render.ref.dataset.addOne("frPath" -> consumed.mkString("/", "/", ""))
                   currentRender.set(Some(render))
                   currentRenderState.set(Some(childState))
                 case RouteEvent.SameRender(nextState, remaining, consumed)         =>

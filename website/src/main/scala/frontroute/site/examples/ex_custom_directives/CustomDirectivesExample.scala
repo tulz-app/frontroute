@@ -17,9 +17,9 @@ object CustomDirectivesExample
         "/movie?id=not-long"
       )
     )(() => {
-      import com.raquo.laminar.api.L._
-      import frontroute._
-      import scala.util._
+      import com.raquo.laminar.api.L.*
+      import frontroute.*
+      import scala.util.*
 
       def longParam(paramName: String): Directive[Long] =
         /* <focus> */

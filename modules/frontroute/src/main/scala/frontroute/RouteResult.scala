@@ -1,6 +1,6 @@
 package frontroute
 
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import frontroute.internal.RoutingState
 
 sealed trait RouteResult extends Product with Serializable

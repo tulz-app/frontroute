@@ -10,10 +10,13 @@ import org.openqa.selenium.remote.server.DriverFactory
 import org.openqa.selenium.remote.server.DriverProvider
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
+import scala.Ordering.Implicits._
 
 import java.util.concurrent.TimeUnit
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
+import org.typelevel.scalacoptions.ScalaVersion.V3_0_0
+import org.typelevel.scalacoptions.ScalacOptions
 
 val disableWebsiteOnCI = true
 
@@ -127,10 +130,26 @@ inThisBuild(
   )
 )
 
+lazy val commonSettings = Seq(
+  tpolecatScalacOptions ++= Set(
+    ScalacOptions.source("3-cross", _ < V3_0_0)
+  ),
+  Test / tpolecatExcludeOptions ++= Set(
+    ScalacOptions.warnValueDiscard,
+    ScalacOptions.warnUnusedImports,
+    ScalacOptions.warnUnusedLocals,
+    ScalacOptions.warnUnusedImplicits,
+    ScalacOptions.warnUnusedPatVars,
+    ScalacOptions.warnDeadCode,
+    ScalacOptions.warnNonUnitStatement
+  ),
+)
+
 lazy val frontroute =
   project
     .in(file("modules/frontroute"))
     .enablePlugins(ScalaJSPlugin)
+    .settings(commonSettings)
     .settings(
       name                     := "frontroute",
       libraryDependencies ++=
@@ -142,7 +161,6 @@ lazy val frontroute =
           Dependencies.`scala-js-macrotask-executor`.value.map(_ % Test)
         ),
       Test / parallelExecution := false,
-      ScalaOptions.fixOptions,
       scalacOptions ++= {
         val sourcesGithubUrl  = s"https://raw.githubusercontent.com/tulz-app/frontroute/${git.gitHeadCommit.value.get}/"
         val sourcesOptionName = CrossVersion.partialVersion(scalaVersion.value) match {
@@ -178,7 +196,7 @@ def templateVars(s: String): String =
 lazy val website = project
   .in(file("website"))
   .enablePlugins(ScalaJSPlugin, EmbeddedFilesPlugin, BuildInfoPlugin)
-  .settings(ScalaOptions.fixOptions)
+  .settings(commonSettings)
   .settings(noPublish)
   .settings(
     githubWorkflowTargetTags        := Seq.empty,

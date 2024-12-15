@@ -1,15 +1,15 @@
 package frontroute.site.components
 
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import frontroute.BrowserNavigation
 import frontroute.internal.UrlString
-import io.laminext.syntax.core._
-import io.laminext.syntax.dangerous._
+import io.laminext.syntax.core.*
+import io.laminext.syntax.dangerous.*
 import io.laminext.highlight.Highlight
 import frontroute.site.examples.CodeExample
 import frontroute.site.Site
 import frontroute.site.Styles
-import frontroute._
+import frontroute.*
 import org.scalajs.dom
 import org.scalajs.dom.HTMLIFrameElement
 import org.scalajs.dom.Location

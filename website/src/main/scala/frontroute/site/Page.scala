@@ -1,6 +1,6 @@
 package frontroute.site
 
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 
 final class Page private (
   val path: String,

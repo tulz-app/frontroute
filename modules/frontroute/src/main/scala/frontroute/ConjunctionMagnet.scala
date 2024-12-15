@@ -9,7 +9,9 @@ trait ConjunctionMagnet[L] {
 
 object ConjunctionMagnet {
 
-  implicit def fromDirective[L, R](other: Directive[R])(implicit composition: Composition[L, R]): ConjunctionMagnet[L] {
+  implicit def fromDirective[L, R](other: Directive[R])(implicit
+    composition: Composition[L, R]
+  ): ConjunctionMagnet[L] {
     type Out = Directive[composition.Composed]
   } =
     new ConjunctionMagnet[L] {

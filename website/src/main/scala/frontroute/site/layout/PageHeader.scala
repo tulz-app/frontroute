@@ -2,9 +2,9 @@ package frontroute.site
 
 package layout
 
-import com.raquo.laminar.api.L._
-import io.laminext.syntax.tailwind._
-import io.laminext.syntax.core._
+import com.raquo.laminar.api.L.*
+import io.laminext.syntax.tailwind.*
+import io.laminext.syntax.core.*
 import frontroute.site.icons.Icons
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 
@@ -155,7 +155,7 @@ object PageHeader {
 
   private def moduleLink(
     currentPage: Signal[Option[(SiteModule, Page)]]
-  )(module: SiteModule) =
+  )(module: SiteModule)  =
     a(
       cls  := "border-b-2 px-2 border-transparent flex font-display tracking-wide",
       currentPage

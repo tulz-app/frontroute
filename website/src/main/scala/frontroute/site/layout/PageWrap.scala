@@ -4,9 +4,9 @@ import frontroute.site.Page
 import frontroute.site.Site
 import frontroute.site.SiteModule
 import frontroute.site.Styles
-import com.raquo.laminar.api.L._
-import io.laminext.syntax.core._
-import io.laminext.syntax.tailwind._
+import com.raquo.laminar.api.L.*
+import io.laminext.syntax.core.*
+import io.laminext.syntax.tailwind.*
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 
 object PageWrap {

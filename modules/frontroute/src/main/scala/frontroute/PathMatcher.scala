@@ -116,7 +116,7 @@ object PathMatcher {
 
   def provide[V](v: V): PathMatcher[V] = unit.map(_ => v)
 
-  def fail[T]: PathMatcher[T] = (consumed: List[String], in: List[String]) => PathMatchResult.Rejected(in)
+  def fail[T]: PathMatcher[T] = (_: List[String], in: List[String]) => PathMatchResult.Rejected(in)
 
 }
 

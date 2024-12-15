@@ -15,10 +15,9 @@ object EffectExample
         "/some-page"
       )
     )(() => {
-      import frontroute._
+      import frontroute.*
 
-      import io.laminext.syntax.core._
-      import com.raquo.laminar.api.L._
+      import com.raquo.laminar.api.L.*
       import org.scalajs.dom
 
       routes(

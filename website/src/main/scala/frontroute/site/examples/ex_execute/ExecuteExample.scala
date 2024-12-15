@@ -19,8 +19,8 @@ object ExecuteExample
         "/some-page"
       )
     )(() => {
-      import frontroute._
-      import com.raquo.laminar.api.L._
+      import frontroute.*
+      import com.raquo.laminar.api.L.*
       import org.scalajs.dom
 
       routes(

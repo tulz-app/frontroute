@@ -17,10 +17,10 @@ object TabsExample
         "/some-page"
       )
     )(() => {
-      import frontroute._
+      import frontroute.*
 
-      import io.laminext.syntax.core._
-      import com.raquo.laminar.api.L._
+      import io.laminext.syntax.core.*
+      import com.raquo.laminar.api.L.*
 
       val tabs = Seq(
         "tab-1" -> "Tab 1",

@@ -1,4 +1,4 @@
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 
 import app.tulz.tuplez.ApplyConverter
 import app.tulz.tuplez.ApplyConverters
@@ -32,12 +32,12 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
   val reject: Route = (_, _, _) => rejected
 
   def debug(message: Any, optionalParams: Any*)(subRoute: Route): Route = { (location, previous, state) =>
-    dom.console.debug(message, optionalParams: _*)
+    dom.console.debug(message, optionalParams*)
     subRoute(location, previous, state)
   }
 
   @deprecated("use firstMatch instead", "0.16.0")
-  def concat(routes: Route*): Route = firstMatch(routes: _*)
+  def concat(routes: Route*): Route = firstMatch(routes*)
 
   def initRouting: Modifier[Element] = {
     initRouting(LocationProvider.windowLocationProvider)

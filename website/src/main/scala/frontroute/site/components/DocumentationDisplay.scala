@@ -1,8 +1,8 @@
 package frontroute.site.components
 
 import io.laminext.highlight.Highlight
-import com.raquo.laminar.api.L._
-import io.laminext.syntax.dangerous._
+import com.raquo.laminar.api.L.*
+import io.laminext.syntax.dangerous.*
 
 object DocumentationDisplay {
 

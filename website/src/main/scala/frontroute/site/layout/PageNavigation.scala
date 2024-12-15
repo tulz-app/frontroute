@@ -3,8 +3,8 @@ package frontroute.site.layout
 import frontroute.site.Page
 import frontroute.site.Site
 import frontroute.site.SiteModule
-import io.laminext.syntax.core._
-import com.raquo.laminar.api.L._
+import io.laminext.syntax.core.*
+import com.raquo.laminar.api.L.*
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 
 object PageNavigation {

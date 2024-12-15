@@ -1,6 +1,6 @@
 package frontroute.pathDirectives
 
-import frontroute._
+import frontroute.*
 import frontroute.testing.TestBase
 
 class SimplePathEndTest extends TestBase {

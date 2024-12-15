@@ -1,6 +1,6 @@
 package frontroute.site
 
-import io.laminext.syntax.core._
+import io.laminext.syntax.core.*
 
 object Styles {
 

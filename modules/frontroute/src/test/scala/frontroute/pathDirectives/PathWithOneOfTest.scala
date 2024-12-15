@@ -1,7 +1,7 @@
 package frontroute.pathDirectives
 
 import frontroute.testing.TestBase
-import frontroute._
+import frontroute.*
 
 class PathWithOneOfTest extends TestBase {
 

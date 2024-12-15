@@ -1,13 +1,13 @@
 package frontroute.site
 
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import frontroute.site.layout.PageWrap
-import io.laminext.syntax.tailwind._
+import io.laminext.syntax.tailwind.*
 import io.laminext.tailwind.modal.ModalContent
 import io.laminext.tailwind.theme.Modal
 import io.laminext.tailwind.theme.Theme
 import org.scalajs.dom
-import frontroute._
+import frontroute.*
 
 class Routes {
 
@@ -53,7 +53,7 @@ class Routes {
     val menuContainer = dom.document.querySelector("#menu-modal")
 
     appContainer.innerHTML = ""
-    com.raquo.laminar.api.L.render(
+    val _ = com.raquo.laminar.api.L.render(
       appContainer,
       routes(
         div(

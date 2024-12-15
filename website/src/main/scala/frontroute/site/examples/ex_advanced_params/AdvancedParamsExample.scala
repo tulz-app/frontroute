@@ -16,8 +16,8 @@ object AdvancedParamsExample
         "/movies?page=3",
       )
     )(() => {
-      import com.raquo.laminar.api.L._
-      import frontroute._
+      import com.raquo.laminar.api.L.*
+      import frontroute.*
       import scala.util.Try
 
       /* <focus> */

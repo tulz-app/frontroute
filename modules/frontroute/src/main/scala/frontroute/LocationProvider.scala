@@ -1,6 +1,6 @@
 package frontroute
 
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import com.raquo.airstream.core.EventStream
 import org.scalajs.dom
 

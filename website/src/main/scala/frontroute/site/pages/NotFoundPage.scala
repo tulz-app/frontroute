@@ -1,6 +1,6 @@
 package frontroute.site.pages
 
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import frontroute.site.components.DocumentationDisplay
 
 object NotFoundPage {

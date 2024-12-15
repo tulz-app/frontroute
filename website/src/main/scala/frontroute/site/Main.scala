@@ -1,6 +1,6 @@
 package frontroute.site
 
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import frontroute.BrowserNavigation
 import frontroute.LinkHandler
 import frontroute.site.components.CodeExampleDisplay

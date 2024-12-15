@@ -16,10 +16,10 @@ object MatchedPathExample
         "/some-page"
       )
     )(() => {
-      import frontroute._
-      import io.laminext.syntax.core._
+      import frontroute.*
+      import io.laminext.syntax.core.*
 
-      import com.raquo.laminar.api.L._
+      import com.raquo.laminar.api.L.*
 
       def ShowCurrentPath(label: String): Element =
         div(

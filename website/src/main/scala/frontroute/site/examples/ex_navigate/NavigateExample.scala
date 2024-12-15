@@ -21,10 +21,9 @@ object NavigateExample
         "/some-page"
       )
     )(() => {
-      import frontroute._
-      import io.laminext.syntax.core._
+      import frontroute.*
 
-      import com.raquo.laminar.api.L._
+      import com.raquo.laminar.api.L.*
 
       routes(
         div(

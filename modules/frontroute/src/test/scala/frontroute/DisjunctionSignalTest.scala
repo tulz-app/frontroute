@@ -1,7 +1,7 @@
 package frontroute
 
 import com.raquo.airstream.core.Signal
-import frontroute.testing._
+import frontroute.testing.*
 
 import scala.concurrent.Future
 

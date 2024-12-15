@@ -1,6 +1,6 @@
 package frontroute.site.layout
 
-import com.raquo.laminar.api.L._
+import com.raquo.laminar.api.L.*
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 
 object PageFooter {

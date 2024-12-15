@@ -20,8 +20,8 @@ object RecursivePathMatchingExample
         "/recursive/1/2/3/4/5"
       )
     )(() => {
-      import com.raquo.laminar.api.L._
-      import frontroute._
+      import com.raquo.laminar.api.L.*
+      import frontroute.*
 
       def recursivePathMatch: Directive[List[String]] =
         /* <focus> */

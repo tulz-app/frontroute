@@ -1,8 +1,8 @@
 package frontroute.site.icons
 
 import com.raquo.laminar.api.L
-import com.raquo.laminar.api.L.svg._
-import io.laminext.syntax.core._
+import com.raquo.laminar.api.L.svg.*
+import io.laminext.syntax.core.*
 import org.scalajs.dom.svg.SVG
 
 object Icons {

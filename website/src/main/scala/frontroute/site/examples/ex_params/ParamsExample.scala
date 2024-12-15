@@ -19,8 +19,8 @@ object ParamsExample
         "/movies/search?year=1991"
       )
     )(() => {
-      import com.raquo.laminar.api.L._
-      import frontroute._
+      import com.raquo.laminar.api.L.*
+      import frontroute.*
 
       routes(
         div(

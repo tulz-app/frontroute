@@ -93,7 +93,7 @@ final private[frontroute] class RoutingState private (
   override def toString: String = {
     s"""state: consumed: '${consumed.mkString("/", "/", "")}' path: '$path', data: '${data
         .map {
-          case (key, value: Var[_]) =>
+          case (key, value: Var[?]) =>
             s"$key -> $value (${value.signal.now()})"
           case (key, value)         =>
             s"$key -> $value"
@@ -107,7 +107,7 @@ final private[frontroute] class RoutingState private (
   }
 
   override def hashCode(): Int = {
-    val state = Seq(path, data)
+    val state: Seq[AnyRef] = Seq(path, data)
     state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
   }
 

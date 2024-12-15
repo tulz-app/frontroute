@@ -21,8 +21,8 @@ object PathMatchingExample
         "/page-4"
       )
     )(() => {
-      import com.raquo.laminar.api.L._
-      import frontroute._
+      import com.raquo.laminar.api.L.*
+      import frontroute.*
 
       routes(
         div(

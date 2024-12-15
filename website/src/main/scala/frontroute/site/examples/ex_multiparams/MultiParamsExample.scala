@@ -15,8 +15,8 @@ object MultiParamsExample
         "/movies/search?year=1991&year=1992&year=1994&year=1995"
       )
     )(() => {
-      import com.raquo.laminar.api.L._
-      import frontroute._
+      import com.raquo.laminar.api.L.*
+      import frontroute.*
 
       routes(
         div(

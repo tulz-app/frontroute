@@ -15,9 +15,9 @@ object ExtractMatchedPathExample
         "/some-page"
       )
     )(() => {
-      import frontroute._
+      import frontroute.*
 
-      import com.raquo.laminar.api.L._
+      import com.raquo.laminar.api.L.*
 
       def ShowCurrentPath(label: String): Element =
         div(
