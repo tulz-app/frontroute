@@ -35,7 +35,7 @@ Global / useJSEnv := JSEnv.NodeJS
 
 inThisBuild(
   List(
-    organization                               := "io.frontroute",
+    organization                               := "dev.frontroute",
     homepage                                   := Some(url("https://github.com/tulz-app/frontroute")),
     licenses                                   := List("MIT" -> url("https://github.com/tulz-app/frontroute/blob/main/LICENSE.md")),
     scmInfo                                    := Some(ScmInfo(url("https://github.com/tulz-app/frontroute"), "scm:git@github.com/tulz-app/frontroute.git")),
@@ -182,10 +182,10 @@ lazy val frontrouteSiteVersion: String = IO.read(file("website/.frontroute-versi
 lazy val thisVersionSitePrefix         = s"/v/$frontrouteSiteVersion/"
 
 lazy val vars = Seq(
-  "frontrouteVersion" -> "0.19.0",
-  "laminarVersion"    -> "17.0.0",
+  "frontrouteVersion" -> "0.19.1",
+  "laminarVersion"    -> "17.2.0",
   "scalajsVersion"    -> "1.16.0",
-  "scala3version"     -> "3.3.1",
+  "scala3version"     -> "3.3.4",
 )
 
 def templateVars(s: String): String =

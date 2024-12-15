@@ -24,6 +24,17 @@ See [getting started](/getting-started).
 
 ## Installation
 
+<div class="bg-sky-200 px-8 py-4">
+<div class="font-bold">
+Important!
+</div>
+
+<div>
+Starting with version 0.19.1 the dependency organization name has changed from "io.frontroute" to "dev.frontroute".
+</div>
+</div>
+
+
 ### Prerequisites
 
 * [Scala.js](https://www.scala-js.org/) `v{{scalajsVersion}}`+
@@ -44,7 +55,7 @@ Enable the plugin and add the `frontroute` library to your `build.sbt` file:
 enablePlugins(ScalaJSPlugin)
 
 libraryDependencies ++= Seq(
-  "io.frontroute" %%% "frontroute" % "{{frontrouteVersion}}"
+  "dev.frontroute" %%% "frontroute" % "{{frontrouteVersion}}"
 )
 ```
 
@@ -61,7 +72,7 @@ object counter extends ScalaJSModule {
     def scalaVersion   = "{{scala3version}}"
     def scalaJSVersion = "{{scalajsVersion}}"
     
-    def ivyDeps = Agg(ivy"io.frontroute::frontroute::{{frontrouteVersion}}")
+    def ivyDeps = Agg(ivy"dev.frontroute::frontroute::{{frontrouteVersion}}")
     
     override def moduleKind = T(mill.scalajslib.api.ModuleKind.CommonJSModule)
 }
