@@ -52,6 +52,8 @@ inThisBuild(
     versionPolicyIntention                     := Compatibility.BinaryCompatible,
     githubWorkflowJavaVersions                 := Seq(JavaSpec.temurin("17")),
 //    githubWorkflowBuild += WorkflowStep.Sbt(List("versionPolicyCheck")),
+    sonatypeCredentialHost                     := "s01.oss.sonatype.org",
+    sonatypeRepository                         := "https://s01.oss.sonatype.org/service/local",
     githubWorkflowTargetTags ++= Seq("v*"),
     githubWorkflowArtifactUpload               := false,
     githubWorkflowPublishTargetBranches        := Seq(RefPredicate.StartsWith(Ref.Tag("v"))),
