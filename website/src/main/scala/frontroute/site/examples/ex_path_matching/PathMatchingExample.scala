@@ -3,7 +3,6 @@ package examples
 package ex_path_matching
 
 import com.yurique.embedded.FileAsString
-import frontroute.site.examples.CodeExample
 
 object PathMatchingExample
     extends CodeExample(

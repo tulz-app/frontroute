@@ -3,7 +3,6 @@ package examples
 package ex_custom_directives
 
 import com.yurique.embedded.FileAsString
-import frontroute.site.examples.CodeExample
 
 object CustomDirectivesExample
     extends CodeExample(

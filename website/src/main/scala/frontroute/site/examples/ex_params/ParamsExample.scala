@@ -3,7 +3,6 @@ package examples
 package ex_params
 
 import com.yurique.embedded.FileAsString
-import frontroute.site.examples.CodeExample
 
 object ParamsExample
     extends CodeExample(

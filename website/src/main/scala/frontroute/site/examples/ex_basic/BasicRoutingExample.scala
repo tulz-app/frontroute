@@ -2,7 +2,6 @@ package frontroute.site
 package examples
 package ex_basic
 
-import frontroute.site.examples.CodeExample
 import com.yurique.embedded.FileAsString
 
 object BasicRoutingExample

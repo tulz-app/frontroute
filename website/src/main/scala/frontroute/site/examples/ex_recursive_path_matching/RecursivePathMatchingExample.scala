@@ -3,7 +3,6 @@ package examples
 package ex_recursive_path_matching
 
 import com.yurique.embedded.FileAsString
-import frontroute.site.examples.CodeExample
 
 object RecursivePathMatchingExample
     extends CodeExample(

@@ -1,7 +1,6 @@
 package frontroute.site.components
 
 import com.raquo.laminar.api.L.*
-import frontroute.BrowserNavigation
 import frontroute.internal.UrlString
 import io.laminext.syntax.core.*
 import io.laminext.syntax.dangerous.*

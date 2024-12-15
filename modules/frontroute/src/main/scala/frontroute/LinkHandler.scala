@@ -32,7 +32,7 @@ object LinkHandler {
         }
       } else if (rel == "external") {
         event.preventDefault()
-        dom.window.open(anchor.href)
+        val _ = dom.window.open(anchor.href)
       }
     }
   }
