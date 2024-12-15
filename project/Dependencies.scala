@@ -1,6 +1,6 @@
-import sbt._
+import sbt.*
 
-import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
+import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport.*
 
 object Dependencies {
 
@@ -32,12 +32,12 @@ object Dependencies {
 
   val laminext: Def.Initialize[Seq[ModuleID]] = Def.setting {
     Seq(
-      "io.laminext" %%% "core"                   % DependencyVersions.laminext,
-      "io.laminext" %%% "highlight"              % DependencyVersions.laminext,
-      "io.laminext" %%% "ui"                     % DependencyVersions.laminext,
-      "io.laminext" %%% "tailwind"               % DependencyVersions.laminext,
-      "io.laminext" %%% "util"                   % DependencyVersions.laminext,
-      "io.laminext" %%% "tailwind-default-theme" % DependencyVersions.laminext
+      "dev.laminext" %%% "core"                   % DependencyVersions.laminext,
+      "dev.laminext" %%% "highlight"              % DependencyVersions.laminext,
+      "dev.laminext" %%% "ui"                     % DependencyVersions.laminext,
+      "dev.laminext" %%% "tailwind"               % DependencyVersions.laminext,
+      "dev.laminext" %%% "util"                   % DependencyVersions.laminext,
+      "dev.laminext" %%% "tailwind-default-theme" % DependencyVersions.laminext
     )
   }
 
