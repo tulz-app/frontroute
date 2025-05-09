@@ -189,7 +189,7 @@ lazy val vars = Seq(
   "frontrouteVersion" -> "0.19.1",
   "laminarVersion"    -> "17.2.0",
   "scalajsVersion"    -> "1.16.0",
-  "scala3version"     -> "3.3.4",
+  "scala3version"     -> "3.3.6",
 )
 
 def templateVars(s: String): String =
