@@ -3,7 +3,7 @@ logLevel := Level.Warn
 libraryDependencies += "org.commonmark" % "commonmark"               % "0.24.0"
 libraryDependencies += "org.scala-js"  %% "scalajs-env-nodejs"       % "1.4.0"
 libraryDependencies += "org.scala-js"  %% "scalajs-env-selenium"     % "1.1.1"
-libraryDependencies += "org.scala-js"  %% "scalajs-env-jsdom-nodejs" % "1.1.0"
+libraryDependencies += "org.scala-js"  %% "scalajs-env-jsdom-nodejs" % "1.1.1"
 
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.16.0")
 
