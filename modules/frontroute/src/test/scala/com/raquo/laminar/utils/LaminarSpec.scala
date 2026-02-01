@@ -1,24 +1,28 @@
 package com.raquo.laminar.utils
 
-import com.raquo.domtestutils.matching.*
 import com.raquo.domtestutils.EventSimulator
 import com.raquo.domtestutils.MountOps
-import com.raquo.laminar.api.L.CompositeSvgAttr
+import com.raquo.domtestutils.matching.*
 import com.raquo.laminar.api.*
-import com.raquo.laminar.codecs.StringAsIsCodec
-import com.raquo.laminar.defs.complex.ComplexHtmlKeys.CompositeHtmlAttr
-import com.raquo.laminar.defs.complex.ComplexHtmlKeys.CompositeHtmlProp
-import com.raquo.laminar.keys.HtmlAttr
-import com.raquo.laminar.keys.HtmlProp
-import com.raquo.laminar.keys.StyleProp
-import com.raquo.laminar.keys.SvgAttr
-import com.raquo.laminar.nodes.CommentNode
-import com.raquo.laminar.nodes.ReactiveElement
-import com.raquo.laminar.nodes.RootNode
+import com.raquo.laminar.keys.*
+import com.raquo.laminar.nodes.*
 import com.raquo.laminar.tags.Tag
 import org.scalactic
 
-trait LaminarSpec extends MountOps with RuleImplicits[Tag.Base, CommentNode, HtmlProp, HtmlAttr, SvgAttr, StyleProp] with EventSimulator {
+trait LaminarSpec
+    extends MountOps
+    with RuleImplicits[
+      Tag.Base,
+      CommentNode,
+      HtmlProp,
+      GlobalAttr,
+      HtmlAttr,
+      SvgAttr,
+      MathMlAttr,
+      StyleProp,
+      CompositeAttr[?],
+    ]
+    with EventSimulator {
   // === On nullable variables ===
   // `root` is nullable because if it was an Option it would be too easy to
   // forget to handle the `None` case when mapping or foreach-ing over it.
@@ -87,31 +91,32 @@ trait LaminarSpec extends MountOps with RuleImplicits[Tag.Base, CommentNode, Htm
     ExpectedNode.comment
   }
 
-  implicit override def makeAttrTestable[V](attr: HtmlAttr[V]): TestableHtmlAttr[V] = {
-    new TestableHtmlAttr[V](attr.name, attr.codec.encode, attr.codec.decode)
-  }
-
-  implicit override def makePropTestable[V, DomV](prop: HtmlProp[V, DomV]): TestableProp[V, DomV] = {
-    new TestableProp[V, DomV](prop.name, prop.codec.decode)
+  implicit override def makeHtmlPropTestable[V, _DomV](prop: HtmlProp[V] { type DomV = _DomV }): TestableHtmlProp[V, _DomV] = {
+    new TestableHtmlProp[V, _DomV](prop.name, prop.codec.decode)
   }
 
   implicit override def makeStyleTestable[V](style: StyleProp[V]): TestableStyleProp[V] = {
     new TestableStyleProp[V](style.name)
   }
 
+  implicit override def makeGlobalAttrTestable[V](attr: GlobalAttr[V]): TestableGlobalAttr[V] = {
+    new TestableGlobalAttr[V](attr.name, attr.codec.encode, attr.codec.decode)
+  }
+
+  implicit override def makeHtmlAttrTestable[V](attr: HtmlAttr[V]): TestableHtmlAttr[V] = {
+    new TestableHtmlAttr[V](attr.name, attr.codec.encode, attr.codec.decode)
+  }
+
   implicit override def makeSvgAttrTestable[V](svgAttr: SvgAttr[V]): TestableSvgAttr[V] = {
     new TestableSvgAttr[V](svgAttr.name, svgAttr.codec.encode, svgAttr.codec.decode, svgAttr.namespaceUri)
   }
 
-  implicit def makeCompositePropTestable(prop: CompositeHtmlProp): TestableProp[String, String] = {
-    new TestableProp(prop.name, StringAsIsCodec.decode)
+  implicit override def makeMathMlAttrTestable[V](attr: MathMlAttr[V]): TestableMathMlAttr[V] = {
+    new TestableMathMlAttr[V](attr.name, attr.codec.encode, attr.codec.decode)
   }
 
-  implicit def makeCompositeHtmlAttrTestable(attr: CompositeHtmlAttr): TestableHtmlAttr[String] = {
-    new TestableHtmlAttr(attr.name, StringAsIsCodec.encode, StringAsIsCodec.decode)
+  implicit override def makeCompositeKeyTestable(key: CompositeAttr[?]): TestableCompositeKey = {
+    new TestableCompositeKey(key.name, key.separator, getRawDomValue = _.getAttribute(key.name))
   }
 
-  implicit def makeCompositeSvgAttrTestable(attr: CompositeSvgAttr): TestableSvgAttr[String] = {
-    new TestableSvgAttr(attr.name, StringAsIsCodec.encode, StringAsIsCodec.decode, namespace = None)
-  }
 }
