@@ -6,14 +6,13 @@ import frontroute.site.SiteModule
 import frontroute.site.Styles
 import com.raquo.laminar.api.L.*
 import io.laminext.syntax.core.*
-import io.laminext.syntax.tailwind.*
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 
 object PageWrap {
 
   def apply(
     $page: Signal[Option[(SiteModule, Page)]],
-    menuObserver: Observer[Option[ModalContent]]
+    menuObserver: Observer[Option[Element]]
   ): ReactiveHtmlElement.Base = {
     div(
       linkTag(
@@ -31,7 +30,7 @@ object PageWrap {
         ),
         div(
           cls := "flex-1 flex overflow-hidden",
-          PageNavigation($page).hiddenIf($page.optionMap(_._1).optionContains(Site.indexModule)),
+          PageNavigation($page).amend(cls("hidden") <-- $page.optionMap(_._1).optionContains(Site.indexModule)),
           div(
             cls := "flex-1 bg-gray-200 overflow-auto md:p-4",
             div(

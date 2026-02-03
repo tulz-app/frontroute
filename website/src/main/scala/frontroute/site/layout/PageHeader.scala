@@ -3,8 +3,9 @@ package frontroute.site
 package layout
 
 import com.raquo.laminar.api.L.*
-import io.laminext.syntax.tailwind.*
 import io.laminext.syntax.core.*
+import io.laminext.syntax.ui.*
+import io.laminext.tailwind.theme.TailwindTransition
 import frontroute.site.icons.Icons
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 
@@ -12,7 +13,7 @@ object PageHeader {
 
   def apply(
     $page: Signal[Option[(SiteModule, Page)]],
-    menuObserver: Observer[Option[ModalContent]]
+    menuObserver: Observer[Option[Element]]
   ): ReactiveHtmlElement.Base = {
     val styleDropDownOpen = Var(false)
     val styleSearch       = Var("")
@@ -67,15 +68,21 @@ object PageHeader {
             Icons
               .chevronDown(
                 svg.cls := "-mr-1 ml-2 h-4 fill-current text-gray-300"
-              ).hiddenIf(styleDropDownOpen.signal),
+              )
+              .amend(
+                cls("hidden") <-- styleDropDownOpen.signal
+              ),
             Icons
               .chevronUp(
                 svg.cls := "-mr-1 ml-2 h-4 fill-current text-gray-300"
-              ).visibleIf(styleDropDownOpen.signal)
+              )
+              .amend(
+                cls("hidden") <-- styleDropDownOpen.signal.not
+              )
           )
         ),
         div(
-          TW.transition(styleDropDownOpen.signal),
+          addTransition(styleDropDownOpen.signal, TailwindTransition.opacityAndScale),
           cls := "origin-top-right absolute max-h-128 overflow-auto right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20 p-2",
           div(
             cls              := "py-1",
@@ -106,8 +113,8 @@ object PageHeader {
                     None
                   }
                 }
-              ).hiddenIf(
-                styleSearch.signal.map(search => !styleName.contains(search))
+              ).amend(
+                cls("hidden") <-- styleSearch.signal.map(search => !styleName.contains(search))
               )
             }
           )
@@ -120,23 +127,20 @@ object PageHeader {
           cls := "btn-md-outline-white",
           onClick.mapTo(
             Some(
-              ModalContent(
+              div(
                 div(
-                  div(
-                    cls := "flex justify-end py-4 px-8",
-                    button(
-                      "Close",
-                      cls := "btn-md-outline-white",
-                      onClick.mapTo(None) --> menuObserver
-                    )
-                  ),
-                  PageNavigation($page, mobile = true),
-                  div(
-                    cls := "flex flex-wrap justify-start items-center p-4",
-                    Site.modules.drop(1).map(moduleLink($page))
+                  cls := "flex justify-end py-4 px-8",
+                  button(
+                    "Close",
+                    cls := "btn-md-outline-white",
+                    onClick.mapTo(None) --> menuObserver
                   )
                 ),
-                Some(menuObserver.contramap(_ => None))
+                PageNavigation($page, mobile = true),
+                div(
+                  cls := "flex flex-wrap justify-start items-center p-4",
+                  Site.modules.drop(1).map(moduleLink($page))
+                )
               )
             )
           ) --> menuObserver

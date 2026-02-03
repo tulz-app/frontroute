@@ -2,16 +2,12 @@ package frontroute.site
 
 import com.raquo.laminar.api.L.*
 import frontroute.site.layout.PageWrap
-import io.laminext.syntax.tailwind.*
-import io.laminext.tailwind.modal.ModalContent
-import io.laminext.tailwind.theme.Modal
-import io.laminext.tailwind.theme.Theme
 import org.scalajs.dom
 import frontroute.*
 
 class Routes {
 
-  private val mobileMenuContent = Var[Option[ModalContent]](None)
+  private val mobileMenuContent = Var[Option[Element]](None)
 
   private def modulePrefix: Directive[SiteModule] =
     pathPrefix(segment).flatMap { moduleName =>
@@ -29,12 +25,6 @@ class Routes {
       }
     }
 
-  private val mobileMenuModal: Modal = Theme.current.modal.customize(
-    contentWrapTransition = _.customize(
-      nonHidden = _ :+ "bg-gray-900"
-    )
-  )
-
   private val versionSegment = {
     regex("\\d+\\.\\d+\\.\\S+".r).map(_.source)
   }
@@ -49,8 +39,7 @@ class Routes {
     versionPrefix.mapTo(())
 
   def start(): Unit = {
-    val appContainer  = dom.document.querySelector("#app-container")
-    val menuContainer = dom.document.querySelector("#menu-modal")
+    val appContainer = dom.document.querySelector("#app-container")
 
     appContainer.innerHTML = ""
     val _ = com.raquo.laminar.api.L.render(
@@ -76,11 +65,15 @@ class Routes {
           },
           noneMatched {
             div("Not Found")
+          },
+          child.maybe <-- mobileMenuContent.signal.mapSome { content =>
+            dialogTag(
+              content
+            )
           }
         )
       )
     )
-    val _ = com.raquo.laminar.api.L.render(menuContainer, TW.modal(mobileMenuContent.signal, mobileMenuModal))
   }
 
 }

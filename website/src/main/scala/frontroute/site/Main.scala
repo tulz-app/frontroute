@@ -9,9 +9,6 @@ import io.laminext.highlight.HighlightJavaScript
 import io.laminext.highlight.HighlightJson
 import io.laminext.highlight.HighlightScala
 import io.laminext.highlight.HighlightXml
-import io.laminext.tailwind.modal.Modal
-import io.laminext.tailwind.theme.DefaultTheme
-import io.laminext.tailwind.theme.Theme
 import org.scalajs.dom
 
 import scala.scalajs.js
@@ -27,8 +24,6 @@ object Main {
 
   def main(args: Array[String]): Unit = {
     val _ = documentEvents(_.onDomContentLoaded).foreach { _ =>
-      Theme.setTheme(DefaultTheme.theme)
-      Modal.initialize()
       val wiring = Wiring()
       removeNoJsClass(wiring.ssrContext)
       insertJsClass(wiring.ssrContext)
