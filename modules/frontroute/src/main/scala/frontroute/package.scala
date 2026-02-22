@@ -245,7 +245,7 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
             .merge(
               EventStream.fromValue(()).sample(locationState.location),
               mutations.events.sample(locationState.location),
-              locationState.location.changes
+              locationState.location.updates
             )
             .foreach { location =>
               val UrlString(url) = ctx.thisNode.ref.href
