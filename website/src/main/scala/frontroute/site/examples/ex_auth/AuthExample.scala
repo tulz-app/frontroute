@@ -25,7 +25,7 @@ object AuthExample
         case class SignedIn(userId: String) extends AuthenticationEvent
       }
 
-      val authenticationEvents = new EventBus[AuthenticationEvent]
+      val authenticationEvents                    = new EventBus[AuthenticationEvent]
       /* <focus> */
       val authenticatedUser: Signal[Option[User]] =
         /* </focus> */
