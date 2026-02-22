@@ -36,7 +36,7 @@ object AuthExample
 
       val route = {
         div(
-          child <-- authenticatedUser.signal.map { maybeUser =>
+          child <-- authenticatedUser.map { maybeUser =>
             div(
               firstMatch(
                 pathEnd {
