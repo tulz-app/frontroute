@@ -1,0 +1,3 @@
+package frontroute
+
+trait FrontrouteCross

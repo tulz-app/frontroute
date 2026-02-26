@@ -1,13 +1,10 @@
 import com.raquo.laminar.api.L.*
 
-import app.tulz.tuplez.ApplyConverter
-import app.tulz.tuplez.ApplyConverters
 import com.raquo.airstream.core.Signal
 import com.raquo.laminar.nodes.ReactiveElement
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 import frontroute.internal.LocationState
 import frontroute.internal.UrlString
-import frontroute.ops.DirectiveOfOptionOps
 import org.scalajs.dom
 import org.scalajs.dom.HTMLAnchorElement
 import org.scalajs.dom.HTMLDivElement
@@ -19,13 +16,11 @@ import org.scalajs.dom.html
 import scala.annotation.tailrec
 import scala.scalajs.js
 
-package object frontroute extends PathMatchers with Directives with ApplyConverters[Route] {
+package object frontroute extends PathMatchers with Directives with FrontrouteCross {
 
   type PathMatcher0 = PathMatcher[Unit]
 
   type Directive0 = Directive[Unit]
-
-  implicit def directiveOfOptionSyntax[L](underlying: Directive[Option[L]]): DirectiveOfOptionOps[L] = new DirectiveOfOptionOps(underlying)
 
   private[frontroute] val rejected: RouteResult = RouteResult.Rejected
 
@@ -73,44 +68,6 @@ package object frontroute extends PathMatchers with Directives with ApplyConvert
       }
 
     findFirst(routes.zipWithIndex.toList)
-  }
-
-  implicit def addDirectiveApply[L](directive: Directive[L])(implicit hac: ApplyConverter[L, Route]): hac.In => Route = { subRoute => (location, previous, state) =>
-    directive.tapply(hac(subRoute))(location, previous, state)
-  }
-
-//  implicit def addDirectiveExecute[L](directive: Directive[L])(implicit hac: ApplyConverter[L, Unit]): DirectiveExecute[hac.In] = new DirectiveExecute[hac.In] {
-//    def execute(run: hac.In): Route = {
-//      directive.tapply { l =>
-//        runEffect {
-//          hac(run)(l)
-//        }
-//      }
-//    }
-//  }
-
-  implicit def addDirectiveExecute[L](directive: Directive[L]): DirectiveExecute[L => Unit] = new DirectiveExecute[L => Unit] {
-    def execute(run: L => Unit): Route = {
-      directive.tapply { l =>
-        runEffect {
-          run(l)
-        }
-      }
-    }
-  }
-
-  implicit def addNullaryDirectiveApply(directive: Directive0): Route => Route = { subRoute => (location, previous, state) =>
-    directive.tapply(_ => subRoute)(location, previous, state)
-  }
-
-  implicit def addNullaryDirectiveExecute(directive: Directive0): DirectiveUnitExecute = new DirectiveUnitExecute {
-    def execute(run: => Unit): Route = {
-      directive.tapply { _ =>
-        runEffect {
-          run
-        }
-      }
-    }
   }
 
   private def complete(result: () => HtmlElement): Route = (location, _, state) => RouteResult.Matched(state, location, state.consumed, result)

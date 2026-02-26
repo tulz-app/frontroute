@@ -7,7 +7,7 @@ import scala.scalajs.js
 trait Directives {
 
   private[frontroute] def extractLocation: Directive[Location] =
-    Directive[Location](inner => (location, previous, state) => inner(location)(location, previous, state))
+    new Directive[Location](inner => (location, previous, state) => inner(location)(location, previous, state))
 
   private[frontroute] def extract[T](f: Location => T): Directive[T] =
     extractLocation.map(f)
@@ -44,7 +44,7 @@ trait Directives {
     }
 
   def extractMatchedPath: Directive[List[String]] =
-    Directive[List[String]](inner => (location, previous, state) => inner(state.consumed)(location, previous, state))
+    new Directive[List[String]](inner => (location, previous, state) => inner(state.consumed)(location, previous, state))
 
   val extractUnmatchedPath: Directive[List[String]] = extract(_.path)
 

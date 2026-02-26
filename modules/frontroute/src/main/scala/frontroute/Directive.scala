@@ -1,7 +1,6 @@
 package frontroute
 
 import com.raquo.laminar.api.L.*
-import frontroute.ops.DirectiveOfOptionOps
 
 class Directive[L](
   val tapply: (L => Route) => Route
@@ -106,7 +105,7 @@ class Directive[L](
 
 }
 
-object Directive {
+object Directive extends DirectiveCross {
 
   def apply[L](f: (L => Route) => Route): Directive[L] = {
     new Directive[L](inner =>
@@ -118,7 +117,5 @@ object Directive {
         )(location, previous, state)
     )
   }
-
-  implicit def directiveOfOptionSyntax[A](underlying: Directive[Option[A]]): DirectiveOfOptionOps[A] = new DirectiveOfOptionOps[A](underlying)
 
 }

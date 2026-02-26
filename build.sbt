@@ -44,7 +44,7 @@ inThisBuild(
     Test / publishArtifact                     := false,
     scalafmtOnCompile                          := true,
     versionScheme                              := Some("early-semver"),
-    scalaVersion                               := ScalaVersions.v213,
+    scalaVersion                               := ScalaVersions.v3,
     crossScalaVersions                         := Seq(
       ScalaVersions.v3,
       ScalaVersions.v213

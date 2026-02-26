@@ -1,4 +1,5 @@
 import sbt.*
+import sbt.Keys.*
 
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport.*
 
@@ -11,9 +12,14 @@ object Dependencies {
   }
 
   val `tuplez-apply`: Def.Initialize[Seq[ModuleID]] = Def.setting {
-    Seq(
-      "app.tulz" %%% "tuplez-apply" % DependencyVersions.`tuplez-apply`
-    )
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, _)) =>
+        Seq(
+          "app.tulz" %%% "tuplez-apply" % DependencyVersions.`tuplez-apply`
+        )
+      case _            =>
+        Seq.empty
+    }
   }
 
   val domtestutils: Def.Initialize[Seq[ModuleID]] = Def.setting {
