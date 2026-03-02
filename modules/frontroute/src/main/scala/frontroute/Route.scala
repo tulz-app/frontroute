@@ -7,7 +7,7 @@ import frontroute.internal.LocationState
 import frontroute.internal.RoutingState
 import frontroute.internal.RouterStateRef
 
-trait Route extends ((Location, RoutingState, RoutingState) => RouteResult) with Mod[HtmlElement] {
+trait Route extends ((Location, RoutingState, RoutingState, BaseName) => RouteResult) with Mod[HtmlElement] {
 
   import Route.*
 
@@ -27,7 +27,8 @@ trait Route extends ((Location, RoutingState, RoutingState) => RouteResult) with
               val renderResult = this.apply(
                 currentUnmatched.copy(otherMatched = locationState.isSiblingMatched()),
                 locationState.routerState.get(this).fold(RoutingState.empty)(_.resetPath),
-                RoutingState.empty.withConsumed(locationState.consumed.now())
+                RoutingState.empty.withConsumed(locationState.consumed.now()),
+                locationState.baseName
               ) match {
                 case RouteResult.Matched(nextState, location, consumed, createResult) =>
                   locationState.resetChildMatched()
@@ -58,6 +59,7 @@ trait Route extends ((Location, RoutingState, RoutingState) => RouteResult) with
 
                   locationState.setRemaining(Some(remaining))
                   val childState = new LocationState(
+                    baseName = locationState.baseName,
                     location = locationState.remaining,
                     isSiblingMatched = locationState.isChildMatched,
                     resetSiblingMatched = locationState.resetChildMatched,

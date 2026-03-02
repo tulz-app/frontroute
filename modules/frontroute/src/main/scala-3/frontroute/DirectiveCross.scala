@@ -4,9 +4,9 @@ trait DirectiveCross {
 
   extension (d: Directive[Unit]) {
 
-    inline def apply(l: => Route): Route = d.tapply(_ => l)
+    def apply(l: => Route): Route = d.tapply(_ => l)
 
-    inline def execute(run: => Unit): Route =
+    def execute(run: => Unit): Route =
       d.tapply { _ =>
         runEffect {
           run
@@ -17,9 +17,9 @@ trait DirectiveCross {
 
   extension [L](d: Directive[L]) {
 
-    inline def apply(l: L => Route): Route = d.tapply(l)
+    def apply(l: L => Route): Route = d.tapply(l)
 
-    inline def execute(run: L => Unit): Route =
+    def execute(run: L => Unit): Route =
       d.tapply { l =>
         runEffect {
           run(l)
@@ -30,11 +30,11 @@ trait DirectiveCross {
 
   extension [A](underlying: Directive[Option[A]]) {
 
-    inline def mapOption[R](f: A => R): Directive[Option[R]] = underlying.map(_.map(f))
+    def mapOption[R](f: A => R): Directive[Option[R]] = underlying.map(_.map(f))
 
-    inline def default(v: => A): Directive[A] = underlying.map(_.getOrElse(v))
+    def default(v: => A): Directive[A] = underlying.map(_.getOrElse(v))
 
-    inline def collectOption[R](f: PartialFunction[A, R]): Directive[Option[R]] = underlying.map(_.collect(f))
+    def collectOption[R](f: PartialFunction[A, R]): Directive[Option[R]] = underlying.map(_.collect(f))
 
   }
 

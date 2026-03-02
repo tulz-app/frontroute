@@ -9,11 +9,11 @@ object MatchedPathExample
       title = "Matched Path",
       description = FileAsString("description.md"),
       links = Seq(
-        "/",
-        "/tabs/tab-1",
-        "/tabs/tab-2",
-        "/tabs/tab-3",
-        "/some-page"
+        "/example-basename/",
+        "/example-basename/tabs/tab-1",
+        "/example-basename/tabs/tab-2",
+        "/example-basename/tabs/tab-3",
+        "/example-basename/some-page"
       )
     )(() => {
       import frontroute.*
@@ -23,13 +23,27 @@ object MatchedPathExample
 
       def ShowCurrentPath(label: String): Element =
         div(
-          span(
+          div(
             cls := "bg-yellow-200 text-yellow-900 rounded-sm space-x-2 text-sm px-2 font-mono",
-            span(label),
-            span(
+            div(label),
+            div(
               /* <focus> */
-              withMatchedPath { path =>
-                child.text <-- path.map(s => s"'${s.mkString("/", "/", "")}'")
+              withMatchedPath { (baseName, path) =>
+                div(
+                  div(
+                    cls := "flex items-center gap-2",
+                    span("baseName:"),
+                    span(
+                      child.text <-- baseName.map(s => s"'${s}'")
+                    )
+                  ),
+                  div(
+                    span("path:"),
+                    span(
+                      child.text <-- path.map(s => s"'${s.mkString("/", "/", "")}'")
+                    )
+                  )
+                )
               }
               /* </focus> */
             )
@@ -101,7 +115,7 @@ object MatchedPathExample
           )
         )
 
-      routes(
+      routes(baseName = "/example-basename")(
         div(
           cls := "p-4 min-h-[300px]",
           pathEnd {
@@ -124,6 +138,29 @@ object MatchedPathExample
               div(unmatched.mkString("/", "/", ""))
             )
           }
+        ),
+        div(
+          cls := "p-4",
+          div("Relative links, '/example-basename' will be auto-prepended):"),
+          ul(
+            Seq(
+              "/",
+              "/tabs/tab-1",
+              "/tabs/tab-2",
+              "/tabs/tab-3",
+              "/some-page"
+            ).map { path =>
+              li(
+                a(
+                  cls := "text-blue-700 hover:text-blue-600",
+                  /* <focus> */
+                  relativeHref(path),
+                  /* </focus> */
+                  s"➜ $path"
+                )
+              )
+            }
+          )
         )
       )
     })

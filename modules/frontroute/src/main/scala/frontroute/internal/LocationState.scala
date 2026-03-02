@@ -42,6 +42,7 @@ private[frontroute] object LocationState {
     }
 
     val state = new LocationState(
+      baseName = lp.baseName,
       location = lp.current,
       isSiblingMatched = () => {
         siblingMatched
@@ -99,6 +100,7 @@ private[frontroute] object LocationState {
 }
 
 private[frontroute] class LocationState(
+  val baseName: String,
   val location: Signal[Option[Location]],
   val isSiblingMatched: () => Boolean,
   val resetSiblingMatched: () => Unit,

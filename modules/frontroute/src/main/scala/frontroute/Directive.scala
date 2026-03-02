@@ -2,32 +2,32 @@ package frontroute
 
 import com.raquo.laminar.api.L.*
 
-class Directive[L](
+class Directive[+L](
   val tapply: (L => Route) => Route
 ) {
   self =>
 
   def flatMap[R](next: L => Directive[R]): Directive[R] = {
     Directive[R] { inner =>
-      self.tapply { value => (location, previous, state) =>
-        next(value).tapply(inner)(location, previous, state.enter)
+      self.tapply { value => (location, previous, state, baseName) =>
+        next(value).tapply(inner)(location, previous, state.enter, baseName)
       }
     }
   }
 
   def map[R](f: L => R): Directive[R] =
     Directive[R] { inner =>
-      self.tapply { value => (location, previous, state) =>
+      self.tapply { value => (location, previous, state, baseName) =>
         val mapped = f(value)
-        inner(mapped)(location, previous, state.enterAndSet(mapped))
+        inner(mapped)(location, previous, state.enterAndSet(mapped), baseName)
       }
     }
 
   def tap(body: L => Unit): Directive[L] =
     Directive[L] { inner =>
-      self.tapply { value => (location, previous, state) =>
+      self.tapply { value => (location, previous, state, baseName) =>
         body(value)
-        inner(value)(location, previous, state.enterAndSet(value))
+        inner(value)(location, previous, state.enterAndSet(value), baseName)
       }
     }
 
@@ -48,29 +48,29 @@ class Directive[L](
 
   @inline def mapTo[R](otherValue: => R): Directive[R] = map(_ => otherValue)
 
-  def &(magnet: ConjunctionMagnet[L]): magnet.Out = magnet(this)
+  def &[LL >: L](magnet: ConjunctionMagnet[LL]): magnet.Out = magnet(this)
 
-  def |(other: Directive[L]): Directive[L] =
-    Directive[L] { inner => (location, previous, state) =>
+  def |[LL >: L](other: Directive[LL]): Directive[LL] =
+    Directive[LL] { inner => (location, previous, state, baseName) =>
       self
-        .tapply { value => (location, previous, state) =>
-          inner(value)(location, previous, state.leaveDisjunction)
-        }(location, previous, state.enterDisjunction) match {
+        .tapply { value => (location, previous, state, baseName) =>
+          inner(value)(location, previous, state.leaveDisjunction, baseName)
+        }(location, previous, state.enterDisjunction, baseName) match {
         case RouteResult.Matched(state, location, consumed, result) => RouteResult.Matched(state, location, consumed, result)
         case RouteResult.RunEffect(state, location, consumed, run)  => RouteResult.RunEffect(state, location, consumed, run)
         case RouteResult.Rejected                                   =>
-          other.tapply { value => (location, previous, state) =>
-            inner(value)(location, previous, state.leaveDisjunction)
-          }(location, previous, state.enterDisjunction)
+          other.tapply { value => (location, previous, state, baseName) =>
+            inner(value)(location, previous, state.leaveDisjunction, baseName)
+          }(location, previous, state.enterDisjunction, baseName)
       }
     }
 
   def collect[R](f: PartialFunction[L, R]): Directive[R] =
     Directive[R] { inner =>
-      self.tapply { value => (location, previous, state) =>
+      self.tapply { value => (location, previous, state, baseName) =>
         if (f.isDefinedAt(value)) {
           val mapped = f(value)
-          inner(mapped)(location, previous, state.enterAndSet(mapped))
+          inner(mapped)(location, previous, state.enterAndSet(mapped), baseName)
         } else {
           rejected
         }
@@ -79,9 +79,9 @@ class Directive[L](
 
   def filter(predicate: L => Boolean): Directive[L] =
     Directive[L] { inner =>
-      self.tapply { value => (location, previous, state) =>
+      self.tapply { value => (location, previous, state, baseName) =>
         if (predicate(value)) {
-          inner(value)(location, previous, state.enter)
+          inner(value)(location, previous, state.enter, baseName)
         } else {
           rejected
         }
@@ -89,18 +89,18 @@ class Directive[L](
     }
 
   def signal: Directive[StrictSignal[L]] =
-    new Directive[StrictSignal[L]]({ inner => (location, previous, state) =>
-      this.tapply { value => (location, previous, state) =>
+    new Directive[StrictSignal[L]]({ inner => (location, previous, state, baseName) =>
+      this.tapply { value => (location, previous, state, baseName) =>
         val next = state.unsetValue().enter
         previous.getValue[Var[L]](next.path.key) match {
           case None              =>
             val newVar = Var(value)
-            inner(newVar.signal)(location, previous, next.setValue(newVar))
+            inner(newVar.signal)(location, previous, next.setValue(newVar), baseName)
           case Some(existingVar) =>
             existingVar.set(value)
-            inner(existingVar.signal)(location, previous, next.setValue(existingVar))
+            inner(existingVar.signal)(location, previous, next.setValue(existingVar), baseName)
         }
-      }(location, previous, state)
+      }(location, previous, state, baseName)
     })
 
 }
@@ -109,12 +109,12 @@ object Directive extends DirectiveCross {
 
   def apply[L](f: (L => Route) => Route): Directive[L] = {
     new Directive[L](inner =>
-      (location, previous, state) =>
+      (location, previous, state, baseName) =>
         f(value =>
-          (location, previous, state) => {
-            inner(value)(location, previous, state)
+          (location, previous, state, baseName) => {
+            inner(value)(location, previous, state, baseName)
           }
-        )(location, previous, state)
+        )(location, previous, state, baseName)
     )
   }
 

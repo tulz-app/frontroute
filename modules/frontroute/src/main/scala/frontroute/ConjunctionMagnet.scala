@@ -17,12 +17,12 @@ object ConjunctionMagnet {
     new ConjunctionMagnet[L] {
       type Out = Directive[composition.Composed]
       def apply(underlying: Directive[L]): Directive[composition.Composed] =
-        Directive[composition.Composed] { inner => (location, previous, state) =>
-          underlying.tapply { prefix => (location, previous, state) =>
+        Directive[composition.Composed] { inner => (location, previous, state, baseName) =>
+          underlying.tapply { prefix => (location, previous, state, baseName) =>
             other.tapply { suffix =>
               inner(composition.compose(prefix, suffix))
-            }(location, previous, state.enterConjunction)
-          }(location, previous, state)
+            }(location, previous, state.enterConjunction, baseName)
+          }(location, previous, state, baseName)
         }
     }
 

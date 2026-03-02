@@ -6,7 +6,8 @@ import org.scalajs.dom
 import scala.scalajs.js
 
 class BrowserLocationProvider(
-  popStateEvents: EventStream[dom.PopStateEvent]
+  popStateEvents: EventStream[dom.PopStateEvent],
+  val baseName: String,
 ) extends LocationProvider {
 
   private val currentVar                = Var(Option.empty[Location])
@@ -18,9 +19,9 @@ class BrowserLocationProvider(
         EventStream.fromValue(js.undefined: js.Any),
         popStateEvents.map(_.state),
       )
-      .map(state => Location(dom.window.location, state))
+      .map(state => Location(dom.window.location, state, baseName))
       .foreach { l =>
-        currentVar.set(Some(l))
+        currentVar.set(l)
       }
   }
 

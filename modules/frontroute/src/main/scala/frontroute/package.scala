@@ -22,13 +22,15 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
 
   type Directive0 = Directive[Unit]
 
+  type BaseName = String
+
   private[frontroute] val rejected: RouteResult = RouteResult.Rejected
 
-  val reject: Route = (_, _, _) => rejected
+  val reject: Route = (_, _, _, _) => rejected
 
-  def debug(message: Any, optionalParams: Any*)(subRoute: Route): Route = { (location, previous, state) =>
+  def debug(message: Any, optionalParams: Any*)(subRoute: Route): Route = { (location, previous, state, baseName) =>
     dom.console.debug(message, optionalParams*)
-    subRoute(location, previous, state)
+    subRoute(location, previous, state, baseName)
   }
 
   @deprecated("use firstMatch instead", "0.16.0")
@@ -36,6 +38,12 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
 
   def initRouting: Modifier[Element] = {
     initRouting(LocationProvider.windowLocationProvider)
+  }
+
+  def initRouting(baseName: BaseName): Modifier[Element] = {
+    if (baseName != "" && !(baseName.startsWith("/") && !baseName.endsWith("/")))
+      throw new IllegalArgumentException("baseName must be empty; or start with /, and NOT end with /")
+    initRouting(LocationProvider.windowLocationProvider(baseName))
   }
 
   def initRouting(lp: LocationProvider): Modifier[Element] =
@@ -46,21 +54,28 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
       )
     }
 
-  def routes[M](mods: Modifier[Element]*): ReactiveHtmlElement[HTMLDivElement] =
+  def routes(mods: Modifier[Element]*): ReactiveHtmlElement[HTMLDivElement] =
     div(
       styleAttr := "display: contents",
       initRouting,
       mods
     )
 
-  def firstMatch(routes: Route*): Route = (location, previous, state) => {
+  def routes(baseName: BaseName)(mods: Modifier[Element]*): ReactiveHtmlElement[HTMLDivElement] =
+    div(
+      styleAttr := "display: contents",
+      initRouting(baseName),
+      mods
+    )
+
+  def firstMatch(routes: Route*): Route = (location, previous, state, baseName) => {
 
     @tailrec
     def findFirst(rs: List[(Route, Int)]): RouteResult =
       rs match {
         case Nil                    => rejected
         case (route, index) :: tail =>
-          route(location, previous, state.enterConcat(index)) match {
+          route(location, previous, state.enterConcat(index), baseName) match {
             case RouteResult.Matched(state, location, consumed, result) => RouteResult.Matched(state, location, consumed, result)
             case RouteResult.RunEffect(state, location, consumed, run)  => RouteResult.RunEffect(state, location, consumed, run)
             case RouteResult.Rejected                                   => findFirst(tail)
@@ -70,9 +85,9 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
     findFirst(routes.zipWithIndex.toList)
   }
 
-  private def complete(result: () => HtmlElement): Route = (location, _, state) => RouteResult.Matched(state, location, state.consumed, result)
+  private def complete(result: () => HtmlElement): Route = (location, _, state, _) => RouteResult.Matched(state, location, state.consumed, result)
 
-  def runEffect(effect: => Unit): Route = (location, _, state) =>
+  def runEffect(effect: => Unit): Route = (location, _, state, _) =>
     RouteResult.RunEffect(
       state,
       location,
@@ -80,10 +95,10 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
       () => effect
     )
 
-  private def makeRelative(matched: List[String], path: String, query: Seq[(String, Seq[String])]): String = {
+  private def makeRelative(matched: List[String], path: String, query: Seq[(String, Seq[String])], baseName: String): String = {
     val relative = {
       if (path.startsWith("/")) {
-        path
+        baseName + path
       } else if (matched.nonEmpty) {
         if (path.nonEmpty) {
           matched.mkString("/", "/", s"/$path")
@@ -141,13 +156,15 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
     query: Seq[(String, Seq[String])],
     replace: Boolean,
   ): Route = {
-    extractMatchedPath { matched =>
-      val relative = makeRelative(matched, to, query)
-      runEffect {
-        if (replace) {
-          BrowserNavigation.replaceState(url = relative)
-        } else {
-          BrowserNavigation.pushState(url = relative)
+    extractBaseName { (baseName: BaseName) =>
+      extractMatchedPath { (matched: List[String]) =>
+        val relative = makeRelative(matched, to, query, baseName)
+        runEffect {
+          if (replace) {
+            BrowserNavigation.replaceState(url = relative)
+          } else {
+            BrowserNavigation.pushState(url = relative)
+          }
         }
       }
     }
@@ -155,16 +172,17 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
 
   implicit def elementToRoute(e: => HtmlElement): Route = complete(() => e)
 
-  def withMatchedPath[Ref <: dom.html.Element](mod: StrictSignal[List[String]] => Mod[ReactiveHtmlElement[Ref]]): Mod[ReactiveHtmlElement[Ref]] = {
+  def withMatchedPath[Ref <: dom.html.Element](mod: (StrictSignal[BaseName], StrictSignal[List[String]]) => Mod[ReactiveHtmlElement[Ref]]): Mod[ReactiveHtmlElement[Ref]] = {
     val consumedVar = Var(List.empty[String])
+    val baseName    = Var("")
     Seq(
       onMountCallback { (ctx: MountContext[ReactiveHtmlElement[Ref]]) =>
         val locationState = LocationState.closestOrFail(ctx.thisNode.ref)
         val consumed      = EventStream.fromValue(()).delay(0).sample(locationState.consumed)
-
-        val _ = ReactiveElement.bindObserver(ctx.thisNode, consumed)(consumedVar.writer)
+        val _             = ReactiveElement.bindObserver(ctx.thisNode, consumed)(consumedVar.writer)
+        baseName.set(locationState.baseName)
       },
-      mod(consumedVar.signal)
+      mod(baseName.signal.debugLogEvents(), consumedVar.signal)
     )
   }
 
@@ -172,9 +190,10 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
     relativeHref(path, Seq.empty)
 
   def relativeHref(path: String, query: Seq[(String, Seq[String])]): Mod[ReactiveHtmlElement[html.Anchor]] =
-    withMatchedPath { matched =>
-      href <-- matched.map { matched =>
-        makeRelative(matched, path, query)
+    withMatchedPath { (baseName, matched) =>
+      href <-- matched.combineWithFn(baseName) { (matched, baseName) =>
+        println(s"relativeHref: $path, baseName: $baseName")
+        makeRelative(matched, path, query, baseName)
       }
     }
 

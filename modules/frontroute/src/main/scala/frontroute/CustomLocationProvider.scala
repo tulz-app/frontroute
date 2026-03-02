@@ -5,10 +5,10 @@ import frontroute.internal.UrlString
 
 import scala.scalajs.js
 
-class CustomLocationProvider(locationStrings: Signal[String]) extends LocationProvider {
+class CustomLocationProvider(locationStrings: Signal[String], val baseName: String) extends LocationProvider {
 
   val current: Signal[Option[Location]] = locationStrings.map { case UrlString(location) =>
-    Some(Location(location, js.undefined))
+    Location(location, js.undefined, baseName)
   }
 
   def start()(implicit owner: Owner): Subscription = new Subscription(owner, () => {})

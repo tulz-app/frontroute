@@ -7,23 +7,26 @@ import scala.scalajs.js
 trait Directives {
 
   private[frontroute] def extractLocation: Directive[Location] =
-    new Directive[Location](inner => (location, previous, state) => inner(location)(location, previous, state))
+    new Directive[Location](inner => (location, previous, state, baseName) => inner(location)(location, previous, state, baseName))
+
+  private[frontroute] def extractBaseName: Directive[String] =
+    new Directive[String](inner => (location, previous, state, baseName) => inner(baseName)(location, previous, state, baseName))
 
   private[frontroute] def extract[T](f: Location => T): Directive[T] =
     extractLocation.map(f)
 
   def param(name: String): Directive[String] =
-    Directive[String] { inner => (location, previous, state) =>
+    Directive[String] { inner => (location, previous, state, baseName) =>
       location.params.get(name).flatMap(_.headOption) match {
-        case Some(paramValue) => inner(paramValue)(location, previous, state.enterAndSet(paramValue))
+        case Some(paramValue) => inner(paramValue)(location, previous, state.enterAndSet(paramValue), baseName)
         case None             => rejected
       }
     }
 
   def multiParam(name: String): Directive[Seq[String]] =
-    Directive[Seq[String]] { inner => (location, previous, state) =>
+    Directive[Seq[String]] { inner => (location, previous, state, baseName) =>
       val values = location.params.getOrElse(name, Seq.empty)
-      inner(values)(location, previous, state.enterAndSet(values))
+      inner(values)(location, previous, state.enterAndSet(values), baseName)
     }
 
   def historyState: Directive[Option[js.Any]] =
@@ -38,13 +41,13 @@ trait Directives {
     })
 
   def maybeParam(name: String): Directive[Option[String]] =
-    Directive[Option[String]] { inner => (location, previous, state) =>
+    Directive[Option[String]] { inner => (location, previous, state, baseName) =>
       val maybeParamValue = location.params.get(name).flatMap(_.headOption)
-      inner(maybeParamValue)(location, previous, state.enterAndSet(maybeParamValue))
+      inner(maybeParamValue)(location, previous, state.enterAndSet(maybeParamValue), baseName)
     }
 
   def extractMatchedPath: Directive[List[String]] =
-    new Directive[List[String]](inner => (location, previous, state) => inner(state.consumed)(location, previous, state))
+    new Directive[List[String]](inner => (location, previous, state, baseName) => inner(state.consumed)(location, previous, state, baseName))
 
   val extractUnmatchedPath: Directive[List[String]] = extract(_.path)
 
@@ -59,74 +62,74 @@ trait Directives {
   val extractOrigin: Directive[String] = extract(_.origin)
 
   def provide[L](value: L): Directive[L] =
-    Directive { inner => (location, previous, state) =>
-      inner(value)(location, previous, state.enterAndSet(value))
+    Directive { inner => (location, previous, state, baseName) =>
+      inner(value)(location, previous, state.enterAndSet(value), baseName)
     }
 
   def provideOption[L](value: Option[L]): Directive[L] =
-    Directive { inner => (location, previous, state) =>
+    Directive { inner => (location, previous, state, baseName) =>
       value match {
         case None        => rejected
-        case Some(value) => inner(value)(location, previous, state.enterAndSet(value))
+        case Some(value) => inner(value)(location, previous, state.enterAndSet(value), baseName)
       }
     }
 
   def pathPrefix[T](m: PathMatcher[T]): Directive[T] =
-    Directive[T] { inner => (location, previous, state) =>
+    Directive[T] { inner => (location, previous, state, baseName) =>
       m(state.consumed, location.path) match {
         case PathMatchResult.Match(t, consumed, rest) =>
-          inner(t)(location.withUnmatchedPath(rest), previous, state.enterAndSet(t).withConsumed(consumed))
+          inner(t)(location.withUnmatchedPath(rest), previous, state.enterAndSet(t).withConsumed(consumed), baseName)
         case _                                        => rejected
       }
     }
 
   def testPathPrefix[T](m: PathMatcher[T]): Directive[T] =
-    Directive[T] { inner => (location, previous, state) =>
+    Directive[T] { inner => (location, previous, state, baseName) =>
       m(state.consumed, location.path) match {
-        case PathMatchResult.Match(t, _, _) => inner(t)(location, previous, state.enterAndSet(t))
+        case PathMatchResult.Match(t, _, _) => inner(t)(location, previous, state.enterAndSet(t), baseName)
         case _                              => rejected
       }
     }
 
   val pathEnd: Directive0 =
-    Directive[Unit] { inner => (location, previous, state) =>
+    Directive[Unit] { inner => (location, previous, state, baseName) =>
       if (location.path.isEmpty) {
-        inner(())(location, previous, state.enter)
+        inner(())(location, previous, state.enter, baseName)
       } else {
         rejected
       }
     }
 
   def path[T](m: PathMatcher[T]): Directive[T] =
-    Directive[T] { inner => (location, previous, state) =>
+    Directive[T] { inner => (location, previous, state, baseName) =>
       m(state.consumed, location.path) match {
         case PathMatchResult.Match(t, consumed, Nil) =>
-          inner(t)(location.withUnmatchedPath(List.empty), previous, state.enterAndSet(t).withConsumed(consumed))
+          inner(t)(location.withUnmatchedPath(List.empty), previous, state.enterAndSet(t).withConsumed(consumed), baseName)
         case _                                       => rejected
       }
     }
 
   def testPath[T](m: PathMatcher[T]): Directive[T] =
-    Directive[T] { inner => (location, previous, state) =>
+    Directive[T] { inner => (location, previous, state, baseName) =>
       m(state.consumed, location.path) match {
-        case PathMatchResult.Match(t, _, Nil) => inner(t)(location, previous, state.enterAndSet(t))
+        case PathMatchResult.Match(t, _, Nil) => inner(t)(location, previous, state.enterAndSet(t), baseName)
         case _                                => rejected
       }
     }
 
   val noneMatched: Directive0 =
-    Directive[Unit] { inner => (location, previous, state) =>
+    Directive[Unit] { inner => (location, previous, state, baseName) =>
       if (location.otherMatched) {
         rejected
       } else {
-        inner(())(location, previous, state.enter)
+        inner(())(location, previous, state.enter, baseName)
       }
     }
 
   def whenTrue(condition: => Boolean): Directive0 =
-    Directive[Unit] { inner => (location, previous, state) =>
+    Directive[Unit] { inner => (location, previous, state, baseName) =>
       if (condition) {
-        inner(())(location, previous, state)
+        inner(())(location, previous, state, baseName)
       } else {
         rejected
       }

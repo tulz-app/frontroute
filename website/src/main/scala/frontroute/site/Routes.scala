@@ -25,52 +25,26 @@ class Routes {
       }
     }
 
-  private val versionSegment = {
-    regex("\\d+\\.\\d+\\.\\S+".r).map(_.source)
-  }
-
-  private val versionPrefix =
-    pathPrefix("v" / versionSegment)
-
-  private val thisVersionPrefix =
-    versionPrefix.filter(_.toString.startsWith(Site.frontrouteVersion)).mapTo(())
-
-  private val anyVersionPrefix =
-    versionPrefix.mapTo(())
-
   def start(): Unit = {
     val appContainer = dom.document.querySelector("#app-container")
 
     appContainer.innerHTML = ""
     val _ = com.raquo.laminar.api.L.render(
       appContainer,
-      routes(
+      routes(s"/v/${Site.frontrouteVersion}")(
         div(
           cls := "contents",
           LinkHandler.bind,
-          thisVersionPrefix(
-            firstMatch(
-              (
-                pathEnd.mapTo(Some((Site.indexModule, Site.indexModule.index))) |
-                  (modulePrefix & pathEnd).map(m => Some((m, m.index))) |
-                  moduleAndPagePrefix.map(moduleAndPage => Some(moduleAndPage))
-              ).signal { moduleAndPage =>
-                PageWrap(moduleAndPage, mobileMenuContent.writer)
-              },
-              div("Not Found")
-            )
+          firstMatch(
+            (
+              pathEnd.mapTo(Some((Site.indexModule, Site.indexModule.index))) |
+                (modulePrefix & pathEnd).map(m => Some((m, m.index))) |
+                moduleAndPagePrefix.map(moduleAndPage => Some(moduleAndPage))
+            ).signal { moduleAndPage =>
+              PageWrap(moduleAndPage, mobileMenuContent)
+            },
+            div("Not Found"),
           ),
-          (noneMatched & anyVersionPrefix) {
-            div("Not Found - wrong version")
-          },
-          noneMatched {
-            div("Not Found")
-          },
-          child.maybe <-- mobileMenuContent.signal.mapSome { content =>
-            dialogTag(
-              content
-            )
-          }
         )
       )
     )

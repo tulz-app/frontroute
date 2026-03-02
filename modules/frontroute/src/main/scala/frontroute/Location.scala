@@ -32,24 +32,30 @@ final case class Location(
 
 object Location {
 
-  def apply(location: dom.Location, state: js.UndefOr[js.Any]): Location = {
-    val path = extractPath(location)
-    new Location(
-      hostname = location.hostname,
-      port = location.port,
-      protocol = location.protocol,
-      host = location.host,
-      origin = location.origin,
-      path = path,
-      fullPath = path,
-      params = LocationUtils.parseLocationParams(location),
-      state = state,
-      otherMatched = false
-    )
+  def apply(location: dom.Location, state: js.UndefOr[js.Any], baseName: String): Option[Location] = {
+    extractPath(location, baseName).map { path =>
+      new Location(
+        hostname = location.hostname,
+        port = location.port,
+        protocol = location.protocol,
+        host = location.host,
+        origin = location.origin,
+        path = path,
+        fullPath = path,
+        params = LocationUtils.parseLocationParams(location),
+        state = state,
+        otherMatched = false
+      )
+    }
   }
 
-  private def extractPath(location: dom.Location): List[String] = {
-    location.pathname.dropWhile(_ == '/').split('/').toList.dropWhile(_.isEmpty)
+  private def extractPath(location: dom.Location, baseName: String): Option[List[String]] = {
+    val pathname = location.pathname
+    if (pathname.startsWith(baseName)) {
+      Some(pathname.drop(baseName.length).dropWhile(_ == '/').split('/').toList.dropWhile(_.isEmpty))
+    } else {
+      None
+    }
   }
 
 }

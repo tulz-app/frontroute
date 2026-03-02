@@ -1,36 +1,6 @@
 package frontroute
 
-import app.tulz.tuplez.ApplyConverter
-import app.tulz.tuplez.ApplyConverters
+trait FrontrouteCross {
 
-trait FrontrouteCross extends ApplyConverters[Route] {
-
-  implicit def addDirectiveApply[L](directive: Directive[L])(implicit hac: ApplyConverter[L, Route]): hac.In => Route = { subRoute => (location, previous, state) =>
-    directive.tapply(hac(subRoute))(location, previous, state)
-  }
-
-  implicit def addNullaryDirectiveApply(directive: Directive0): Route => Route = { subRoute => (location, previous, state) =>
-    directive.tapply(_ => subRoute)(location, previous, state)
-  }
-
-  implicit def addDirectiveExecute[L](directive: Directive[L]): DirectiveExecute[L => Unit] = new DirectiveExecute[L => Unit] {
-    def execute(run: L => Unit): Route = {
-      directive.tapply { l =>
-        runEffect {
-          run(l)
-        }
-      }
-    }
-  }
-
-  implicit def addNullaryDirectiveExecute(directive: Directive0): DirectiveUnitExecute = new DirectiveUnitExecute {
-    def execute(run: => Unit): Route = {
-      directive.tapply { _ =>
-        runEffect {
-          run
-        }
-      }
-    }
-  }
 
 }

@@ -12,7 +12,7 @@ object PageWrap {
 
   def apply(
     $page: Signal[Option[(SiteModule, Page)]],
-    menuObserver: Observer[Option[Element]]
+    mobileMenuContent: Var[Option[Element]],
   ): ReactiveHtmlElement.Base = {
     div(
       linkTag(
@@ -21,7 +21,7 @@ object PageWrap {
       ),
       div(
         cls := "h-screen flex flex-col",
-        PageHeader($page, menuObserver),
+        PageHeader($page, mobileMenuContent.writer),
         noScriptTag(
           div(
             cls := "max-w-5xl border-l-4 border-red-400 bg-red-50 text-red-900 mx-auto p-4 font-condensed",
@@ -40,7 +40,12 @@ object PageWrap {
           )
         ),
         PageFooter()
-      )
+      ),
+      child.maybe <-- mobileMenuContent.signal.mapSome { content =>
+        dialogTag(
+          content
+        )
+      }
     )
   }
 

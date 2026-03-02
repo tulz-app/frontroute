@@ -6,6 +6,7 @@ import org.scalajs.dom
 
 trait LocationProvider {
 
+  def baseName: String
   def current: Signal[Option[Location]]
   def start()(implicit owner: Owner): Subscription
 
@@ -13,10 +14,12 @@ trait LocationProvider {
 
 object LocationProvider {
 
-  lazy val windowLocationProvider: LocationProvider = browser(windowEvents(_.onPopState))
+  lazy val windowLocationProvider: LocationProvider = windowLocationProvider(baseName = "")
 
-  def browser(popStateEvents: EventStream[dom.PopStateEvent]): LocationProvider = new BrowserLocationProvider(popStateEvents.delay(0))
+  def windowLocationProvider(baseName: String): LocationProvider = browser(windowEvents(_.onPopState), baseName)
 
-  def custom(locationStrings: Signal[String]) = new CustomLocationProvider(locationStrings)
+  def browser(popStateEvents: EventStream[dom.PopStateEvent], baseName: String): LocationProvider = new BrowserLocationProvider(popStateEvents.delay(0), baseName)
+
+  def custom(locationStrings: Signal[String], baseName: String) = new CustomLocationProvider(locationStrings, baseName)
 
 }
