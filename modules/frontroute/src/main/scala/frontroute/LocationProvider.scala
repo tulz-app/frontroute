@@ -7,7 +7,7 @@ import org.scalajs.dom
 trait LocationProvider {
 
   def baseName: String
-  def current: Signal[Option[Location]]
+  def current: Signal[Option[Either[Unit, Location]]]
   def start()(implicit owner: Owner): Subscription
 
 }

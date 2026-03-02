@@ -212,7 +212,7 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
         val _             = ReactiveElement.bindObserver(ctx.thisNode, consumed)(consumedVar.writer)
         baseName.set(locationState.baseName)
       },
-      mod(baseName.signal.debugLogEvents(), consumedVar.signal)
+      mod(baseName.signal, consumedVar.signal)
     )
   }
 
@@ -222,7 +222,6 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
   def relativeHref(path: String, query: Seq[(String, Seq[String])]): Mod[ReactiveHtmlElement[html.Anchor]] =
     withMatchedPath { (baseName, matched) =>
       href <-- matched.combineWithFn(baseName) { (matched, baseName) =>
-        println(s"relativeHref: $path, baseName: $baseName")
         makeRelative(matched, path, query, baseName)
       }
     }
@@ -256,7 +255,7 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
             .foreach { location =>
               val UrlString(url) = ctx.thisNode.ref.href
               activeVar.set {
-                location.exists { location =>
+                location.flatMap(_.toOption).exists { location =>
                   compare(location, url)
                 }
               }

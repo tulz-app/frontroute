@@ -1,6 +1,5 @@
 package frontroute
 
-import frontroute.domext.WindowWithScrollXY
 import frontroute.internal.FrontrouteHistoryState
 import frontroute.internal.HistoryState
 import frontroute.internal.HistoryStateScrollPosition
@@ -10,8 +9,6 @@ import scala.scalajs.js.Dynamic
 
 object BrowserNavigation {
 
-  private val windowWithScrollXY = dom.window.asInstanceOf[WindowWithScrollXY]
-
   private var preserveScroll = true
 
   def preserveScroll(keep: Boolean): Unit = {
@@ -20,8 +17,8 @@ object BrowserNavigation {
 
   private def currentScrollPosition(): HistoryStateScrollPosition = {
     new HistoryStateScrollPosition(
-      scrollX = windowWithScrollXY.scrollX,
-      scrollY = windowWithScrollXY.scrollY
+      scrollX = dom.window.scrollX,
+      scrollY = dom.window.scrollY
     )
   }
 

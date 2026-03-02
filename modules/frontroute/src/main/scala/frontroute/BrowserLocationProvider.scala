@@ -10,8 +10,10 @@ class BrowserLocationProvider(
   val baseName: String,
 ) extends LocationProvider {
 
-  private val currentVar                = Var(Option.empty[Location])
-  val current: Signal[Option[Location]] = currentVar.signal.distinct
+  private val currentVar: Var[Option[Either[Unit, Location]]] = Var(Option.empty)
+
+  // left - baseName did not match
+  val current: Signal[Option[Either[Unit, Location]]] = currentVar.signal.distinct
 
   def start()(implicit owner: Owner): Subscription = {
     EventStream
@@ -20,8 +22,11 @@ class BrowserLocationProvider(
         popStateEvents.map(_.state),
       )
       .map(state => Location(dom.window.location, state, baseName))
-      .foreach { l =>
-        currentVar.set(l)
+      .foreach {
+        case Some(l) =>
+          currentVar.set(Some(Right(l)))
+        case None    =>
+          currentVar.set(Some(Left(())))
       }
   }
 

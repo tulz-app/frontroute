@@ -10,6 +10,7 @@ object MatchedPathExample
       description = FileAsString("description.md"),
       links = Seq(
         "/example-basename/",
+        "/example-basename",
         "/example-basename/tabs/tab-1",
         "/example-basename/tabs/tab-2",
         "/example-basename/tabs/tab-3",

@@ -101,17 +101,17 @@ private[frontroute] object LocationState {
 
 private[frontroute] class LocationState(
   val baseName: String,
-  val location: Signal[Option[Location]],
+  val location: Signal[Option[Either[Unit, Location]]],
   val isSiblingMatched: () => Boolean,
   val resetSiblingMatched: () => Unit,
   val notifySiblingMatched: () => Unit,
   val routerState: RouterStateRef,
 ) {
 
-  private val remainingVar                = Var(Option.empty[Location])
-  val remaining: Signal[Option[Location]] = remainingVar.signal.distinct
+  private val remainingVar                              = Var(Option.empty[Either[Unit, Location]])
+  val remaining: Signal[Option[Either[Unit, Location]]] = remainingVar.signal.distinct
 
-  def setRemaining(remaining: Option[Location]): Unit = remainingVar.set(remaining)
+  def setRemaining(remaining: Option[Either[Unit, Location]]): Unit = remainingVar.set(remaining)
 
   private val consumedVar                  = Var(List.empty[String])
   val consumed: StrictSignal[List[String]] = consumedVar.signal

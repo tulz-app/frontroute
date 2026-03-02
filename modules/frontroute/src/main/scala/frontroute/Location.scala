@@ -51,7 +51,7 @@ object Location {
 
   private def extractPath(location: dom.Location, baseName: String): Option[List[String]] = {
     val pathname = location.pathname
-    if (pathname.startsWith(baseName)) {
+    if (pathname.startsWith(baseName + "/")) {
       Some(pathname.drop(baseName.length).dropWhile(_ == '/').split('/').toList.dropWhile(_.isEmpty))
     } else {
       None

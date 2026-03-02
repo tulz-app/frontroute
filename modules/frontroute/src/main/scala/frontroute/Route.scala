@@ -24,40 +24,47 @@ trait Route extends ((Location, RoutingState, RoutingState, BaseName) => RouteRe
         val _ = locationState.location
           .foreach {
             case Some(currentUnmatched) =>
-              val renderResult = this.apply(
-                currentUnmatched.copy(otherMatched = locationState.isSiblingMatched()),
-                locationState.routerState.get(this).fold(RoutingState.empty)(_.resetPath),
-                RoutingState.empty.withConsumed(locationState.consumed.now()),
-                locationState.baseName
-              ) match {
-                case RouteResult.Matched(nextState, location, consumed, createResult) =>
-                  locationState.resetChildMatched()
-                  locationState.notifySiblingMatched()
-                  if (
-                    !locationState.routerState.get(this).contains(nextState) ||
-                    currentRender.now().isEmpty
-                  ) {
-                    RouteEvent.NextRender(nextState, location, consumed, createResult())
-                  } else {
-                    RouteEvent.SameRender(nextState, location, consumed)
-                  }
-                case RouteResult.RunEffect(nextState, location, consumed, run)        =>
-                  locationState.notifySiblingMatched()
-                  if (!locationState.routerState.get(this).contains(nextState)) {
-                    run()
-                    RouteEvent.SameRender(nextState, location, consumed)
-                  } else {
-                    RouteEvent.SameRender(nextState, location, consumed)
-                  }
+              val renderResult =
+                currentUnmatched match {
+                  case Right(currentUnmatched) =>
+                    this.apply(
+                      currentUnmatched.copy(otherMatched = locationState.isSiblingMatched()),
+                      locationState.routerState.get(this).fold(RoutingState.empty)(_.resetPath),
+                      RoutingState.empty.withConsumed(locationState.consumed.now()),
+                      locationState.baseName
+                    ) match {
+                      case RouteResult.Matched(nextState, location, consumed, createResult) =>
+                        locationState.resetChildMatched()
+                        locationState.notifySiblingMatched()
+                        if (
+                          !locationState.routerState.get(this).contains(nextState) ||
+                          currentRender.now().isEmpty
+                        ) {
+                          RouteEvent.NextRender(nextState, location, consumed, createResult())
+                        } else {
+                          RouteEvent.SameRender(nextState, location, consumed)
+                        }
+                      case RouteResult.RunEffect(nextState, location, consumed, run)        =>
+                        locationState.notifySiblingMatched()
+                        if (!locationState.routerState.get(this).contains(nextState)) {
+                          run()
+                          RouteEvent.SameRender(nextState, location, consumed)
+                        } else {
+                          RouteEvent.SameRender(nextState, location, consumed)
+                        }
 
-                case RouteResult.Rejected =>
-                  RouteEvent.NoRender
-              }
+                      case RouteResult.Rejected =>
+                        RouteEvent.NoRender
+                    }
+                  case Left(_)                 => // baseName did not match
+                    RouteEvent.NoRender
+                }
+
               renderResult match {
                 case RouteEvent.NextRender(nextState, remaining, consumed, render) =>
                   locationState.routerState.set(this, nextState)
 
-                  locationState.setRemaining(Some(remaining))
+                  locationState.setRemaining(Option(Right(remaining)))
                   val childState = new LocationState(
                     baseName = locationState.baseName,
                     location = locationState.remaining,
@@ -81,15 +88,14 @@ trait Route extends ((Location, RoutingState, RoutingState, BaseName) => RouteRe
                     render.ref.dataset.addOne("frPath" -> consumed.mkString("/", "/", ""))
                   }
 
-                  locationState.setRemaining(Some(remaining))
+                  locationState.setRemaining(Some(Right(remaining)))
                 case RouteEvent.NoRender                                           =>
                   locationState.routerState.unset(this)
                   currentRender.set(None)
                   currentRenderState.set(None)
               }
             case None                   =>
-//              locationState.routerState.unset(this)
-//              currentRender.set(None)
+            // initial None, nothing to do
           }(ctx.owner)
       }
     }
