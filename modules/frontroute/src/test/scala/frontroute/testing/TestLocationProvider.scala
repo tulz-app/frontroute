@@ -9,6 +9,7 @@ import scala.scalajs.js
 
 class TestLocationProvider extends LocationProvider {
 
+  val baseName: String                                 = ""
   private var currentProtocol                          = "https"
   private var currentHostname                          = "test.nowhere"
   private var currentPort                              = "443"

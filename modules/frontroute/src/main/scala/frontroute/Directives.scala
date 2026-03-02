@@ -6,10 +6,10 @@ import scala.scalajs.js
 
 trait Directives {
 
-  private[frontroute] def extractLocation: Directive[Location] =
+  private[frontroute] val extractLocation: Directive[Location] =
     new Directive[Location](inner => (location, previous, state, baseName) => inner(location)(location, previous, state, baseName))
 
-  private[frontroute] def extractBaseName: Directive[String] =
+  private[frontroute] val extractBaseName: Directive[String] =
     new Directive[String](inner => (location, previous, state, baseName) => inner(baseName)(location, previous, state, baseName))
 
   private[frontroute] def extract[T](f: Location => T): Directive[T] =
@@ -29,10 +29,10 @@ trait Directives {
       inner(values)(location, previous, state.enterAndSet(values), baseName)
     }
 
-  def historyState: Directive[Option[js.Any]] =
+  val historyState: Directive[Option[js.Any]] =
     extractLocation.map(_.parsedState.flatMap(_.user.toOption))
 
-  def historyScroll: Directive[Option[ScrollPosition]] =
+  val historyScroll: Directive[Option[ScrollPosition]] =
     extractLocation.map(_.parsedState.flatMap(_.internal.toOption).flatMap(_.scroll.toOption).map { scroll =>
       ScrollPosition(
         scrollX = scroll.scrollX.toOption.map(_.round.toInt),
@@ -46,7 +46,7 @@ trait Directives {
       inner(maybeParamValue)(location, previous, state.enterAndSet(maybeParamValue), baseName)
     }
 
-  def extractMatchedPath: Directive[List[String]] =
+  val extractMatchedPath: Directive[List[String]] =
     new Directive[List[String]](inner => (location, previous, state, baseName) => inner(state.consumed)(location, previous, state, baseName))
 
   val extractUnmatchedPath: Directive[List[String]] = extract(_.path)

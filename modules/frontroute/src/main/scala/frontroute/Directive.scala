@@ -2,7 +2,7 @@ package frontroute
 
 import com.raquo.laminar.api.L.*
 
-class Directive[+L](
+class Directive[L](
   val tapply: (L => Route) => Route
 ) {
   self =>
@@ -48,10 +48,10 @@ class Directive[+L](
 
   @inline def mapTo[R](otherValue: => R): Directive[R] = map(_ => otherValue)
 
-  def &[LL >: L](magnet: ConjunctionMagnet[LL]): magnet.Out = magnet(this)
+  def &(magnet: ConjunctionMagnet[L]): magnet.Out = magnet(this)
 
-  def |[LL >: L](other: Directive[LL]): Directive[LL] =
-    Directive[LL] { inner => (location, previous, state, baseName) =>
+  def |(other: Directive[L]): Directive[L] =
+    Directive[L] { inner => (location, previous, state, baseName) =>
       self
         .tapply { value => (location, previous, state, baseName) =>
           inner(value)(location, previous, state.leaveDisjunction, baseName)

@@ -1,8 +1,9 @@
 import com.raquo.laminar.api.L.*
-
 import com.raquo.airstream.core.Signal
 import com.raquo.laminar.nodes.ReactiveElement
 import com.raquo.laminar.nodes.ReactiveHtmlElement
+import app.tulz.tuplez.ApplyConverter
+import app.tulz.tuplez.ApplyConverters
 import frontroute.internal.LocationState
 import frontroute.internal.UrlString
 import org.scalajs.dom
@@ -16,7 +17,8 @@ import org.scalajs.dom.html
 import scala.annotation.tailrec
 import scala.scalajs.js
 
-package object frontroute extends PathMatchers with Directives with FrontrouteCross {
+// TODO: ApplyConverters is not needed in scala-3
+package object frontroute extends PathMatchers with Directives with FrontrouteCross with ApplyConverters[Route] {
 
   type PathMatcher0 = PathMatcher[Unit]
 
@@ -83,6 +85,34 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
       }
 
     findFirst(routes.zipWithIndex.toList)
+  }
+
+  implicit def addDirectiveApply[L](directive: Directive[L])(implicit hac: ApplyConverter[L, Route]): hac.In => Route = { subRoute => (location, previous, state, baseName) =>
+    directive.tapply(hac(subRoute))(location, previous, state, baseName)
+  }
+
+  implicit def addNullaryDirectiveApply(directive: Directive0): Route => Route = { subRoute => (location, previous, state, baseName) =>
+    directive.tapply(_ => subRoute)(location, previous, state, baseName)
+  }
+
+  implicit def addDirectiveExecute[L](directive: Directive[L]): DirectiveExecute[L => Unit] = new DirectiveExecute[L => Unit] {
+    def execute(run: L => Unit): Route = {
+      directive.tapply { l =>
+        runEffect {
+          run(l)
+        }
+      }
+    }
+  }
+
+  implicit def addNullaryDirectiveExecute(directive: Directive0): DirectiveUnitExecute = new DirectiveUnitExecute {
+    def execute(run: => Unit): Route = {
+      directive.tapply { _ =>
+        runEffect {
+          run
+        }
+      }
+    }
   }
 
   private def complete(result: () => HtmlElement): Route = (location, _, state, _) => RouteResult.Matched(state, location, state.consumed, result)
@@ -156,8 +186,8 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
     query: Seq[(String, Seq[String])],
     replace: Boolean,
   ): Route = {
-    extractBaseName { (baseName: BaseName) =>
-      extractMatchedPath { (matched: List[String]) =>
+    extractBaseName { baseName =>
+      extractMatchedPath { matched =>
         val relative = makeRelative(matched, to, query, baseName)
         runEffect {
           if (replace) {

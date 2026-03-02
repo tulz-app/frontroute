@@ -18,7 +18,11 @@ object Dependencies {
           "app.tulz" %%% "tuplez-apply" % DependencyVersions.`tuplez-apply`
         )
       case _            =>
-        Seq.empty
+//        TODO: this is not needed in scala-3, but IDEA currently fails to resolve types with apply as an extension method
+//        Seq.empty
+        Seq(
+          "app.tulz" %%% "tuplez-apply" % DependencyVersions.`tuplez-apply`
+        )
     }
   }
 

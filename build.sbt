@@ -10,13 +10,13 @@ import org.openqa.selenium.remote.server.DriverFactory
 import org.openqa.selenium.remote.server.DriverProvider
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
-import scala.Ordering.Implicits._
 
+import scala.Ordering.Implicits.*
 import java.util.concurrent.TimeUnit
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.typelevel.scalacoptions.ScalaVersion.V3_0_0
-import org.typelevel.scalacoptions.ScalacOptions
+import org.typelevel.scalacoptions.{ScalacOption, ScalacOptions}
 
 val disableWebsiteOnCI = true
 
@@ -174,7 +174,9 @@ lazy val frontroute =
         Seq(
           s"$sourcesOptionName:$moduleSourceRoot->$sourcesGithubUrl"
         )
-      }
+      },
+      tpolecatScalacOptions += ScalacOptions.explain,
+      tpolecatScalacOptions += ScalacOption("-explain-cyclic", _ >= V3_0_0),
     )
 
 lazy val parser   = Parser.builder.build
