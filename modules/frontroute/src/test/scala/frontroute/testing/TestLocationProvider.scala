@@ -17,8 +17,8 @@ class TestLocationProvider extends LocationProvider {
   private var currentParams: Map[String, List[String]] = Map.empty
   private var currentState: js.UndefOr[HistoryState]   = js.undefined
 
-  private val _current                  = Var(Option.empty[Location])
-  def current: Signal[Option[Location]] = _current.signal
+  private val _current                                = Var(Option.empty[Either[Unit, Location]])
+  def current: Signal[Option[Either[Unit, Location]]] = _current.signal
 
   def start()(implicit owner: Owner): Subscription = new Subscription(owner, () => {})
 
@@ -61,17 +61,19 @@ class TestLocationProvider extends LocationProvider {
   def emit(): Unit = {
     _current.set(
       Some(
-        Location(
-          hostname = currentHostname,
-          port = currentPort,
-          protocol = currentProtocol,
-          host = s"${currentHostname}:${currentPort}",
-          origin = s"${currentProtocol}://${currentHostname}:${currentPort}",
-          path = currentPath,
-          fullPath = currentPath,
-          params = currentParams,
-          state = currentState,
-          otherMatched = false,
+        Right(
+          Location(
+            hostname = currentHostname,
+            port = currentPort,
+            protocol = currentProtocol,
+            host = s"${currentHostname}:${currentPort}",
+            origin = s"${currentProtocol}://${currentHostname}:${currentPort}",
+            path = currentPath,
+            fullPath = currentPath,
+            params = currentParams,
+            state = currentState,
+            otherMatched = false,
+          )
         )
       )
     )

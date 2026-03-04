@@ -12,9 +12,6 @@ object Site {
 
   val thisVersionPrefix = s"/v/$frontrouteVersion/"
 
-  def thisVersionHref(href: String): String =
-    s"${thisVersionPrefix}${href.dropWhile(_ == '/')}"
-
   private def examplePage(
     example: CodeExample
   ): Page = Page(example.id, example.id + "/live", example.title, CodeExamplePage(example))

@@ -2,6 +2,7 @@ package frontroute.site.examples.ex_matched_path
 
 import frontroute.site.examples.CodeExample
 import com.yurique.embedded.FileAsString
+import scala.scalajs.js.timers
 
 object MatchedPathExample
     extends CodeExample(
@@ -35,7 +36,7 @@ object MatchedPathExample
                     cls := "flex items-center gap-2",
                     span("baseName:"),
                     span(
-                      child.text <-- baseName.map(s => s"'${s}'")
+                      s"'${baseName}'"
                     )
                   ),
                   div(
@@ -79,8 +80,8 @@ object MatchedPathExample
               )
             },
             a(
-              relativeHref("tab-3"),
-              cls := "text-xl px-4 py-1 rounded border-b-2",
+              href := "tab-3",
+              cls  := "text-xl px-4 py-1 rounded border-b-2",
               navMod { active =>
                 Seq(
                   cls("border-blue-800 bg-blue-200 text-blue-800") <-- active,
@@ -96,6 +97,7 @@ object MatchedPathExample
               div(
                 cls := "bg-blue-100 text-blue-600 p-4",
                 div("Content one."),
+                div(a(href := "/tabs/tab-2", "Show Tab 2")),
                 ShowCurrentPath("Inside tab-1:"),
               )
             },
@@ -116,7 +118,9 @@ object MatchedPathExample
           )
         )
 
+      /* <focus> */
       routes(baseName = "/example-basename")(
+        /* </focus> */
         div(
           cls := "p-4 min-h-[300px]",
           pathEnd {
@@ -153,13 +157,63 @@ object MatchedPathExample
             ).map { path =>
               li(
                 a(
-                  cls := "text-blue-700 hover:text-blue-600",
+                  cls  := "text-blue-700 hover:text-blue-600",
                   /* <focus> */
-                  relativeHref(path),
+                  href := path,
                   /* </focus> */
                   s"➜ $path"
                 )
               )
+            },
+            li(
+              a(
+                cls := "text-blue-700 hover:text-blue-600",
+                /* <focus> */
+                // This href is updated dynamically, the baseName will be updated after every update.
+                href <-- EventStream.periodic(5000).toSignal(2).map { i => s"/tabs/tab-${i % 3 + 1}" },
+                /* </focus> */
+                s"➜ changing tab"
+              )
+            ),
+            li(
+              a(
+                cls := "text-blue-700 hover:text-blue-600",
+                onMountUnmountCallbackWithState(
+                  ctx => {
+                    var i = 0
+                    ctx.thisNode.ref.setAttribute("href", s"/tabs/tab-1")
+                    timers.setInterval(5000) {
+                      i += 1
+                      /* <focus> */
+                      // This href is updated dynamically, twice in a row. The baseName will be updated after every update.
+                      ctx.thisNode.ref.setAttribute("href", s"/tabs/tab-${i % 3 + 1}")
+                      ctx.thisNode.ref.setAttribute("href", s"/tabs/tab-${(i + 1) % 3 + 1}")
+                      /* </focus> */
+                    }
+                  },
+                  (_, timer) => {
+                    timers.clearInterval(timer)
+                  }
+                ),
+                s"➜ another changing tab"
+              )
+            ),
+            /* <focus> */
+            // Here, we have an anchor that is being dynamically added and removed from the dom, and its href is also updated dynamically.
+            // The baseName will be updated after every update.
+            /* </focus> */
+            child <-- EventStream.periodic(5000).toSignal(1).map { i =>
+              if (i % 2 == 0) {
+                li(
+                  a(
+                    cls := "text-blue-700 hover:text-blue-600",
+                    href <-- EventStream.periodic(5000).toSignal(2).map { i => s"/tabs/tab-disappearing-${i % 3 + 1}" },
+                    s"➜ disappearing link"
+                  )
+                )
+              } else {
+                li(span("--"))
+              }
             }
           )
         )

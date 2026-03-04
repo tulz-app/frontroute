@@ -6,7 +6,6 @@ import io.laminext.syntax.core.*
 import io.laminext.syntax.dangerous.*
 import io.laminext.highlight.Highlight
 import frontroute.site.examples.CodeExample
-import frontroute.site.Site
 import frontroute.site.Styles
 import frontroute.*
 import org.scalajs.dom
@@ -145,7 +144,7 @@ object CodeExampleDisplay {
                 val f = e.target.asInstanceOf[HTMLIFrameElement]
                 f.style.height = (f.contentWindow.document.body.scrollHeight + 20).toString + "px"
               },
-              src := Site.thisVersionHref(s"/example-frame/${example.id}")
+              src := s"/example-frame/${example.id}"
             )
           ),
           div(

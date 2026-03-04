@@ -1,7 +1,6 @@
 package frontroute.site.layout
 
 import frontroute.site.Page
-import frontroute.site.Site
 import frontroute.site.SiteModule
 import io.laminext.syntax.core.*
 import com.raquo.laminar.api.L.*
@@ -23,7 +22,7 @@ object PageNavigation {
             navigationItem($page, module.index)(
               a(
                 cls  := "ml-2 flex text-xl font-display font-bold",
-                href := Site.thisVersionHref(s"/${module.path}"),
+                href := s"/${module.path}",
                 module.index.title
               )
             )
@@ -40,7 +39,7 @@ object PageNavigation {
                 navigationItem($page, page)(
                   a(
                     cls  := "ml-6 flex font-display font-medium tracking-wide",
-                    href := Site.thisVersionHref(s"/${module.path}/${page.link}"),
+                    href := s"/${module.path}/${page.link}",
                     page.title
                   )
                 )

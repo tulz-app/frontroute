@@ -1,6 +1,5 @@
 import com.raquo.laminar.api.L.*
 import com.raquo.airstream.core.Signal
-import com.raquo.laminar.nodes.ReactiveElement
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 import app.tulz.tuplez.ApplyConverter
 import app.tulz.tuplez.ApplyConverters
@@ -39,34 +38,55 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
   def concat(routes: Route*): Route = firstMatch(routes*)
 
   def initRouting: Modifier[Element] = {
-    initRouting(LocationProvider.windowLocationProvider)
+    initRouting(FrontrouteOptions.default)
+  }
+
+  def initRouting(options: FrontrouteOptions): Modifier[Element] = {
+    initRouting(baseName = "", options)
   }
 
   def initRouting(baseName: BaseName): Modifier[Element] = {
+    initRouting(baseName, FrontrouteOptions.default)
+  }
+
+  def initRouting(baseName: BaseName, options: FrontrouteOptions): Modifier[Element] = {
     if (baseName != "" && !(baseName.startsWith("/") && !baseName.endsWith("/")))
       throw new IllegalArgumentException("baseName must be empty; or start with /, and NOT end with /")
-    initRouting(LocationProvider.windowLocationProvider(baseName))
+    initRouting(LocationProvider.windowLocationProvider(baseName), options = options)
   }
 
   def initRouting(lp: LocationProvider): Modifier[Element] =
-    onMountCallback { ctx =>
-      LocationState.init(
-        ctx.thisNode.ref,
-        LocationState.withLocationProvider(lp)(ctx.owner)
-      )
-    }
+    initRouting(lp, FrontrouteOptions.default)
 
-  def routes(mods: Modifier[Element]*): ReactiveHtmlElement[HTMLDivElement] =
-    div(
-      styleAttr := "display: contents",
-      initRouting,
-      mods
+  def initRouting(lp: LocationProvider, options: FrontrouteOptions): Modifier[Element] =
+    onMountUnmountCallbackWithState(
+      ctx => {
+        LocationState.init(
+          ctx.thisNode.ref,
+          LocationState.withLocationProvider(lp)(ctx.owner)
+        )
+        Option.when(options.installHrefHandler) {
+          HrefHandler.install(ctx, options)
+        }
+      },
+      (_, observer: Option[MutationObserver]) => {
+        observer.foreach(_.disconnect())
+      }
     )
 
+  def routes(mods: Modifier[Element]*): ReactiveHtmlElement[HTMLDivElement] =
+    routes(baseName = "", FrontrouteOptions.default)(mods)
+
   def routes(baseName: BaseName)(mods: Modifier[Element]*): ReactiveHtmlElement[HTMLDivElement] =
+    routes(baseName, FrontrouteOptions.default)(mods)
+
+  def routes(options: FrontrouteOptions)(mods: Modifier[Element]*): ReactiveHtmlElement[HTMLDivElement] =
+    routes(baseName = "", options)(mods)
+
+  def routes(baseName: BaseName, options: FrontrouteOptions)(mods: Modifier[Element]*): ReactiveHtmlElement[HTMLDivElement] =
     div(
       styleAttr := "display: contents",
-      initRouting(baseName),
+      initRouting(baseName, options),
       mods
     )
 
@@ -125,25 +145,29 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
       () => effect
     )
 
-  private def makeRelative(matched: List[String], path: String, query: Seq[(String, Seq[String])], baseName: String): String = {
+  private[frontroute] def makeRelative(matched: List[String], path: String, query: Seq[(String, Seq[String])], baseName: BaseName): String = {
+    val queryStr = LocationUtils.encodeLocationParams(query)
+    makeRelative(matched, path, queryStr, baseName)
+  }
+
+  private[frontroute] def makeRelative(matched: List[String], path: String, queryStr: String, baseName: BaseName): String = {
     val relative = {
       if (path.startsWith("/")) {
-        baseName + path
+        s"${baseName}${path}"
       } else if (matched.nonEmpty) {
         if (path.nonEmpty) {
-          matched.mkString("/", "/", s"/$path")
+          matched.mkString(s"${baseName}/", "/", s"/$path")
         } else {
-          matched.mkString("/", "/", "")
+          matched.mkString(s"${baseName}/", "/", "")
         }
       } else {
         if (path.nonEmpty) {
-          s"/$path"
+          s"/${baseName}$path"
         } else {
-          "/"
+          s"${baseName}/"
         }
       }
     }
-    val queryStr = LocationUtils.encodeLocationParams(query)
     if (queryStr.nonEmpty) {
       s"$relative$queryStr"
     } else {
@@ -202,18 +226,11 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
 
   implicit def elementToRoute(e: => HtmlElement): Route = complete(() => e)
 
-  def withMatchedPath[Ref <: dom.html.Element](mod: (StrictSignal[BaseName], StrictSignal[List[String]]) => Mod[ReactiveHtmlElement[Ref]]): Mod[ReactiveHtmlElement[Ref]] = {
-    val consumedVar = Var(List.empty[String])
-    val baseName    = Var("")
-    Seq(
-      onMountCallback { (ctx: MountContext[ReactiveHtmlElement[Ref]]) =>
-        val locationState = LocationState.closestOrFail(ctx.thisNode.ref)
-        val consumed      = EventStream.fromValue(()).delay(0).sample(locationState.consumed)
-        val _             = ReactiveElement.bindObserver(ctx.thisNode, consumed)(consumedVar.writer)
-        baseName.set(locationState.baseName)
-      },
-      mod(baseName.signal, consumedVar.signal)
-    )
+  def withMatchedPath[Ref <: dom.html.Element](mod: (BaseName, StrictSignal[List[String]]) => Mod[ReactiveHtmlElement[Ref]]): Mod[ReactiveHtmlElement[Ref]] = {
+    onMountCallback { ctx =>
+      val locationState = LocationState.closestOrFail(ctx.thisNode.ref)
+      mod(locationState.baseName, locationState.consumed)(ctx.thisNode)
+    }
   }
 
   @inline def relativeHref(path: String): Mod[ReactiveHtmlElement[html.Anchor]] =
@@ -221,9 +238,12 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
 
   def relativeHref(path: String, query: Seq[(String, Seq[String])]): Mod[ReactiveHtmlElement[html.Anchor]] =
     withMatchedPath { (baseName, matched) =>
-      href <-- matched.combineWithFn(baseName) { (matched, baseName) =>
-        makeRelative(matched, path, query, baseName)
-      }
+      Seq(
+        href <-- matched.map { matched =>
+          makeRelative(matched, path, query, baseName)
+        },
+        dataAttr("fr-rewrite") := "ignore"
+      )
     }
 
   def navModFn(compare: (Location, org.scalajs.dom.Location) => Boolean)(
@@ -248,16 +268,24 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
           // managed subscription
           val _ = EventStream
             .merge(
-              EventStream.fromValue(()).sample(locationState.location),
+              EventStream.unit().sample(locationState.location),
               mutations.events.sample(locationState.location),
               locationState.location.updates
             )
             .foreach { location =>
-              val UrlString(url) = ctx.thisNode.ref.href
-              activeVar.set {
-                location.flatMap(_.toOption).exists { location =>
-                  compare(location, url)
+              val href = ctx.thisNode.ref.href
+              if (href != null) {
+                val UrlString(url) = href
+                if (locationState.baseName != "" && url.pathname.startsWith(locationState.baseName)) {
+                  url.pathname = url.pathname.drop(locationState.baseName.length)
                 }
+                activeVar.set {
+                  location.flatMap(_.toOption).exists { location =>
+                    compare(location, url)
+                  }
+                }
+              } else {
+                activeVar.set(false)
               }
             }(ctx.owner)
           mutationObserver.observe(

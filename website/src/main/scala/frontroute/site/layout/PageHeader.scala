@@ -30,7 +30,8 @@ object PageHeader {
       div(
         cls := "flex-shrink-0 -my-4 -mx-4",
         img(
-          src := Site.thisVersionHref("/images/logo.svg"),
+//          src := Site.thisVersionHref("/images/logo.svg"),
+          src := "/images/logo.svg",
           cls := "w-10 h-10"
         )
       ),
@@ -168,7 +169,7 @@ object PageHeader {
           "border-gray-300 text-white",
           "text-gray-300 hover:border-gray-300 hover:text-white "
         ),
-      href := Site.thisVersionHref(s"/${module.path}"),
+      href := s"/${module.path}",
       module.title
     )
 
