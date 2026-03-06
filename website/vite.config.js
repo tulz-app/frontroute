@@ -1,5 +1,6 @@
 import {resolve} from 'path'
 import {createHtmlPlugin} from 'vite-plugin-html'
+import tailwindcss from '@tailwindcss/vite'
 import commonjs from '@rollup/plugin-commonjs';
 import viteCompression from 'vite-plugin-compression';
 import fs from 'fs'
@@ -23,9 +24,6 @@ export default ({mode}) => {
     build: {
       outDir: `dist/v/${frontrouteVersion}`,
     },
-    optimizeDeps: {
-      disabled: mode === 'production',
-    },
     plugins: [
       ...(mode === 'production' ? [
         commonjs(),
@@ -38,6 +36,7 @@ export default ({mode}) => {
           algorithm: 'brotliCompress'
         }),
       ] : []),
+      tailwindcss(),
       createHtmlPlugin({
         minify: mode === 'production',
         inject: {

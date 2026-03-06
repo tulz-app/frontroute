@@ -30,9 +30,18 @@ Important!
 </div>
 
 <div>
-Starting with version 0.19.1 the dependency organization name has changed from "io.frontroute" to "dev.frontroute".
+
+In version `0.20.x`, two important features were introduced in `frontroute`: <code>baseName</code> and 
+automatic href/src handling/rewriting.
+
+You might need to update your application to work correctly with these features.
+Alternatively, you can disable this.
+
+See <a href="/reference/base-name">baseName</a>
 </div>
 </div>
+
+### Important changes
 
 
 ### Prerequisites
@@ -80,6 +89,7 @@ object counter extends ScalaJSModule {
 
 ### Previous versions
 
+* [frontroute `v0.19.x`](https://frontroute.dev/v/0.19.x/) (Laminar 17.x)
 * [frontroute `v0.18.x`](https://frontroute.dev/v/0.18.x/) (Laminar 16.x)
 * [frontroute `v0.17.x`](https://frontroute.dev/v/0.17.x/) (Laminar 15.x)
 * [frontroute `v0.16.x`](https://frontroute.dev/v/0.16.x/)

@@ -28,7 +28,7 @@ object PageHeader {
     div(
       cls := "flex bg-gray-900 text-white py-4 px-8 items-center space-x-8",
       div(
-        cls := "flex-shrink-0 -my-4 -mx-4",
+        cls := "flex-shrink-0 -my-4 -ml-4",
         img(
 //          src := Site.thisVersionHref("/images/logo.svg"),
           src := "/images/logo.svg",
@@ -54,7 +54,7 @@ object PageHeader {
       ),
       div(
         cls := "hidden lg:block",
-        img(src := "https://img.shields.io/maven-central/v/dev.frontroute/frontroute_sjs1_2.13.svg?versionPrefix=0.19", alt := "latest version on maven central")
+        img(src := "https://img.shields.io/maven-central/v/dev.frontroute/frontroute_sjs1_2.13.svg?versionPrefix=0.20", alt := "latest version on maven central")
       ),
       div(
         cls := "hidden lg:block relative inline-block text-left",

@@ -93,6 +93,9 @@ object Site {
         docPage("directive", "Directive", FileAsString("/doc/reference/under-the-hood/directive.md")),
         docPage("path-matching", "Path-matching", FileAsString("/doc/reference/under-the-hood/path-matching.md")),
       ),
+      "baseName"           -> Seq(
+        docPage("base-name", "baseName", FileAsString("/doc/reference/base-name.md")),
+      ),
     ),
     SiteModule(
       path = "examples",

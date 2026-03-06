@@ -65,7 +65,7 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
           ctx.thisNode.ref,
           LocationState.withLocationProvider(lp)(ctx.owner)
         )
-        Option.when(options.installHrefHandler) {
+        Option.when(options.rewriteUrls) {
           HrefHandler.install(ctx, options)
         }
       },

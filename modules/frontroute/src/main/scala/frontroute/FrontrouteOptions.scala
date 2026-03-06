@@ -1,12 +1,12 @@
 package frontroute
 
 case class FrontrouteOptions(
-  installHrefHandler: Boolean = true,
-  processAnchorHref: Boolean = true,
-  processLinkHref: Boolean = true,
-  processImageSrc: Boolean = true,
-  processScriptSrc: Boolean = true,
-  processIframeSrc: Boolean = true,
+  rewriteUrls: Boolean = true,
+  rewriteAnchorHref: Boolean = true,
+  rewriteLinkHref: Boolean = true,
+  rewriteImageSrc: Boolean = true,
+  rewriteScriptSrc: Boolean = true,
+  rewriteIframeSrc: Boolean = true,
 )
 
 object FrontrouteOptions {

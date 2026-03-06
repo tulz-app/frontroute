@@ -59,17 +59,17 @@ private[frontroute] object HrefHandler {
   }
 
   private def processElement(element: HTMLNode)(options: FrontrouteOptions)(implicit owner: Owner): Unit = element match {
-    case anchor: HTMLAnchorElement => if (options.processAnchorHref) processElementWithHref(anchor)
-    case image: HTMLImageElement   => if (options.processImageSrc) processElementWithSrc(image)
-    case iframe: HTMLIFrameElement => if (options.processIframeSrc) processElementWithSrc(iframe)
-    case link: HTMLLinkElement     => if (options.processLinkHref) processElementWithHref(link)
-    case script: HTMLScriptElement => if (options.processScriptSrc) processElementWithSrc(script)
+    case anchor: HTMLAnchorElement => if (options.rewriteAnchorHref) processElementWithHref(anchor)
+    case image: HTMLImageElement   => if (options.rewriteImageSrc) processElementWithSrc(image)
+    case iframe: HTMLIFrameElement => if (options.rewriteIframeSrc) processElementWithSrc(iframe)
+    case link: HTMLLinkElement     => if (options.rewriteLinkHref) processElementWithHref(link)
+    case script: HTMLScriptElement => if (options.rewriteScriptSrc) processElementWithSrc(script)
     case element: HTMLElement      => processElementChildren(element)(options)
     case _                         => // noop
   }
 
   private def processElementChildren(element: DOMElement)(options: FrontrouteOptions)(implicit owner: Owner): Unit = {
-    if (options.processAnchorHref) {
+    if (options.rewriteAnchorHref) {
       element.getElementsByTagName("a").foreach {
         case anchor: HTMLAnchorElement =>
           processElementWithHref(anchor)
@@ -77,7 +77,7 @@ private[frontroute] object HrefHandler {
       }
     }
 
-    if (options.processImageSrc) {
+    if (options.rewriteImageSrc) {
       element.getElementsByTagName("img").foreach {
         case image: HTMLImageElement =>
           processElementWithSrc(image)
@@ -85,7 +85,7 @@ private[frontroute] object HrefHandler {
       }
     }
 
-    if (options.processIframeSrc) {
+    if (options.rewriteIframeSrc) {
       element.getElementsByTagName("iframe").foreach {
         case iframe: HTMLIFrameElement =>
           processElementWithSrc(iframe)
@@ -93,7 +93,7 @@ private[frontroute] object HrefHandler {
       }
     }
 
-    if (options.processScriptSrc) {
+    if (options.rewriteScriptSrc) {
       element.getElementsByTagName("script").foreach {
         case iframe: HTMLScriptElement =>
           processElementWithSrc(iframe)
@@ -101,7 +101,7 @@ private[frontroute] object HrefHandler {
       }
     }
 
-    if (options.processLinkHref) {
+    if (options.rewriteLinkHref) {
       element.getElementsByTagName("link").foreach {
         case iframe: HTMLLinkElement =>
           processElementWithHref(iframe)
@@ -119,11 +119,11 @@ private[frontroute] object HrefHandler {
     case element: HTMLScriptElement => stopSubscriptionIfAny(element)
     case element: HTMLLinkElement   => stopSubscriptionIfAny(element)
     case element: HTMLElement       =>
-      if (options.processAnchorHref) element.getElementsByTagName("a").foreach(stopSubscriptionIfAny)
-      if (options.processImageSrc) element.getElementsByTagName("img").foreach(stopSubscriptionIfAny)
-      if (options.processIframeSrc) element.getElementsByTagName("iframe").foreach(stopSubscriptionIfAny)
-      if (options.processScriptSrc) element.getElementsByTagName("script").foreach(stopSubscriptionIfAny)
-      if (options.processLinkHref) element.getElementsByTagName("link").foreach(stopSubscriptionIfAny)
+      if (options.rewriteAnchorHref) element.getElementsByTagName("a").foreach(stopSubscriptionIfAny)
+      if (options.rewriteImageSrc) element.getElementsByTagName("img").foreach(stopSubscriptionIfAny)
+      if (options.rewriteIframeSrc) element.getElementsByTagName("iframe").foreach(stopSubscriptionIfAny)
+      if (options.rewriteScriptSrc) element.getElementsByTagName("script").foreach(stopSubscriptionIfAny)
+      if (options.rewriteLinkHref) element.getElementsByTagName("link").foreach(stopSubscriptionIfAny)
     case _                          => // noop
   }
 

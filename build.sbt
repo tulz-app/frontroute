@@ -186,10 +186,10 @@ lazy val frontrouteSiteVersion: String = IO.read(file("website/.frontroute-versi
 lazy val thisVersionSitePrefix         = s"/v/$frontrouteSiteVersion/"
 
 lazy val vars = Seq(
-  "frontrouteVersion" -> "0.19.1",
-  "laminarVersion"    -> "17.2.0",
-  "scalajsVersion"    -> "1.16.0",
-  "scala3version"     -> "3.3.4",
+  "frontrouteVersion" -> "0.20.0-MXX",
+  "laminarVersion"    -> "18.0.0-MXX",
+  "scalajsVersion"    -> "1.20.2",
+  "scala3version"     -> "3.3.7",
 )
 
 def templateVars(s: String): String =
