@@ -68,6 +68,28 @@ class HrefHandlerTests extends TestBase {
     }
   }
 
+  test("relative href-s are ignored when requested, without baseName") {
+    routeTestDom(
+      route = pathPrefix("a") {
+        path("b") {
+          L.a(
+            href                   := "../sibling-path-dont-touch-me",
+            idAttr                 := "sibling-anchor",
+            dataAttr("fr-rewrite") := "ignore"
+          )
+        }
+      },
+      init = locationProvider => {
+        locationProvider.path("a", "b")
+      },
+      baseName = ""
+    ) { root =>
+      val anchors = root.getElementsByTagName("a")
+      val anchor  = anchors.find(_.id == "sibling-anchor").value.asInstanceOf[dom.HTMLAnchorElement]
+      anchor.getAttribute("href") shouldBe "../sibling-path-dont-touch-me"
+    }
+  }
+
   test("href-s do change with baseName") {
     routeTestDom(
       route = path("a") {
