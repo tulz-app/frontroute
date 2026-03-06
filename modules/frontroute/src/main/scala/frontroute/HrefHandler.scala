@@ -28,12 +28,9 @@ private[frontroute] object HrefHandler {
   }
 
   def install(ctx: MountContext[ReactiveElement.Base], options: FrontrouteOptions): MutationObserver = {
+    implicit val owner: Owner = ctx.owner
+
     processElementChildren(ctx.thisNode.ref)(options)
-//    ctx.thisNode.ref.getElementsByTagName("a").foreach(processElementWithHref) {
-//      case anchor: HTMLAnchorElement =>
-//        processElementWithHref(anchor)
-//      case _                         => // noop
-//    }
 
     val callback: js.Function2[js.Array[MutationRecord], MutationObserver, ?] = (records, _) => {
       records.foreach { rec =>
@@ -61,7 +58,7 @@ private[frontroute] object HrefHandler {
     observer
   }
 
-  private def processElement(element: HTMLNode)(options: FrontrouteOptions): Unit = element match {
+  private def processElement(element: HTMLNode)(options: FrontrouteOptions)(implicit owner: Owner): Unit = element match {
     case anchor: HTMLAnchorElement => if (options.processAnchorHref) processElementWithHref(anchor)
     case image: HTMLImageElement   => if (options.processImageSrc) processElementWithSrc(image)
     case iframe: HTMLIFrameElement => if (options.processIframeSrc) processElementWithSrc(iframe)
@@ -71,7 +68,7 @@ private[frontroute] object HrefHandler {
     case _                         => // noop
   }
 
-  private def processElementChildren(element: DOMElement)(options: FrontrouteOptions): Unit = {
+  private def processElementChildren(element: DOMElement)(options: FrontrouteOptions)(implicit owner: Owner): Unit = {
     if (options.processAnchorHref) {
       element.getElementsByTagName("a").foreach {
         case anchor: HTMLAnchorElement =>
@@ -133,15 +130,18 @@ private[frontroute] object HrefHandler {
   private def stopSubscriptionIfAny(
     element: HTMLNode
   ): Unit = {
-    val targetWithState = element.asInstanceOf[HTMLElementWithState]
-    targetWithState.frontroute_href_subscription.foreach { oldSubscription =>
-      oldSubscription.kill()
+    val elementWithState = element.asInstanceOf[HTMLElementWithState]
+    elementWithState.frontroute_href_subscription.foreach { oldSubscription =>
+      if (!oldSubscription.isKilled) {
+        oldSubscription.kill()
+      }
     }
+    elementWithState.frontroute_href_subscription = js.undefined
   }
 
   private def processElementWithHref(
     element: HTMLAnchorElement | HTMLLinkElement,
-  ): Unit = {
+  )(implicit owner: Owner): Unit = {
     val href         = element.getAttribute("href")
     val shouldIgnore = element.dataset.get("fr-rewrite").contains("ignore")
 
@@ -152,10 +152,7 @@ private[frontroute] object HrefHandler {
     } else {
       if (href != null && !shouldIgnore) {
         LocationState.closest(element).foreach { locationState =>
-          targetWithState.frontroute_href_subscription.foreach { oldSubscription =>
-            oldSubscription.kill()
-          }
-          targetWithState.frontroute_href_subscription = js.undefined
+          stopSubscriptionIfAny(element)
 
           val baseName = locationState.baseName
           if (!href.startsWith(baseName)) {
@@ -169,7 +166,7 @@ private[frontroute] object HrefHandler {
                 targetWithState.frontroute_href_updated = true
                 val updatedHref    = makeRelative(matched, href.takeWhile(_ != '?'), url.search, locationState.baseName)
                 element.setAttribute("href", updatedHref)
-              }(unsafeWindowOwner)
+              }
               targetWithState.frontroute_href_subscription = subscription
             }
           }
@@ -180,7 +177,7 @@ private[frontroute] object HrefHandler {
 
   private def processElementWithSrc(
     element: HTMLImageElement | HTMLIFrameElement | HTMLScriptElement,
-  ): Unit = {
+  )(implicit owner: Owner): Unit = {
     val src              = element.getAttribute("src")
     val shouldIgnore     = element.dataset.get("fr-rewrite").contains("ignore")
     val elementWithState = element.asInstanceOf[HTMLElementWithState]
@@ -190,10 +187,7 @@ private[frontroute] object HrefHandler {
     } else {
       if (src != null && !shouldIgnore) {
         LocationState.closest(element).foreach { locationState =>
-          elementWithState.frontroute_href_subscription.foreach { oldSubscription =>
-            oldSubscription.kill()
-          }
-          elementWithState.frontroute_href_subscription = js.undefined
+          stopSubscriptionIfAny(element)
 
           val baseName = locationState.baseName
           if (!src.startsWith(baseName)) {
@@ -207,7 +201,7 @@ private[frontroute] object HrefHandler {
                 elementWithState.frontroute_href_updated = true
                 val updatedHref    = makeRelative(matched, src.takeWhile(_ != '?'), url.search, locationState.baseName)
                 element.setAttribute("src", updatedHref)
-              }(unsafeWindowOwner)
+              }
               elementWithState.frontroute_href_subscription = subscription
             }
           }
