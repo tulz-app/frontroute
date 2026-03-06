@@ -85,6 +85,28 @@ routes(baseName = "/example-basename", FrontrouteOptions.default.copy(
 }
 ```
 
+## Selectively disabling rewrite
+
+```scala
+
+import frontroute.*
+
+routes(baseName = "/example-basename") {
+  pathPrefix("page-1") { // will match the /example-basename/page-1 path
+    path("summary") {
+      div(
+        // /keep-me-as-is - without baseName
+        a(          
+          href := "/keep-me-as-is",
+          dataAttr("fr-rewrite") := "ignore",
+          "Root link"
+        ),
+      )
+    }
+  }  
+}
+```
+
 ## Preserving pre-0.20.x behavior
 
 In order to revert to the pre-0.20.x behaviour, specify `baseName=""` and `rewriteUrls = false`. 

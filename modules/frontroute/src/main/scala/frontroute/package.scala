@@ -111,7 +111,7 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
     directive.tapply(hac(subRoute))(location, previous, state, baseName)
   }
 
-  implicit def addNullaryDirectiveApply(directive: => Directive0): Route => Route = { subRoute => (location, previous, state, baseName) =>
+  implicit def addNullaryDirectiveApply(directive: Directive0): Route => Route = { subRoute => (location, previous, state, baseName) =>
     directive.tapply(_ => subRoute)(location, previous, state, baseName)
   }
 
@@ -125,7 +125,7 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
     }
   }
 
-  implicit def addNullaryDirectiveExecute(directive: => Directive0): DirectiveUnitExecute = new DirectiveUnitExecute {
+  implicit def addNullaryDirectiveExecute(directive: Directive0): DirectiveUnitExecute = new DirectiveUnitExecute {
     def execute(run: => Unit): Route = {
       directive.tapply { _ =>
         runEffect {

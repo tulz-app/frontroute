@@ -44,7 +44,7 @@ private[frontroute] object HrefHandler {
       }
     }
 
-    val observer = MutationObserver(callback)
+    val observer = new MutationObserver(callback)
 
     observer.observe(
       ctx.thisNode.ref,
@@ -140,7 +140,7 @@ private[frontroute] object HrefHandler {
   }
 
   private def processElementWithHref(
-    element: HTMLAnchorElement | HTMLLinkElement,
+    element: dom.HTMLElement,
   )(implicit owner: Owner): Unit = {
     val href         = element.getAttribute("href")
     val shouldIgnore = Option(element.getAttribute("data-fr-rewrite")).contains("ignore")
@@ -181,7 +181,7 @@ private[frontroute] object HrefHandler {
   }
 
   private def processElementWithSrc(
-    element: HTMLImageElement | HTMLIFrameElement | HTMLScriptElement,
+    element: dom.HTMLElement,
   )(implicit owner: Owner): Unit = {
     val src              = element.getAttribute("src")
     val shouldIgnore     = element.dataset.get("fr-rewrite").contains("ignore")
