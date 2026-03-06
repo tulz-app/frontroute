@@ -6,9 +6,13 @@ import com.raquo.airstream.ownership.Owner
 import com.raquo.airstream.state.Var
 import com.raquo.domtestutils.scalatest.AsyncMountSpec
 import com.raquo.laminar.api.L.*
+import com.raquo.laminar.nodes.ReactiveElement
+import com.raquo.laminar.nodes.RootNode
 import com.raquo.laminar.utils.LaminarSpec
 import frontroute.*
+import org.scalajs.dom
 import org.scalatest.BeforeAndAfterEach
+import org.scalatest.OptionValues
 import org.scalatest.funsuite.AsyncFunSuite
 import org.scalatest.matchers.should.Matchers
 
@@ -19,7 +23,7 @@ import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration.*
 import scala.scalajs.js.timers.setTimeout
 
-abstract class TestBase extends AsyncFunSuite with Matchers with LaminarSpec with AsyncMountSpec with BeforeAndAfterEach {
+abstract class TestBase extends AsyncFunSuite with Matchers with LaminarSpec with AsyncMountSpec with BeforeAndAfterEach with OptionValues {
 
   implicit protected val testOwner: Owner = new Owner {}
 
@@ -54,6 +58,9 @@ abstract class TestBase extends AsyncFunSuite with Matchers with LaminarSpec wit
     init: TestLocationProvider => Unit,
     baseName: BaseName = ""
   )(checks: Probe[String] => Future[T]): Future[T] = {
+    if (baseName != "" && !(baseName.startsWith("/") && !baseName.endsWith("/")))
+      throw new IllegalArgumentException("baseName must be empty; or start with /, and NOT end with /")
+
     val lp    = new TestLocationProvider(baseName)
     val probe = new Probe[String]
 
@@ -77,6 +84,38 @@ abstract class TestBase extends AsyncFunSuite with Matchers with LaminarSpec wit
     init: TestLocationProvider => Unit,
     baseName: BaseName = ""
   )(checks: Probe[String] => T): Future[T] = routeTestF[T](route, wait, init, baseName)(probe => Future.successful(checks(probe)))
+
+  protected def routeTestDomF[T](
+    route: => Route,
+    wait: FiniteDuration = 250.millis,
+    init: TestLocationProvider => Unit,
+    baseName: BaseName = ""
+  )(checks: dom.HTMLElement => Future[T]): Future[T] = {
+    if (baseName != "" && !(baseName.startsWith("/") && !baseName.endsWith("/")))
+      throw new IllegalArgumentException("baseName must be empty; or start with /, and NOT end with /")
+
+    val lp = new TestLocationProvider(baseName)
+
+    mount(
+      div(
+        initRouting(lp),
+        route
+      )
+    )
+
+    val future = delayedFuture(wait).flatMap { _ =>
+      checks(root.container.asInstanceOf[dom.HTMLElement])
+    }
+    init(lp)
+    future
+  }
+
+  protected def routeTestDom[T](
+    route: => Route,
+    wait: FiniteDuration = 10.millis,
+    init: TestLocationProvider => Unit,
+    baseName: BaseName = ""
+  )(checks: dom.HTMLElement => T): Future[T] = routeTestDomF[T](route, wait, init, baseName)(root => Future.successful(checks(root)))
 
   def nthSignal[T](n: Int, s: Signal[T], waitTime: FiniteDuration = 1.second): Future[T] = {
     val p     = Promise[T]()

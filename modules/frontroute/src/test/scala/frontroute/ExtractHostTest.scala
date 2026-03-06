@@ -3,10 +3,7 @@ package frontroute
 import frontroute.testing.*
 import org.scalatest.OptionValues
 
-import scala.scalajs.js
-import scala.scalajs.js.JSON
-
-class ExtractHostTest extends TestBase with OptionValues {
+class ExtractHostTest extends TestBase {
 
   test("extractHost") {
     routeTest(

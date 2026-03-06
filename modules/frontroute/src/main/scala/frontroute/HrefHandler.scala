@@ -143,33 +143,38 @@ private[frontroute] object HrefHandler {
     element: HTMLAnchorElement | HTMLLinkElement,
   )(implicit owner: Owner): Unit = {
     val href         = element.getAttribute("href")
-    val shouldIgnore = element.dataset.get("fr-rewrite").contains("ignore")
+    val shouldIgnore = Option(element.getAttribute("data-fr-rewrite")).contains("ignore")
 
-    val targetWithState = element.asInstanceOf[HTMLElementWithState]
+    val elementWithState = element.asInstanceOf[HTMLElementWithState]
 
-    if (targetWithState.frontroute_href_updated.contains(true)) {
-      targetWithState.frontroute_href_updated = false
-    } else {
-      if (href != null && !shouldIgnore) {
-        LocationState.closest(element).foreach { locationState =>
-          stopSubscriptionIfAny(element)
+    if (elementWithState.frontroute_href_updated.contains(true)) {
+      elementWithState.frontroute_href_updated = false
+      return
+    }
 
-          val baseName = locationState.baseName
-          if (!href.startsWith(baseName)) {
-            if (href.startsWith("/") && !href.startsWith("//")) {
-              targetWithState.frontroute_href_updated = true
-              element.setAttribute("href", baseName + href)
-            } else if (!href.contains("://")) {
-              // relative href
-              val subscription = locationState.consumed.foreach { matched =>
-                val UrlString(url) = href
-                targetWithState.frontroute_href_updated = true
-                val updatedHref    = makeRelative(matched, href.takeWhile(_ != '?'), url.search, locationState.baseName)
-                element.setAttribute("href", updatedHref)
-              }
-              targetWithState.frontroute_href_subscription = subscription
-            }
+    if (href == null || shouldIgnore) { return }
+
+    LocationState.closest(element).foreach { locationState =>
+      stopSubscriptionIfAny(element)
+
+      val baseName = locationState.baseName
+      if (baseName == "" || !href.startsWith(baseName)) {
+        if (href.startsWith("/") && !href.startsWith("//")) {
+          elementWithState.frontroute_href_updated = true
+          element.setAttribute("href", baseName + href)
+        } else if (!href.contains("://")) {
+          // relative href
+
+          def update(matched: List[String]): Unit = {
+            val UrlString(url) = href
+            elementWithState.frontroute_href_updated = true
+            val updatedHref    = makeRelative(matched, href.takeWhile(_ != '?'), url.search, locationState.baseName)
+            element.setAttribute("href", updatedHref)
           }
+
+          update(locationState.consumed.now())
+          val subscription = locationState.consumed.updates.foreach(update)
+          elementWithState.frontroute_href_subscription = subscription
         }
       }
     }
@@ -184,27 +189,34 @@ private[frontroute] object HrefHandler {
 
     if (elementWithState.frontroute_href_updated.contains(true)) {
       elementWithState.frontroute_href_updated = false
-    } else {
-      if (src != null && !shouldIgnore) {
-        LocationState.closest(element).foreach { locationState =>
-          stopSubscriptionIfAny(element)
+      return
+    }
 
-          val baseName = locationState.baseName
-          if (!src.startsWith(baseName)) {
-            if (src.startsWith("/") && !src.startsWith("//")) {
-              elementWithState.frontroute_href_updated = true
-              element.setAttribute("src", baseName + src)
-            } else if (!src.contains("://")) {
-              // relative href
-              val subscription = locationState.consumed.foreach { matched =>
-                val UrlString(url) = src
-                elementWithState.frontroute_href_updated = true
-                val updatedHref    = makeRelative(matched, src.takeWhile(_ != '?'), url.search, locationState.baseName)
-                element.setAttribute("src", updatedHref)
-              }
-              elementWithState.frontroute_href_subscription = subscription
-            }
+    if (src == null || shouldIgnore) {
+      return
+    }
+
+    LocationState.closest(element).foreach { locationState =>
+      stopSubscriptionIfAny(element)
+
+      val baseName = locationState.baseName
+      if (!src.startsWith(baseName)) {
+        if (src.startsWith("/") && !src.startsWith("//")) {
+          elementWithState.frontroute_href_updated = true
+          element.setAttribute("src", baseName + src)
+        } else if (!src.contains("://")) {
+          // relative src
+
+          def update(matched: List[String]): Unit = {
+            val UrlString(url) = src
+            elementWithState.frontroute_href_updated = true
+            val updatedHref    = makeRelative(matched, src.takeWhile(_ != '?'), url.search, locationState.baseName)
+            element.setAttribute("src", updatedHref)
           }
+
+          update(locationState.consumed.now())
+          val subscription = locationState.consumed.updates.foreach(update)
+          elementWithState.frontroute_href_subscription = subscription
         }
       }
     }

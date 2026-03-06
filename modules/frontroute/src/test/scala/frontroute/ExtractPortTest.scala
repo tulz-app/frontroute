@@ -3,7 +3,7 @@ package frontroute
 import frontroute.testing.*
 import org.scalatest.OptionValues
 
-class ExtractPortTest extends TestBase with OptionValues {
+class ExtractPortTest extends TestBase {
 
   test("extractPort") {
     routeTest(

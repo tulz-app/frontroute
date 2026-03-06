@@ -111,7 +111,7 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
     directive.tapply(hac(subRoute))(location, previous, state, baseName)
   }
 
-  implicit def addNullaryDirectiveApply(directive: Directive0): Route => Route = { subRoute => (location, previous, state, baseName) =>
+  implicit def addNullaryDirectiveApply(directive: => Directive0): Route => Route = { subRoute => (location, previous, state, baseName) =>
     directive.tapply(_ => subRoute)(location, previous, state, baseName)
   }
 
@@ -125,7 +125,7 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
     }
   }
 
-  implicit def addNullaryDirectiveExecute(directive: Directive0): DirectiveUnitExecute = new DirectiveUnitExecute {
+  implicit def addNullaryDirectiveExecute(directive: => Directive0): DirectiveUnitExecute = new DirectiveUnitExecute {
     def execute(run: => Unit): Route = {
       directive.tapply { _ =>
         runEffect {
@@ -150,21 +150,32 @@ package object frontroute extends PathMatchers with Directives with FrontrouteCr
     makeRelative(matched, path, queryStr, baseName)
   }
 
-  private[frontroute] def makeRelative(matched: List[String], path: String, queryStr: String, baseName: BaseName): String = {
+  @tailrec
+  private[frontroute] def moveUp(matchedReversed: List[String], path: String): (List[String], String) = {
+    if (!path.startsWith("../")) (matchedReversed.reverse, path)
+    else if (matchedReversed.isEmpty) (matchedReversed.reverse, path)
+    else moveUp(matchedReversed.tail, path.drop("../".length))
+  }
+
+  private[frontroute] def makeRelative(matchedOriginal: List[String], pathOriginal: String, queryStr: String, baseName: BaseName): String = {
     val relative = {
-      if (path.startsWith("/")) {
-        s"${baseName}${path}"
-      } else if (matched.nonEmpty) {
-        if (path.nonEmpty) {
-          matched.mkString(s"${baseName}/", "/", s"/$path")
-        } else {
-          matched.mkString(s"${baseName}/", "/", "")
-        }
+      if (pathOriginal.startsWith("/")) {
+        s"${baseName}${pathOriginal}"
       } else {
-        if (path.nonEmpty) {
-          s"/${baseName}$path"
+        val (matched, path) = moveUp(matchedOriginal.reverse, pathOriginal)
+
+        if (matched.nonEmpty) {
+          if (path.nonEmpty) {
+            matched.mkString(s"${baseName}/", "/", s"/$path")
+          } else {
+            matched.mkString(s"${baseName}/", "/", "")
+          }
         } else {
-          s"${baseName}/"
+          if (path.nonEmpty) {
+            s"/${baseName}$path"
+          } else {
+            s"${baseName}/"
+          }
         }
       }
     }
