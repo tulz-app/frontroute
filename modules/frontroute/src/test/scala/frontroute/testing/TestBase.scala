@@ -51,9 +51,10 @@ abstract class TestBase extends AsyncFunSuite with Matchers with LaminarSpec wit
   protected def routeTestF[T](
     route: Probe[String] => Route,
     wait: FiniteDuration = 10.millis,
-    init: TestLocationProvider => Unit
+    init: TestLocationProvider => Unit,
+    baseName: BaseName = ""
   )(checks: Probe[String] => Future[T]): Future[T] = {
-    val lp    = new TestLocationProvider()
+    val lp    = new TestLocationProvider(baseName)
     val probe = new Probe[String]
 
     mount(
@@ -73,8 +74,9 @@ abstract class TestBase extends AsyncFunSuite with Matchers with LaminarSpec wit
   protected def routeTest[T](
     route: Probe[String] => Route,
     wait: FiniteDuration = 10.millis,
-    init: TestLocationProvider => Unit
-  )(checks: Probe[String] => T): Future[T] = routeTestF[T](route, wait, init)(probe => Future.successful(checks(probe)))
+    init: TestLocationProvider => Unit,
+    baseName: BaseName = ""
+  )(checks: Probe[String] => T): Future[T] = routeTestF[T](route, wait, init, baseName)(probe => Future.successful(checks(probe)))
 
   def nthSignal[T](n: Int, s: Signal[T], waitTime: FiniteDuration = 1.second): Future[T] = {
     val p     = Promise[T]()

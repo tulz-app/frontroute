@@ -19,7 +19,7 @@ class ExtractProtocolTest extends TestBase {
         locationProvider.path()
       }
     ) { probe =>
-      probe.toList shouldBe List("https")
+      probe.toList shouldBe List("https:")
     }
   }
 

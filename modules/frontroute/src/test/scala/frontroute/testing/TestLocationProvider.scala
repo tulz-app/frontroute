@@ -4,12 +4,13 @@ import com.raquo.laminar.api.L.*
 import frontroute.LocationProvider
 import frontroute.Location
 import frontroute.internal.HistoryState
+import frontroute.internal.UrlString
 
 import scala.scalajs.js
+import scala.scalajs.js.URIUtils.encodeURIComponent
 
-class TestLocationProvider extends LocationProvider {
+class TestLocationProvider(val baseName: String = "") extends LocationProvider {
 
-  val baseName: String                                 = ""
   private var currentProtocol                          = "https"
   private var currentHostname                          = "test.nowhere"
   private var currentPort                              = "443"
@@ -59,24 +60,22 @@ class TestLocationProvider extends LocationProvider {
   }
 
   def emit(): Unit = {
-    _current.set(
-      Some(
-        Right(
-          Location(
-            hostname = currentHostname,
-            port = currentPort,
-            protocol = currentProtocol,
-            host = s"${currentHostname}:${currentPort}",
-            origin = s"${currentProtocol}://${currentHostname}:${currentPort}",
-            path = currentPath,
-            fullPath = currentPath,
-            params = currentParams,
-            state = currentState,
-            otherMatched = false,
-          )
-        )
-      )
-    )
+    val query =
+      currentParams.toSeq
+        .flatMap { case (key, values) =>
+          values.map { value =>
+            s"${encodeURIComponent(key)}=${encodeURIComponent(value)}"
+          }
+        }.mkString("?", "&", "")
+
+    val locationString      = s"${currentProtocol}://${currentHostname}:${currentPort}${currentPath.mkString("/", "/", "")}${query}"
+//    println(s"LOCATION: ${locationString}")
+    val UrlString(location) = locationString
+//    org.scalajs.dom.console.log(s"PARSED LOCATION", location)
+    Location(location, currentState, baseName) match {
+      case Some(location) => _current.set(Some(Right(location)))
+      case None           => _current.set(Some(Left(())))
+    }
   }
 
 }

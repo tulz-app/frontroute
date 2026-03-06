@@ -34,12 +34,16 @@ object Location {
 
   def apply(location: dom.Location, state: js.UndefOr[js.Any], baseName: String): Option[Location] = {
     extractPath(location, baseName).map { path =>
+      var origin = s"${location.protocol}//${location.hostname}"
+      if (location.port != "") {
+        origin = s"${origin}:${location.port}"
+      }
       new Location(
         hostname = location.hostname,
         port = location.port,
         protocol = location.protocol,
         host = location.host,
-        origin = location.origin,
+        origin = origin, // location.origin, TODO: location.origin was undefined in tests
         path = path,
         fullPath = path,
         params = LocationUtils.parseLocationParams(location),
