@@ -1,8 +1,7 @@
 import {resolve} from 'path'
 import {createHtmlPlugin} from 'vite-plugin-html'
 import tailwindcss from '@tailwindcss/vite'
-import commonjs from '@rollup/plugin-commonjs';
-import viteCompression from 'vite-plugin-compression';
+import viteCompression from 'vite-plugin-compression2';
 import fs from 'fs'
 
 import scalaVersion from './scala-version'
@@ -26,15 +25,13 @@ export default ({mode}) => {
     },
     plugins: [
       ...(mode === 'production' ? [
-        commonjs(),
         viteCompression({
-          filter: /\.(js|css|html)$/i,
-          algorithm: 'gzip'
-        }),
-        viteCompression({
-          filter: /\.(js|css|html)$/i,
-          algorithm: 'brotliCompress'
-        }),
+          include: /\.(js|css|html)$/i,
+          algorithms: [
+            'gzip',
+            'brotliCompress'
+          ]
+        })
       ] : []),
       tailwindcss(),
       createHtmlPlugin({
