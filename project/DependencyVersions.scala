@@ -3,7 +3,7 @@ object DependencyVersions {
   val laminar        = "18.0.0-M3"
   val `tuplez-apply` = "0.4.0"
   val domtestutils   = "19.0.0"
-  val scalatest      = "3.2.19"
+  val scalatest      = "3.2.20"
 
   // tests
   val `scala-js-macrotask-executor` = "1.1.1"
