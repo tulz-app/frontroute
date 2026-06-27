@@ -9,7 +9,7 @@ addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.20.2")
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.6")
 
-addSbtPlugin("org.typelevel" % "sbt-tpolecat" % "0.5.3")
+addSbtPlugin("org.typelevel" % "sbt-tpolecat" % "0.5.7")
 
 addSbtPlugin("com.github.sbt" % "sbt-github-actions" % "0.29.0")
 
