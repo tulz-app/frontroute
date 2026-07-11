@@ -1,6 +1,6 @@
-import sbt._
+import sbt.*
 
-import sbt.Keys._
+import sbt.Keys.*
 
 object ScalaOptions {
 
